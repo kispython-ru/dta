@@ -4,7 +4,7 @@ from flask_jwt_extended.utils import get_jwt_identity, unset_jwt_cookies
 from sqlalchemy.orm.session import Session
 from app.utils import authorize, handle_errors, use_session
 from app.forms import LoginForm, RegisterForm
-from app.managers import UserManager
+from app.managers import TaskManager, UserManager
 from flask_jwt_extended import create_access_token, set_access_cookies
 
 blueprint = Blueprint('views', __name__)
@@ -63,7 +63,9 @@ def logout():
 @handle_errors()
 @use_session()
 def tasks(session: Session):
-    id = get_jwt_identity()
     users = UserManager(session)
+    tasks = TaskManager(session)
+    id = get_jwt_identity()
     user = users.get_by_id(id)
-    return render_template("user/tasks.jinja", user=user)
+    tasks = tasks.ensure_user_tasks_created(user.id)
+    return render_template("user/tasks.jinja", user=user, tasks=tasks)

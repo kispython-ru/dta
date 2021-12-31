@@ -56,12 +56,14 @@ class TaskManager():
         self.session = session
 
     def create_task(self, name: str) -> Task:
+        app.logger.info(f'Creating task {name}')
         task = Task(name=name)
         self.session.add(task)
         self.session.commit()
         return task
 
     def create_user_task(self, user_id: int, task_id: int) -> UserTask:
+        app.logger.info(f'Creating user task {task_id} for user {user_id}')
         status = TaskStatus.Created
         now = datetime.datetime.now()
         task = self.session.query(Task).get(task_id)
@@ -73,6 +75,20 @@ class TaskManager():
         self.session.add(user_task)
         self.session.commit()
         return user_task
+
+    def create_user_tasks(self, user_id: int) -> List[UserTask]:
+        tasks = self.session.query(Task).all()
+        user_tasks = []
+        for task in tasks:
+            user_task = self.create_user_task(user_id, task.id)
+            user_tasks.append(user_task)
+        return user_tasks
+
+    def ensure_user_tasks_created(self, user_id: int) -> List[UserTask]:
+        tasks = self.get_user_tasks(self)
+        if len(tasks) is 0:
+            return self.create_user_tasks(user_id)
+        return tasks
 
     def get_user_tasks(self, user_id: int) -> List[UserTaskInfo]:
         user_tasks = self.session \
