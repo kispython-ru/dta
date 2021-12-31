@@ -1,9 +1,9 @@
 {% extends 'user-layout.jinja' %}
 {% block content %}
 <div class="container mt-3">
-  <h5 class="card-title fw-bold">Статистика</h5>
+  <h5 class="card-title fw-bold">Доступные задачи</h5>
   <h6 class="card-subtitle mb-2 text-muted">
-    Статистика решения задач
+    Список задач, требующих Вашего внимания.
   </h6>
   <table class="table table-striped">
     <thead>
@@ -17,7 +17,11 @@
       {% for info in tasks %}
         <tr>
           <th scope="row">Т{{ info.task.id }}</th>
-          <td>{{ info.task.name }}</td>
+          <td>
+            <a class="text-decoration-none" href="/logout">
+              {{ info.task.name }}
+            </a>
+          </td>
           <td>
             <span class="badge rounded-pill bg-primary">
               {{ info.status.name }}
