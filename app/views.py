@@ -24,7 +24,7 @@ def register(session: Session):
         set_access_cookies(response, access_token)
         return response
     app.logger.info(f"Registration form is invalid: {form.errors}")
-    return render_template("register.jinja", form=form)
+    return render_template("anon/register.jinja", form=form)
 
 
 @blueprint.route("/login", methods=['GET', 'POST'])
@@ -47,7 +47,7 @@ def login(session: Session):
             error_message="Password is invalid.",
             error_redirect="/login")
     app.logger.info(f"Login form is invalid: {form.errors}")
-    return render_template("login.jinja", form=form)
+    return render_template("anon/login.jinja", form=form)
 
 
 @blueprint.route("/logout", methods=["GET"])
@@ -62,8 +62,8 @@ def logout():
 @authorize()
 @handle_errors()
 @use_session()
-def index(session: Session):
+def tasks(session: Session):
     id = get_jwt_identity()
     users = UserManager(session)
     user = users.get_by_id(id)
-    return render_template("index.jinja", email=user.email)
+    return render_template("user/tasks.jinja", user=user)

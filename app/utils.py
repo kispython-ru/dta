@@ -47,7 +47,7 @@ def handle_errors(
             except Exception as error:
                 app.logger.error(error)
                 return render_template(
-                    "error.jinja",
+                    "anon/error.jinja",
                     error_code=error_code,
                     error_message=error_message,
                     error_redirect=error_redirect)
