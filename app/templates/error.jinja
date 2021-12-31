@@ -1,0 +1,16 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<div class="container">
+  <div class="card w-50 m-auto mt-5">
+    <div class="card-body">
+      <h5 class="card-title">Error occured</h5>
+      <h6 class="card-subtitle mb-2 text-muted">
+        {{ error_message }} Code: {{ error_code }}
+      </h6>
+      <a class="btn btn-primary w-50 d-block" href="{{ error_redirect }}">
+        Try again
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

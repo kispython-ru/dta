@@ -1,0 +1,47 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<div class="container">
+  <div class="card w-50 m-auto mt-5">
+    <form class="card-body" action="/login" method="POST">
+      <h5 class="card-title">Login</h5>
+      <div class="form-group mb-2">
+        <label>Email</label>
+        <input name="email" type="text" class="form-control" placeholder="Email" value="{{ form.email.data if form.email.data }}">
+        <small class="form-text text-muted">Please, enter email.</small>
+      </div>
+      {% if form.email.errors %}
+        <ul class="errors">
+          {% for error in form.email.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group mb-2">
+        <label>Password</label>
+        <input name="password" type="password" class="form-control" placeholder="Password">
+        <small class="form-text text-muted">Please, enter password.</small>
+      </div>
+      {% if form.password.errors %}
+        <ul class="errors">
+          {% for error in form.password.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {{ form.csrf_token }}
+      <div class="row">
+        <div class="col-md-6">
+          <button type="submit" class="btn btn-primary w-100 d-block">
+            Login
+          </button>
+        </div>
+        <div class="col-md-6">
+          <a href="/register" class="btn btn-secondary w-100 d-block">
+            Not registered?
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

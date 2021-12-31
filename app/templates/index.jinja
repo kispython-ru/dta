@@ -1,0 +1,20 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<div class="container">
+  <div class="card w-50 m-auto mt-5">
+    <form class="card-body" action="/login" method="POST">
+      <h5 class="card-title">Secure Page</h5>
+      <h6 class="card-subtitle mb-2 text-muted">
+        Your email is: {{ email }}
+      </h6>
+      <div class="row">
+        <div class="col-md-6">
+          <a href="/logout" class="btn btn-primary w-100 d-block">
+            Logout
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
