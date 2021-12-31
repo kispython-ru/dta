@@ -85,18 +85,19 @@ class TaskManager():
         return user_tasks
 
     def ensure_user_tasks_created(self, user_id: int) -> List[UserTask]:
-        tasks = self.get_user_tasks(self)
+        tasks = self.get_user_tasks(user_id)
         if len(tasks) is 0:
             return self.create_user_tasks(user_id)
-        return tasks
+        return list(tasks)
 
     def get_user_tasks(self, user_id: int) -> List[UserTaskInfo]:
+        app.logger.info(f'Fetching user tasks for user {user_id}')
         user_tasks = self.session \
-            .query(UserTask) \
+            .query(UserTask, Task) \
             .filter_by(user_id=user_id) \
             .join(Task, Task.id == UserTask.task_id)
-        records = user_tasks.all()
         user_task_info = []
-        for user_task, task in records:
-            user_task_info.append(UserTaskInfo(user_task=user_task, task=task))
+        for (user_task, task) in user_tasks.all():
+            info = UserTaskInfo(user_task=user_task, task=task)
+            user_task_info.append(info)
         return user_task_info
