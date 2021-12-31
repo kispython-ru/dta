@@ -43,7 +43,11 @@ def upgrade():
         sa.Column(
             'status',
             sa.Integer,
-            nullable=False))
+            nullable=False),
+        sa.UniqueConstraint(
+            'user_id',
+            'task_id',
+            name='user_task_unique_constraint'))
 
 
 def downgrade():
