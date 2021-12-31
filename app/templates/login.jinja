@@ -3,11 +3,14 @@
 <div class="container">
   <div class="card w-50 m-auto mt-5">
     <form class="card-body" action="/login" method="POST">
-      <h5 class="card-title">Login</h5>
+      <h5 class="card-title fw-bold">Авторизация</h5>
+      <h6 class="card-subtitle mb-2 text-muted">
+        Цифровой ассистент преподавателя
+      </h6>
       <div class="form-group mb-2">
-        <label>Email</label>
-        <input name="email" type="text" class="form-control" placeholder="Email" value="{{ form.email.data if form.email.data }}">
-        <small class="form-text text-muted">Please, enter email.</small>
+        <label>Электронная почта</label>
+        <input name="email" type="text" class="form-control" placeholder="Электронная почта" value="{{ form.email.data if form.email.data }}">
+        <small class="form-text text-muted">Пожалуйста, введите электронную почту.</small>
       </div>
       {% if form.email.errors %}
         <ul class="errors">
@@ -17,9 +20,9 @@
         </ul>
       {% endif %}
       <div class="form-group mb-2">
-        <label>Password</label>
-        <input name="password" type="password" class="form-control" placeholder="Password">
-        <small class="form-text text-muted">Please, enter password.</small>
+        <label>Пароль</label>
+        <input name="password" type="password" class="form-control" placeholder="Пароль">
+        <small class="form-text text-muted">Пожалуйста, введите пароль.</small>
       </div>
       {% if form.password.errors %}
         <ul class="errors">
@@ -32,12 +35,12 @@
       <div class="row">
         <div class="col-md-6">
           <button type="submit" class="btn btn-primary w-100 d-block">
-            Login
+            Войти
           </button>
         </div>
         <div class="col-md-6">
           <a href="/register" class="btn btn-secondary w-100 d-block">
-            Not registered?
+            Не зарегистрирваны?
           </a>
         </div>
       </div>
