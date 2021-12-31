@@ -69,3 +69,17 @@ def tasks(session: Session):
     user = users.get_by_id(id)
     tasks = tasks.ensure_user_tasks_created(user.id)
     return render_template("user/tasks.jinja", user=user, tasks=tasks)
+
+
+@blueprint.route("/tasks/<task_id>", methods=['GET'])
+@authorize()
+@handle_errors()
+@use_session()
+def task(session: Session, task_id: int):
+    users = UserManager(session)
+    tasks = TaskManager(session)
+    id = get_jwt_identity()
+    user = users.get_by_id(id)
+    task = tasks.get_user_task(task_id, id)
+    app.logger.info(task)
+    return render_template("user/task.jinja", user=user, info=task)

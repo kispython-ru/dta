@@ -1,0 +1,10 @@
+{% extends 'user-layout.jinja' %}
+{% block content %}
+<div class="container mt-3">
+  <h5 class="card-title fw-bold">{{ info.task.name }}</h5>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Список задач, требующих Вашего внимания.
+  </h6>
+  <div>Условие задачи.</div>
+</div>
+{% endblock %}

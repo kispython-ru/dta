@@ -104,3 +104,11 @@ class TaskManager():
             info = UserTaskInfo(user_task=user_task, task=task)
             user_task_info.append(info)
         return user_task_info
+
+    def get_user_task(self, task_id: int, user_id: int) -> UserTaskInfo:
+        user_tasks = self.session \
+            .query(UserTask, Task) \
+            .filter_by(user_id=user_id) \
+            .join(Task, Task.id == UserTask.task_id and Task.id == task_id)
+        for (user_task, task) in user_tasks.all():
+            return UserTaskInfo(user_task=user_task, task=task)
