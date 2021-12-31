@@ -27,7 +27,7 @@ def authorize(redirect_url="/login", redirect_if_authorized=False):
             except Exception as e:
                 app.logger.error(e)
                 return render_template(
-                    "error.jinja",
+                    "anon/error.jinja",
                     error_code=500,
                     error_message="An error has occured.",
                     error_redirect="/logout")
