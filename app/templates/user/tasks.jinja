@@ -5,5 +5,27 @@
   <h6 class="card-subtitle mb-2 text-muted">
     Статистика решения задач
   </h6>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Тип задачи</th>
+        <th scope="col">Название задачи</th>
+        <th scope="col">Состояние задачи</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for info in tasks %}
+        <tr>
+          <th scope="row">Т{{ info.task.id }}</th>
+          <td>{{ info.task.name }}</td>
+          <td>
+            <span class="badge rounded-pill bg-primary">
+              {{ info.status.name }}
+            </span>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

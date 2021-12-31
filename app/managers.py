@@ -38,17 +38,18 @@ class UserManager():
         return user
 
 
-class UserTaskInfo():
-    def __init__(self, task: Task, user_task: UserTask):
-        self.task = task
-        self.user_task = user_task
-
-
 class TaskStatus(IntEnum):
     Created = 0
     Submitted = 1
     Checking = 2
     Checked = 3
+
+
+class UserTaskInfo():
+    def __init__(self, task: Task, user_task: UserTask):
+        self.task = task
+        self.user_task = user_task
+        self.status = TaskStatus(user_task.status)
 
 
 class TaskManager():
@@ -84,7 +85,7 @@ class TaskManager():
             user_tasks.append(user_task)
         return user_tasks
 
-    def ensure_user_tasks_created(self, user_id: int) -> List[UserTask]:
+    def ensure_user_tasks_created(self, user_id: int) -> List[UserTaskInfo]:
         tasks = self.get_user_tasks(user_id)
         if len(tasks) is 0:
             return self.create_user_tasks(user_id)
