@@ -81,5 +81,4 @@ def task(session: Session, task_id: int):
     id = get_jwt_identity()
     user = users.get_by_id(id)
     task = tasks.get_user_task(task_id, id)
-    app.logger.info(task)
     return render_template("user/task.jinja", user=user, info=task)
