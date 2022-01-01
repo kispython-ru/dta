@@ -1,7 +1,7 @@
 {% extends 'layout.jinja' %}
 {% block content %}
 <div class="container">
-  <div class="card w-50 m-auto mt-5">
+  <div class="card m-auto mt-5" style="max-width: 500px">
     <form class="card-body" action="/login" method="POST">
       <h5 class="card-title fw-bold">Авторизация</h5>
       <h6 class="card-subtitle mb-2 text-muted">
@@ -40,7 +40,7 @@
         </div>
         <div class="col-md-6">
           <a href="/register" class="btn btn-secondary w-100 d-block">
-            Не зарегистрирваны?
+            Регистрация
           </a>
         </div>
       </div>
