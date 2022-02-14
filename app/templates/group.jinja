@@ -1,0 +1,47 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<div class="container mt-3">
+  <h5 class="card-title fw-bold">
+    Варианты заданий группы <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
+  </h5>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Список вариантов заданий для студентов группы {{ group.title }}.
+  </h6>
+  {% for variant in variants %}
+    <h6 class="card-title mt-4">
+      Вариант <b>№{{ variant.id }}</b>
+    </h6>
+    <h6 class="card-subtitle mb-2 text-muted">
+      <small>Нажмите на номер задания, чтобы перейти к отправке решения.</small>
+    </h6>
+    <div class="card">
+      <div class="card-body">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 15%;">Задача</th>
+              {% for task in tasks %}
+                <td scope="col" tooltip="{{ task.title }}">
+                  <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
+                    <span class="badge alert-primary" style="font-size: inherit">№{{ task.id }}</span>
+                  </a>
+                </td>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 0">
+              <th scope="col" style="width: 15%;border-bottom: 0">Состояние</th>
+              {% for task in tasks %}
+                <td scope="col" style="border-bottom: 0">
+                  {{ find_task_status(statuses, task, variant, group) }}
+                </th>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

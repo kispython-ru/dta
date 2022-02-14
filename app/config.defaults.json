@@ -4,5 +4,5 @@
     "JWT_SECRET_KEY": "secret-for-jwt",
     "JWT_TOKEN_LOCATION": ["cookies"],
     "JWT_COOKIE_SECURE": false,
-    "CONNECTION_STRING": "postgresql://postgres:postgres@localhost/app"
+    "CONNECTION_STRING": "sqlite:////tmp/web-app.db"
 }

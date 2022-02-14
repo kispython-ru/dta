@@ -1,112 +1,187 @@
-from typing import List, Union
-from flask_bcrypt import Bcrypt
-from flask import current_app as app
-from sqlalchemy.sql.sqltypes import DateTime
-from app.models import Task, User, UserTask
+import datetime
+from typing import List
+from app.models import Task, Group, TaskStatus, Variant, Message
 from sqlalchemy.orm import Session
 from enum import IntEnum
-import datetime
 
 
-class UserManager():
+class GroupManager():
     def __init__(self, session: Session):
         self.session = session
-        self.bcrypt = Bcrypt(app)
 
-    def register(self, email: str, password: str) -> User:
-        app.logger.info(f'Registering user {email}')
-        password_hash = self.bcrypt.generate_password_hash(
-            password).decode('utf8')
-        user = User(email=email, password=password_hash)
-        self.session.add(user)
+    def get_all(self) -> List[Group]:
+        groups = self.session.query(Group).all()
+        return groups
+
+    def get_by_id(self, id: int) -> Group:
+        group = self.session.query(Group).get(id)
+        return group
+
+    def create_by_names(self, names: List[str]):
+        for name in names:
+            group = Group(title=name)
+            self.session.add(group)
         self.session.commit()
-        return user
 
-    def check_password(self, email: str, password: str) -> Union[User, None]:
-        app.logger.info(f'Checking password for user {email}')
-        user = self.session.query(User).filter_by(email=email).first()
-        if user is None:
-            return None
-        check_result = self.bcrypt.check_password_hash(
-            user.password, password)
-        if check_result:
-            return user
-        return None
-
-    def get_by_id(self, id: int) -> User:
-        user = self.session.query(User).get(id)
-        return user
-
-
-class TaskStatus(IntEnum):
-    Created = 0
-    Submitted = 1
-    Checking = 2
-    Checked = 3
-
-
-class UserTaskInfo():
-    def __init__(self, task: Task, user_task: UserTask):
-        self.task = task
-        self.user_task = user_task
-        self.status = TaskStatus(user_task.status)
+    def delete_all(self):
+        self.session.query(Group).delete()
 
 
 class TaskManager():
     def __init__(self, session: Session):
         self.session = session
 
-    def create_task(self, name: str) -> Task:
-        app.logger.info(f'Creating task {name}')
-        task = Task(name=name)
-        self.session.add(task)
-        self.session.commit()
+    def get_all(self) -> List[Task]:
+        tasks = self.session.query(Task).all()
+        return tasks
+
+    def get_by_id(self, id: int) -> Task:
+        task = self.session.query(Task).get(id)
         return task
 
-    def create_user_task(self, user_id: int, task_id: int) -> UserTask:
-        app.logger.info(f'Creating user task {task_id} for user {user_id}')
-        status = TaskStatus.Created
-        now = datetime.datetime.now()
-        task = self.session.query(Task).get(task_id)
-        user_task = UserTask(
-            user_id=user_id,
-            task_id=task.id,
-            created_at=now,
-            status=status)
-        self.session.add(user_task)
+    def create_by_names(self, names: List[str]):
+        for name in names:
+            group = Task(title=name)
+            self.session.add(group)
         self.session.commit()
-        return user_task
 
-    def create_user_tasks(self, user_id: int) -> List[UserTask]:
-        app.logger.info(f'Creating user tasks for user {user_id}')
-        tasks = self.session.query(Task).all()
-        user_tasks = []
-        for task in tasks:
-            user_task = self.create_user_task(user_id, task.id)
-            user_tasks.append(user_task)
-        return user_tasks
+    def delete_all(self):
+        self.session.query(Task).delete()
 
-    def ensure_user_tasks_created(self, user_id: int) -> List[UserTaskInfo]:
-        tasks = self.get_user_tasks(user_id)
-        if len(tasks) is 0:
-            self.create_user_tasks(user_id)
-            return self.get_user_tasks(user_id)
-        return list(tasks)
 
-    def get_user_tasks(self, user_id: int) -> List[UserTaskInfo]:
-        app.logger.info(f'Fetching user tasks for user {user_id}')
-        user_tasks = self.session \
-            .query(UserTask, Task) \
-            .filter_by(user_id=user_id) \
-            .join(Task, Task.id == UserTask.task_id)
-        user_task_info = []
-        for (user_task, task) in user_tasks.all():
-            info = UserTaskInfo(user_task=user_task, task=task)
-            user_task_info.append(info)
-        return user_task_info
+class VariantManager():
+    def __init__(self, session: Session):
+        self.session = session
 
-    def get_user_task(self, task_id: int, user_id: int) -> UserTaskInfo:
-        user_task = self.session.query(UserTask).filter_by(
-            user_id=user_id, task_id=task_id).one()
-        task = self.session.query(Task).filter_by(id=task_id).one()
-        return UserTaskInfo(user_task=user_task, task=task)
+    def get_all(self) -> List[Variant]:
+        variants = self.session.query(Variant).all()
+        return variants
+
+    def get_by_id(self, id: int) -> Variant:
+        variant = self.session.query(Variant).get(id)
+        return variant
+
+    def create_many(self, count: int):
+        for i in range(1, count):
+            task = Variant()
+            self.session.add(task)
+            self.session.commit()
+
+    def delete_all(self):
+        self.session.query(Variant).delete()
+
+
+class TaskStatusEnum(IntEnum):
+    Submitted = 0
+    Checking = 1
+    Checked = 2
+    Failed = 3
+
+    @property
+    def name(self):
+        return {
+            self.Submitted: "Отправлено",
+            self.Checking: "Проверяется",
+            self.Checked: "Принято",
+            self.Failed: "Ошибка!"
+        }[self]
+
+    @property
+    def code(self):
+        return {
+            self.Submitted: "?",
+            self.Checking: "...",
+            self.Checked: "+",
+            self.Failed: "x"
+        }[self]
+
+    @property
+    def color(self):
+        return {
+            self.Submitted: "primary",
+            self.Checking: "warning",
+            self.Checked: "success",
+            self.Failed: "danger"
+        }[self]
+
+
+class TaskStatusManager():
+    def __init__(self, session: Session):
+        self.session = session
+
+    def get_all(self) -> List[TaskStatus]:
+        statuses = self.session.query(TaskStatus).all()
+        return statuses
+
+    def get_task_status(self, task: int, variant: int, group: int) -> TaskStatus:
+        status = self.session.query(TaskStatus) \
+            .filter_by(task=task, variant=variant, group=group) \
+            .first()
+        return status 
+
+    def submit_task(self, task: int, variant: int, group: int, code: str) -> TaskStatus:
+        existing = self.get_task_status(task, variant, group)
+        if existing != None:
+            if existing.status == TaskStatusEnum.Checked:
+                return # We've already accepted this task!
+            self.session.delete(existing)
+            self.session.commit()
+        now = datetime.datetime.now()
+        status = TaskStatusEnum.Submitted
+        task_status = TaskStatus(
+            task=task,
+            variant=variant,
+            group=group,
+            time=now,
+            code=code,
+            output=None,
+            status=status
+        )
+        self.session.add(task_status)
+        self.session.commit()
+        return task_status
+
+
+class MessageManager():
+    def __init__(self, session: Session):
+        self.session = session
+
+    def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> Message:
+        now = datetime.datetime.now()
+        message = Message(
+            task=task,
+            variant=variant,
+            group=group,
+            time=now,
+            code=code,
+            ip=ip,
+            processed=False
+        )
+        self.session.add(message)
+        self.session.commit()
+        return message
+
+
+class AppDbContext():
+    def __init__(self, session: Session):
+        self.session = session
+
+    @property
+    def groups(self) -> GroupManager:
+        return GroupManager(self.session)
+
+    @property
+    def tasks(self) -> TaskManager:
+        return TaskManager(self.session)
+
+    @property
+    def variants(self) -> VariantManager:
+        return VariantManager(self.session)
+
+    @property
+    def statuses(self) -> TaskStatusManager:
+        return TaskStatusManager(self.session)
+
+    @property
+    def messages(self) -> MessageManager:
+        return MessageManager(self.session)

@@ -1,8 +1,5 @@
 from functools import wraps
 from flask.templating import render_template
-from flask_jwt_extended.utils import get_jwt_identity
-from flask_jwt_extended.view_decorators import verify_jwt_in_request
-from flask import redirect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker, Session
@@ -12,27 +9,6 @@ import os
 import json
 
 Base = declarative_base()
-
-
-def authorize(redirect_url="/login", redirect_if_authorized=False):
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request(optional=True)
-                logged_in = get_jwt_identity()
-                if not redirect_if_authorized and not logged_in or redirect_if_authorized and logged_in:
-                    return redirect(redirect_url)
-                return fn(*args, **kwargs)
-            except Exception as e:
-                app.logger.error(e)
-                return render_template(
-                    "anon/error.jinja",
-                    error_code=500,
-                    error_message="An error has occured.",
-                    error_redirect="/logout")
-        return decorator
-    return wrapper
 
 
 def handle_errors(
@@ -47,7 +23,7 @@ def handle_errors(
             except Exception as error:
                 app.logger.error(error)
                 return render_template(
-                    "anon/error.jinja",
+                    "error.jinja",
                     error_code=error_code,
                     error_message=error_message,
                     error_redirect=error_redirect)

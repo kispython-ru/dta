@@ -1,84 +1,82 @@
-from flask import Blueprint, render_template, redirect, make_response
-from flask import current_app as app
-from flask_jwt_extended.utils import get_jwt_identity, unset_jwt_cookies
-from sqlalchemy.orm.session import Session
-from app.utils import authorize, handle_errors, use_session
-from app.forms import LoginForm, RegisterForm
-from app.managers import TaskManager, UserManager
-from flask_jwt_extended import create_access_token, set_access_cookies
+from typing import List
+from flask import Blueprint, render_template
+from app.forms import MessageForm
+from app.managers import AppDbContext, TaskStatusEnum
+from app.models import Group, Task, TaskStatus, Variant
+from app.utils import handle_errors, use_session
+from sqlalchemy.orm import Session
+from flask import request
 
 blueprint = Blueprint('views', __name__)
 
-
-@blueprint.route("/register", methods=['GET', 'POST'])
-@authorize(redirect_if_authorized=True, redirect_url="/")
-@handle_errors(error_message="Unable to register.", error_redirect="/register")
-@use_session()
-def register(session: Session):
-    form = RegisterForm()
-    if form.validate_on_submit():
-        users = UserManager(session)
-        user = users.register(form.email.data, form.password.data)
-        access_token = create_access_token(identity=user.id)
-        response = make_response(redirect("/"))
-        set_access_cookies(response, access_token)
-        return response
-    app.logger.info(f"Registration form is invalid: {form.errors}")
-    return render_template("anon/register.jinja", form=form)
-
-
-@blueprint.route("/login", methods=['GET', 'POST'])
-@authorize(redirect_if_authorized=True, redirect_url="/")
-@handle_errors(error_message="Unable to log in.", error_redirect="/login")
-@use_session()
-def login(session: Session):
-    form = LoginForm()
-    if form.validate_on_submit():
-        users = UserManager(session)
-        user = users.check_password(form.email.data, form.password.data)
-        if user is not None:
-            access_token = create_access_token(identity=user.id)
-            response = make_response(redirect("/"))
-            set_access_cookies(response, access_token)
-            return response
-        return render_template(
-            "error.jinja",
-            error_code=401,
-            error_message="Password is invalid.",
-            error_redirect="/login")
-    app.logger.info(f"Login form is invalid: {form.errors}")
-    return render_template("anon/login.jinja", form=form)
-
-
-@blueprint.route("/logout", methods=["GET"])
-@handle_errors()
-def logout():
-    response = make_response(redirect("/login"))
-    unset_jwt_cookies(response)
-    return response
+def find_task_status(statuses: List[TaskStatus], task: Task, variant: Variant, group: Group):
+    for status in statuses:
+        if status.group == group.id and status.variant == variant.id and status.task == task.id:
+            return TaskStatusEnum(status.status).code
+    return "—"
 
 
 @blueprint.route("/", methods=['GET'])
-@authorize()
 @handle_errors()
 @use_session()
-def tasks(session: Session):
-    users = UserManager(session)
-    tasks = TaskManager(session)
-    id = get_jwt_identity()
-    user = users.get_by_id(id)
-    tasks = tasks.ensure_user_tasks_created(user.id)
-    return render_template("user/tasks.jinja", user=user, tasks=tasks)
+def dashboard(session: Session):
+    db = AppDbContext(session)
+    groups = db.groups.get_all()
+    return render_template(
+        "dashboard.jinja",
+        groups=groups,
+        find_task_status=find_task_status)
 
 
-@blueprint.route("/tasks/<task_id>", methods=['GET'])
-@authorize()
+@blueprint.route("/group/<group_id>", methods=['GET'])
 @handle_errors()
 @use_session()
-def task(session: Session, task_id: int):
-    users = UserManager(session)
-    tasks = TaskManager(session)
-    id = get_jwt_identity()
-    user = users.get_by_id(id)
-    task = tasks.get_user_task(task_id, id)
-    return render_template("user/task.jinja", user=user, info=task)
+def group(session: Session, group_id: int):
+    db = AppDbContext(session)
+    group = db.groups.get_by_id(group_id)
+    variants = db.variants.get_all()
+    tasks = db.tasks.get_all()
+    statuses = db.statuses.get_all()
+    return render_template(
+        "group.jinja",
+        variants=variants,
+        group=group,
+        tasks=tasks,
+        statuses=statuses,
+        find_task_status=find_task_status)
+
+
+@blueprint.route("/group/<group_id>/variant/<variant_id>/task/<task_id>",
+                 methods=['GET', 'POST'])
+@handle_errors()
+@use_session()
+def task(session: Session, group_id: int, variant_id: int, task_id: int):
+    db = AppDbContext(session)
+    variant = db.variants.get_by_id(variant_id)
+    group = db.groups.get_by_id(group_id)
+    task = db.tasks.get_by_id(task_id)
+    form = MessageForm()
+    if form.validate_on_submit():
+        code = form.code.data
+        ip = request.remote_addr
+        message = db.messages.submit_task(task_id, variant_id, group_id, code, ip)
+        if message is None:
+            raise ValueError("Unable to accept the submission.")
+        status = db.statuses.submit_task(task_id, variant_id, group_id, code)
+        return render_template(
+            "success.jinja",
+            form=form,
+            variant=variant,
+            group=group,
+            task=task,
+            status=status)
+    status = db.statuses.get_task_status(task_id, variant_id, group_id)
+    status_enum = TaskStatusEnum(status.status) if status is not None else None
+    return render_template(
+        "task.jinja",
+        form=form,
+        variant=variant,
+        group=group,
+        task=task,
+        status=status,
+        status_enum=status_enum)

@@ -1,0 +1,16 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<div class="container mt-3">
+  <h5 class="card-title fw-bold">Перечень групп</h5>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Нажмите на группу, чтобы перейти к вариантам заданий группы.
+  </h6>
+  <div>
+    {% for group in groups %}
+      <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
+        {{ group.title }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
