@@ -113,17 +113,26 @@ class TaskStatusManager():
         statuses = self.session.query(TaskStatus).all()
         return statuses
 
-    def get_task_status(self, task: int, variant: int, group: int) -> TaskStatus:
+    def get_task_status(
+            self,
+            task: int,
+            variant: int,
+            group: int) -> TaskStatus:
         status = self.session.query(TaskStatus) \
             .filter_by(task=task, variant=variant, group=group) \
             .first()
-        return status 
+        return status
 
-    def submit_task(self, task: int, variant: int, group: int, code: str) -> TaskStatus:
+    def submit_task(
+            self,
+            task: int,
+            variant: int,
+            group: int,
+            code: str) -> TaskStatus:
         existing = self.get_task_status(task, variant, group)
-        if existing != None:
+        if existing is not None:
             if existing.status == TaskStatusEnum.Checked:
-                return # We've already accepted this task!
+                return  # We've already accepted this task!
             self.session.delete(existing)
             self.session.commit()
         now = datetime.datetime.now()
@@ -146,7 +155,13 @@ class MessageManager():
     def __init__(self, session: Session):
         self.session = session
 
-    def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> Message:
+    def submit_task(
+            self,
+            task: int,
+            variant: int,
+            group: int,
+            code: str,
+            ip: str) -> Message:
         now = datetime.datetime.now()
         message = Message(
             task=task,

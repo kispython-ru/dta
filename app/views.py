@@ -9,7 +9,12 @@ from flask import request
 
 blueprint = Blueprint('views', __name__)
 
-def find_task_status(statuses: List[TaskStatus], task: Task, variant: Variant, group: Group):
+
+def find_task_status(
+        statuses: List[TaskStatus],
+        task: Task,
+        variant: Variant,
+        group: Group):
     for status in statuses:
         if status.group == group.id and status.variant == variant.id and status.task == task.id:
             return TaskStatusEnum(status.status).code
@@ -59,7 +64,8 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
     if form.validate_on_submit():
         code = form.code.data
         ip = request.remote_addr
-        message = db.messages.submit_task(task_id, variant_id, group_id, code, ip)
+        message = db.messages.submit_task(
+            task_id, variant_id, group_id, code, ip)
         if message is None:
             raise ValueError("Unable to accept the submission.")
         status = db.statuses.submit_task(task_id, variant_id, group_id, code)
