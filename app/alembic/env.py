@@ -10,7 +10,7 @@ fileConfig(config.config_file_name)
 
 
 def run_migrations_offline():
-    url = config.get_main_option("sqlalchemy.url")
+    url = context.get_x_argument(as_dictionary=True).get('connection_string')
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -23,8 +23,12 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
+    section = config.get_section(config.config_ini_section)
+    connection_string = context.get_x_argument(
+        as_dictionary=True).get('connection_string')
+    section["sqlalchemy.url"] = connection_string
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

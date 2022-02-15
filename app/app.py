@@ -2,20 +2,28 @@ import logging
 import os
 import sys
 from flask import Flask
-from app.utils import create_session, load_config_files, use_session
+from app.utils import create_session, load_config_files
 import alembic.config
 import app.views as views
-from sqlalchemy.orm import Session
 from app.managers import AppDbContext
 
 
 def create_app():
     app = Flask(__name__)
     app.url_map.strict_slashes = False
-    app.config.update(load_config_files(os.getcwd()))
+    config = load_config_files(os.getcwd())
+    app.config.update(config)
     app.register_blueprint(views.blueprint)
     logging.basicConfig(level=logging.DEBUG)
-    alembic.config.main(prog='alembic', argv=['--raiseerr', 'upgrade', 'head'])
+    connection_string = config['CONNECTION_STRING']
+    alembic.config.main(
+        prog='alembic',
+        argv=[
+            '--raiseerr',
+            '-x',
+            f'connection_string={connection_string}',
+            'upgrade',
+            'head'])
     if os.environ.get('SEED'):
         with app.app_context():
             seed_app()
