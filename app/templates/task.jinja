@@ -4,7 +4,7 @@
   <h5 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id }}</span>,
-    группа <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
+    группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h5>
   <h6 class="card-subtitle mb-2 text-muted">
     Здесь Вы можете отправить ответ на задание №{{ task.id }} (вариант №{{ variant.id }}, группа {{ group.title }}).
@@ -13,7 +13,12 @@
     <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
       <h6 class="card-title fw-bold">Добавить новый ответ</h6>
       <div class="form-group mb-2">
-        <textarea name="code" type="text" class="form-control" placeholder="Текст программы на Python"></textarea>
+        <textarea
+          name="code"
+          type="text"
+          class="form-control"
+          placeholder="Текст программы на Python"
+          style="min-height: 250px;font-family: monospace, monospace;"></textarea>
         <small class="form-text text-muted">
           <div>Введите текст программы на языке программирования Python в поле выше.</div>
           <div>В отправляемом коде должна присутствовать функция main и не должно быть какого-либо ввода/вывода.</div>
@@ -43,7 +48,7 @@
     В данной секции Вы можете отслеживать состояние отправленного задания.
   </h6>
   {% if status == None %}
-    <div>После отправки здесь Вы увидите её статус.</div>
+    <div>После отправки выполненного задания Вы сможете отслеживать его статус.</div>
   {% else %}
     <div>Состояние задания:</div>
     <div class="badge alert-{{ status_enum.color }} mt-2" style="font-size: inherit">

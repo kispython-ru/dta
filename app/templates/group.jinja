@@ -5,43 +5,39 @@
     Варианты заданий группы <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
   </h5>
   <h6 class="card-subtitle mb-2 text-muted">
-    Список вариантов заданий для студентов группы {{ group.title }}.
+    Список вариантов для студентов группы {{ group.title }}. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
   </h6>
-  {% for variant in variants %}
-    <h6 class="card-title mt-4">
-      Вариант <b>№{{ variant.id }}</b>
-    </h6>
-    <h6 class="card-subtitle mb-2 text-muted">
-      <small>Нажмите на номер задания, чтобы перейти к отправке решения.</small>
-    </h6>
-    <div class="card">
-      <div class="card-body">
-        <table class="table mb-0">
-          <thead>
+  <div class="card">
+    <div class="card-body">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 15%;">Вариант</th>
+            {% for task in tasks %}
+              <td scope="col" tooltip="{{ task.title }}">
+                <span class="badge alert-primary" style="font-size: inherit">№{{ task.id }}</span>
+              </td>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for variant in variants %}
             <tr>
-              <th scope="col" style="width: 15%;">Задача</th>
+              <th scope="col" style="width: 15%;border-bottom: 0">
+                {{ variant.id }}
+              </th>
               {% for task in tasks %}
-                <td scope="col" tooltip="{{ task.title }}">
-                  <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
-                    <span class="badge alert-primary" style="font-size: inherit">№{{ task.id }}</span>
+                <td scope="col" style="border-bottom: 0">
+                  <a style="text-decoration:none" href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
+                    {{ find_task_status(statuses, task, variant, group) }}
                   </a>
                 </td>
               {% endfor %}
             </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 0">
-              <th scope="col" style="width: 15%;border-bottom: 0">Состояние</th>
-              {% for task in tasks %}
-                <td scope="col" style="border-bottom: 0">
-                  {{ find_task_status(statuses, task, variant, group) }}
-                </th>
-              {% endfor %}
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  {% endfor %}
+  </div>
 </div>
 {% endblock %}
