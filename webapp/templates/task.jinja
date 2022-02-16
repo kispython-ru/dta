@@ -9,6 +9,11 @@
   <h6 class="card-subtitle mb-2 text-muted">
     Здесь Вы можете отправить ответ на задание №{{ task.id }} (вариант №{{ variant.id }}, группа {{ group.title }}).
   </h6>
+  <h6 class="card-subtitle mb-4 text-muted">
+    <a href="http://sovietov.com/kispython/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
+      Список задач для варианта {{ variant.id + 1 }} группы {{ group.title }}.
+    </a>
+  </h6>
   <div class="card m-auto mt-3">
     <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
       <h6 class="card-title fw-bold">Добавить новый ответ</h6>
