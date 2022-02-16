@@ -59,7 +59,7 @@ class Message(Base):
         sa.ForeignKey('variants.id'),
         nullable=False)
     group = sa.Column(
-        'title',
+        'group',
         sa.Integer,
         sa.ForeignKey('groups.id'),
         nullable=False)
@@ -67,3 +67,14 @@ class Message(Base):
     code = sa.Column('code', sa.String, nullable=False)
     ip = sa.Column('ip', sa.String, nullable=False)
     processed = sa.Column('processed', sa.Boolean, nullable=False)
+
+    def __str__(self):
+        return str({
+            "id": self.id,
+            "task": self.task,
+            "variant": self.variant,
+            "group": self.group,
+            "time": self.time,
+            "ip": self.ip,
+            "processed": self.processed
+        })

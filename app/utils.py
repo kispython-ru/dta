@@ -49,6 +49,10 @@ def use_session():
 
 def create_session() -> Session:
     connection_string = app.config['CONNECTION_STRING']
+    return create_session_manually(connection_string)
+
+
+def create_session_manually(connection_string: str) -> Session:
     engine = create_engine(connection_string)
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine)

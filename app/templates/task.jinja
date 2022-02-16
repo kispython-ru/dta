@@ -51,8 +51,12 @@
     <div>После отправки выполненного задания Вы сможете отслеживать его статус.</div>
   {% else %}
     <div>Состояние задания:</div>
-    <div class="badge alert-{{ status_enum.color }} mt-2" style="font-size: inherit">
+    <div class="badge alert-{{ status_enum.color }} mt-2 mb-2" style="font-size: inherit">
       {{ status_enum.name }}
+    </div>
+    <div>Подробные сведения об ошибке:</div>
+    <div class="text-muted">
+      {{ status.output }}
     </div>
   {% endif %}
 </div>

@@ -1,11 +1,11 @@
 import logging
 import os
-import sys
 from flask import Flask
 from app.utils import create_session, load_config_files
 import alembic.config
 import app.views as views
 from app.managers import AppDbContext
+import app.worker as worker
 
 
 def create_app():
@@ -14,6 +14,7 @@ def create_app():
     config = load_config_files(os.getcwd())
     app.config.update(config)
     app.register_blueprint(views.blueprint)
+    app.register_blueprint(worker.blueprint)
     logging.basicConfig(level=logging.DEBUG)
     connection_string = config['CONNECTION_STRING']
     alembic.config.main(
