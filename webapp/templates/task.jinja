@@ -16,12 +16,16 @@
   </h6>
   <div class="card m-auto mt-3">
     <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
-      <h6 class="card-title fw-bold">Добавить новый ответ</h6>
+      <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
+      <div class="text-muted mb-2">
+        Во избежание утери данных рекомендуется сохранять отправляемые программы локально.
+      </div>
       <div class="form-group mb-2">
         <textarea
           name="code"
           type="text"
           class="form-control"
+          {% if status and status.status == 2 %}disabled{%endif%}
           placeholder="Текст программы на Python"
           style="min-height: 250px;font-family: monospace, monospace;"></textarea>
         <small class="form-text text-muted">
@@ -39,7 +43,10 @@
       {{ form.csrf_token }}
       <div class="row">
         <div class="col-md-8">
-          <button type="submit" class="btn btn-primary w-100 d-block">
+          <button
+            type="submit"
+            {% if status and status.status == 2 %}disabled{%endif%}
+            class="btn btn-primary w-100 d-block">
             Отправить задание на проверку
           </button>
         </div>

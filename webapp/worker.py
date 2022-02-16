@@ -44,8 +44,10 @@ def load_tests(core_path: str):
 
 
 def process_pending_messages(db: AppDbContext, core_path: str):
-    # print('Checking for incoming messages...')
     pending_messages = db.messages.get_pending_messages_unique()
+    message_count = len(pending_messages)
+    if message_count > 0:
+        print(f'Processing {message_count} incoming messages...')
     for message in pending_messages:
         group = db.groups.get_by_id(message.group)
         task = db.tasks.get_by_id(message.task)
