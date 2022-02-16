@@ -1,11 +1,13 @@
 from typing import List
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, make_response, current_app as app
 from app.forms import MessageForm
 from app.managers import AppDbContext, TaskStatusEnum
 from app.models import Group, Task, TaskStatus, Variant
 from app.utils import handle_errors, use_session
 from sqlalchemy.orm import Session
 from flask import request
+import io
+import csv
 
 blueprint = Blueprint('views', __name__)
 
@@ -86,3 +88,31 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
         task=task,
         status=status,
         status_enum=status_enum)
+
+
+@blueprint.route("/csv/bWVzc2FnZXM=", methods=['GET'])
+@handle_errors()
+@use_session()
+def export(session: Session):
+    db = AppDbContext(session)
+    messages = db.messages.get_all()
+    rows = [['ID', 'Время отправки', 'Группа',
+             'Задача', 'Вариант', 'IP', 'Текст программы']]
+    for message in messages:
+        rows.append([
+            message.id,
+            message.time,
+            message.group,
+            message.task,
+            message.variant,
+            message.ip,
+            message.code
+        ])
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(rows)
+    value = si.getvalue()
+    output = make_response(value)
+    output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

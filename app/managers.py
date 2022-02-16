@@ -188,6 +188,10 @@ class MessageManager():
         self.session.commit()
         return message
 
+    def get_all(self) -> List[Message]:
+        all = self.session.query(Message).all()
+        return all
+
     def get_pending_messages(self) -> List[Message]:
         pending = self.session.query(Message) \
             .filter_by(processed=False) \
