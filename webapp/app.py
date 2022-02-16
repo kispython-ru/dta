@@ -20,8 +20,11 @@ def migrate_database(connection_string: str):
 
 
 def seed_database(app: Flask):
+    print("Checking if we need to seed the database...")
     if os.environ.get('SEED') != 1:
+        print("We don't need to seed the database.")
         return
+    print("Seeding the database now...")
     with app.app_context():
         core_path = app.config['CORE_PATH']
         groups, tasks = worker.load_tests(core_path)
@@ -33,6 +36,7 @@ def seed_database(app: Flask):
         db.tasks.create_by_names(tasks)
         db.variants.delete_all()
         db.variants.create_by_ids(range(0, 39))
+    print("Successfully seeded the dabatase!")
 
 
 def read_configuration():
