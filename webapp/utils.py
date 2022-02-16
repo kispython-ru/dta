@@ -63,8 +63,9 @@ def load_config_files(directory_name: str):
     merged = {}
     for file in os.listdir(directory_name):
         if file.endswith(".json"):
-            print(f"Merging {file}")
-            with open(file, mode='r') as configuration:
+            path = os.path.join(directory_name, file)
+            print(f"Merging {path}")
+            with open(path, mode='r') as configuration:
                 content = configuration.read()
                 json_content = json.loads(content)
                 merged = {**merged, **json_content}
