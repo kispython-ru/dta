@@ -1,6 +1,6 @@
 import datetime
 from typing import List
-from app.models import Task, Group, TaskStatus, Variant, Message
+from webapp.models import Task, Group, TaskStatus, Variant, Message
 from sqlalchemy.orm import Session
 from enum import IntEnum
 

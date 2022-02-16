@@ -1,9 +1,9 @@
 from typing import List
 from flask import Blueprint, render_template, make_response, current_app as app
-from app.forms import MessageForm
-from app.managers import AppDbContext, TaskStatusEnum
-from app.models import Group, Task, TaskStatus, Variant
-from app.utils import handle_errors, use_session
+from webapp.forms import MessageForm
+from webapp.managers import AppDbContext, TaskStatusEnum
+from webapp.models import Group, Task, TaskStatus, Variant
+from webapp.utils import handle_errors, use_session
 from sqlalchemy.orm import Session
 from flask import request
 import io

@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from app.utils import Base
+from webapp.utils import Base
 
 
 class Group(Base):

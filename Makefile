@@ -1,5 +1,5 @@
 flask:
-	cd app && export FLASK_APP=app && export FLASK_ENV=development && flask run
+	cd webapp && export FLASK_APP=app && export FLASK_ENV=development && flask run
 image:
 	docker build -t flask-app .
 container:

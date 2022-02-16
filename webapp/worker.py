@@ -1,12 +1,12 @@
 from multiprocessing import Process
 from flask import Blueprint, current_app as app
-from app.managers import AppDbContext, TaskStatusEnum
-from app.utils import create_session_manually
+from webapp.managers import AppDbContext, TaskStatusEnum
+from webapp.utils import create_session_manually
 import time
 import sys
 import os
 import traceback
-from app.models import Group, Message, Task, Variant
+from webapp.models import Group, Message, Task, Variant
 
 blueprint = Blueprint('worker', __name__)
 

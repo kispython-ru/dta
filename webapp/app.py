@@ -1,11 +1,11 @@
 import logging
 import os
 from flask import Flask
-from app.utils import create_session, load_config_files
+from webapp.utils import create_session, load_config_files
 import alembic.config
-import app.views as views
-from app.managers import AppDbContext
-import app.worker as worker
+import webapp.views as views
+from webapp.managers import AppDbContext
+import webapp.worker as worker
 
 
 def migrate_database(connection_string: str):
