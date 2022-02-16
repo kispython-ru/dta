@@ -8,15 +8,7 @@ from app.managers import AppDbContext
 import app.worker as worker
 
 
-def create_app():
-    app = Flask(__name__)
-    app.url_map.strict_slashes = False
-    config = load_config_files(os.getcwd())
-    app.config.update(config)
-    app.register_blueprint(views.blueprint)
-    app.register_blueprint(worker.blueprint)
-    logging.basicConfig(level=logging.DEBUG)
-    connection_string = config['CONNECTION_STRING']
+def migrate_database(connection_string: str):
     alembic.config.main(
         prog='alembic',
         argv=[
@@ -25,19 +17,38 @@ def create_app():
             f'connection_string={connection_string}',
             'upgrade',
             'head'])
-    if os.environ.get('SEED'):
-        with app.app_context():
-            seed_app(app.config['CORE_PATH'])
+
+
+def seed_database(app: Flask):
+    if os.environ.get('SEED') != 1:
+        return
+    with app.app_context():
+        core_path = app.config['CORE_PATH']
+        groups, tasks = worker.load_tests(core_path)
+        session = create_session()
+        db = AppDbContext(session)
+        db.groups.delete_all()
+        db.groups.create_by_names(groups)
+        db.tasks.delete_all()
+        db.tasks.create_by_names(tasks)
+        db.variants.delete_all()
+        db.variants.create_by_ids(range(0, 39))
+
+
+def read_configuration():
+    config_path = os.environ.get('CONFIG_PATH')
+    configuration_directory = config_path if config_path is not None else os.getcwd()
+    return load_config_files(configuration_directory)
+
+
+def create_app():
+    config = read_configuration()
+    app = Flask(__name__)
+    app.url_map.strict_slashes = False
+    app.config.update(config)
+    app.register_blueprint(views.blueprint)
+    app.register_blueprint(worker.blueprint)
+    logging.basicConfig(level=logging.DEBUG)
+    migrate_database(config['CONNECTION_STRING'])
+    seed_database(app)
     return app
-
-
-def seed_app(core_path: str):
-    groups, tasks = worker.load_tests(core_path)
-    session = create_session()
-    db = AppDbContext(session)
-    db.groups.delete_all()
-    db.groups.create_by_names(groups)
-    db.tasks.delete_all()
-    db.tasks.create_by_names(tasks)
-    db.variants.delete_all()
-    db.variants.create_by_ids(range(0, 39))
