@@ -62,8 +62,8 @@ class VariantManager():
         return variant
 
     def create_many(self, count: int):
-        for i in range(1, count):
-            task = Variant()
+        for i in range(0, count):
+            task = Variant(id=i + 1)
             self.session.add(task)
             self.session.commit()
 

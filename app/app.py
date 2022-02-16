@@ -43,6 +43,6 @@ def seed_app():
     db.groups.delete_all()
     db.groups.create_by_names(groups)
     db.tasks.delete_all()
-    db.tasks.create_by_names(["Реализовать функцию"])
+    db.tasks.create_by_names(["1.1"])
     db.variants.delete_all()
     db.variants.create_many(40)

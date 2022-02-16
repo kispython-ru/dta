@@ -55,9 +55,7 @@
       {{ status_enum.name }}
     </div>
     <div>Подробные сведения об ошибке:</div>
-    <div class="text-muted">
-      {{ status.output }}
-    </div>
+    <div class="text-muted mb-5" style="white-space: pre">{{ status.output }}</div>
   {% endif %}
 </div>
 {% endblock %}

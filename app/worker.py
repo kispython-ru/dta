@@ -6,6 +6,7 @@ import time
 import sys
 import os
 import traceback
+from app.models import Group, Message, Task, Variant
 
 blueprint = Blueprint('worker', __name__)
 
@@ -18,26 +19,36 @@ def decrypt_exception() -> str:
     return log
 
 
+# HACK Change sys path, change os current working directory.
+def check_solution(
+        group: Group,
+        task: Task,
+        variant: Variant,
+        message: Message):
+    cwd = os.getcwd()
+    sys.path.insert(1, os.path.join(sys.path[0], '../core'))
+    os.chdir(sys.path[1])
+    from check_solution import check_solution
+    (ok, error) = check_solution(
+        group=group.title,
+        task=task.title,
+        variant=variant.id - 1,
+        prog=message.code)
+    os.chdir(cwd)
+    return (ok, error)
+
+
 def process_pending_messages(db: AppDbContext):
     print('Checking for incoming messages...')
     pending_messages = db.messages.get_pending_messages_unique()
     for message in pending_messages:
+        group = db.groups.get_by_id(message.group)
+        task = db.tasks.get_by_id(message.task)
+        variant = db.variants.get_by_id(message.variant)
         print(f'g-{message.group}, t-{message.task}, v-{message.variant}')
         try:
-            # HACK Change sys path, change os current working directory.
-            cwd = os.getcwd()
-            sys.path.insert(1, os.path.join(sys.path[0], '../core'))
-            os.chdir(sys.path[1])
-            from check_solution import check_solution
-            (ok, error) = check_solution(
-                group=message.group,
-                task=message.task,
-                variant=message.variant,
-                prog=message.code)
-            # HACK Change the current directory back.
-            os.chdir(cwd)
-            print(
-                f'g-{message.group}, t-{message.task}, v-{message.variant}: {ok}, {error}')
+            (ok, error) = check_solution(group, task, variant, message)
+            print(f'Check result: {ok}, {error}')
             status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed
             db.messages.mark_as_processed(
                 task=message.task,
