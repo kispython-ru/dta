@@ -59,7 +59,7 @@
     <div class="badge alert-{{ status_enum.color }} mt-2 mb-2" style="font-size: inherit">
       {{ status_enum.name }}
     </div>
-    {% if status.output is not none %}
+    {% if status.output is not none and status.output %}
       <div>Подробные сведения об ошибке:</div>
       <div class="text-muted mb-5" style="white-space: pre">{{ status.output }}</div>
     {% else %}
