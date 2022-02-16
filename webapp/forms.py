@@ -8,4 +8,4 @@ class MessageForm(FlaskForm):
         'code', [
             DataRequired(
                 message="Данное поле не может быть пустым!"), Length(
-                min=10)])
+                min=10, message="Данное поле должно содержать как минимум 10 символов!")])

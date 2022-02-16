@@ -7,7 +7,7 @@
     группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h5>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ task.id }} (вариант №{{ variant.id }}, группа {{ group.title }}).
+    Здесь Вы можете отправить ответ на задание №{{ task.id }} (вариант №{{ variant.id + 1 }}, группа {{ group.title }}).
   </h6>
   <h6 class="card-subtitle mb-4 text-muted">
     <a href="http://sovietov.com/kispython/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
