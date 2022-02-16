@@ -21,7 +21,7 @@ def migrate_database(connection_string: str):
 
 def seed_database(app: Flask):
     print("Checking if we need to seed the database...")
-    if os.environ.get('SEED') != 1:
+    if os.environ.get('SEED') is None:
         print("We don't need to seed the database.")
         return
     print("Seeding the database now...")
