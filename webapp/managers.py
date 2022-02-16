@@ -130,6 +130,10 @@ class TaskStatusManager():
             group: int,
             status: int,
             output: str):
+        existing = self.get_task_status(task, variant, group)
+        if existing is not None:
+            if existing.status == TaskStatusEnum.Checked:
+                return  # We've already accepted this task!
         self.session.query(TaskStatus) \
             .filter_by(task=task, variant=variant, group=group) \
             .update({"status": status, "output": output})
