@@ -54,8 +54,12 @@
     <div class="badge alert-{{ status_enum.color }} mt-2 mb-2" style="font-size: inherit">
       {{ status_enum.name }}
     </div>
-    <div>Подробные сведения об ошибке:</div>
-    <div class="text-muted mb-5" style="white-space: pre">{{ status.output }}</div>
+    {% if status.output is defined and status.output|length > 0 %}
+      <div>Подробные сведения об ошибке:</div>
+      <div class="text-muted mb-5" style="white-space: pre">{{ status.output }}</div>
+    {% else %}
+      <div class="mb-4"></div>
+    {% endif %}
   {% endif %}
 </div>
 {% endblock %}
