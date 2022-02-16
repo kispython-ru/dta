@@ -18,6 +18,7 @@ psycopg2-binary = "^2.9.3"
 Flask-Bcrypt = "^0.7.1"
 pycodestyle = "^2.8.0"
 radon = "^5.1.0"
+waitress = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
