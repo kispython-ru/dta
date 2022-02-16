@@ -19,26 +19,31 @@ def decrypt_exception() -> str:
     return log
 
 
-# HACK Change sys path, change os current working directory.
 def check_solution(
+        core_path: str,
         group: Group,
         task: Task,
         variant: Variant,
         message: Message):
-    cwd = os.getcwd()
-    sys.path.insert(1, os.path.join(sys.path[0], '../core'))
-    os.chdir(sys.path[1])
+    if core_path not in sys.path:
+        sys.path.insert(1, core_path)
     from check_solution import check_solution
     (ok, error) = check_solution(
         group=group.title,
-        task=task.title,
-        variant=variant.id - 1,
-        prog=message.code)
-    os.chdir(cwd)
+        task=str(task.id),
+        variant=variant.id,
+        code=message.code)
     return (ok, error)
 
 
-def process_pending_messages(db: AppDbContext):
+def load_tests(core_path: str):
+    if core_path not in sys.path:
+        sys.path.insert(1, core_path)
+    from loaded_tests import GROUPS, TASKS
+    return GROUPS, TASKS
+
+
+def process_pending_messages(db: AppDbContext, core_path: str):
     print('Checking for incoming messages...')
     pending_messages = db.messages.get_pending_messages_unique()
     for message in pending_messages:
@@ -47,7 +52,7 @@ def process_pending_messages(db: AppDbContext):
         variant = db.variants.get_by_id(message.variant)
         print(f'g-{message.group}, t-{message.task}, v-{message.variant}')
         try:
-            (ok, error) = check_solution(group, task, variant, message)
+            (ok, error) = check_solution(core_path, group, task, variant, message)
             print(f'Check result: {ok}, {error}')
             status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed
             db.messages.mark_as_processed(
@@ -65,14 +70,14 @@ def process_pending_messages(db: AppDbContext):
             print(f'Error orccured: {exception}')
 
 
-def background_worker(connection_string: str):
+def background_worker(connection_string: str, core_path: str):
     print(f'Starting background worker for database: {connection_string}')
     while True:
         time.sleep(10)
         with create_session_manually(connection_string) as session:
             db = AppDbContext(session)
             try:
-                process_pending_messages(db)
+                process_pending_messages(db, core_path)
             except BaseException:
                 exception = decrypt_exception()
                 print(f'Error orccured inside the loop: {exception}')
@@ -81,5 +86,8 @@ def background_worker(connection_string: str):
 @blueprint.before_app_first_request
 def start_background_worker():
     connection_string = app.config['CONNECTION_STRING']
-    process = Process(target=background_worker, args=(connection_string,))
+    core_path = app.config['CORE_PATH']
+    process = Process(
+        target=background_worker, args=(
+            connection_string, core_path))
     process.start()

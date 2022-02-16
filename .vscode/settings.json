@@ -1,5 +1,5 @@
 {
     "python.analysis.extraPaths": [
-        "./core"
+        "/home/artyom/Github/dta_core"
     ]
 }

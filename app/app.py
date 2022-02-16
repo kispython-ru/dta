@@ -27,22 +27,17 @@ def create_app():
             'head'])
     if os.environ.get('SEED'):
         with app.app_context():
-            seed_app()
+            seed_app(app.config['CORE_PATH'])
     return app
 
 
-def seed_app():
-    ivbo = [f'ИВБО-{i:02d}-20' for i in range(1, 9)] + ['ИВБО-13-20']
-    ikbo = [f'ИКБО-{i:02d}-20' for i in range(1, 28)] + ['ИКБО-30-20']
-    inbo = [
-        f'ИНБО-{i:02d}-20' for i in range(1, 12)] + ['ИНБО-13-15', 'ИНБО-15-20']
-    imbo = [f'ИМБО-{i:02d}-20' for i in range(1, 3)]
-    groups = ivbo + ikbo + inbo + imbo
+def seed_app(core_path: str):
+    groups, tasks = worker.load_tests(core_path)
     session = create_session()
     db = AppDbContext(session)
     db.groups.delete_all()
     db.groups.create_by_names(groups)
     db.tasks.delete_all()
-    db.tasks.create_by_names(["1.1"])
+    db.tasks.create_by_names(tasks)
     db.variants.delete_all()
-    db.variants.create_many(40)
+    db.variants.create_by_ids(range(0, 39))

@@ -61,11 +61,11 @@ class VariantManager():
         variant = self.session.query(Variant).get(id)
         return variant
 
-    def create_many(self, count: int):
-        for i in range(0, count):
-            task = Variant(id=i + 1)
+    def create_by_ids(self, ids: List[int]):
+        for id in ids:
+            task = Variant(id=id)
             self.session.add(task)
-            self.session.commit()
+        self.session.commit()
 
     def delete_all(self):
         self.session.query(Variant).delete()
