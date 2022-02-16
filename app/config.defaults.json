@@ -1,8 +1,5 @@
 {
     "TEMPLATES_AUTO_RELOAD": true,
     "SECRET_KEY": "secret-for-csrf",
-    "JWT_SECRET_KEY": "secret-for-jwt",
-    "JWT_TOKEN_LOCATION": ["cookies"],
-    "JWT_COOKIE_SECURE": false,
     "CONNECTION_STRING": "sqlite:////tmp/web-app.db"
 }
