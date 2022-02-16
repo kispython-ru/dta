@@ -44,7 +44,7 @@ def load_tests(core_path: str):
 
 
 def process_pending_messages(db: AppDbContext, core_path: str):
-    print('Checking for incoming messages...')
+    # print('Checking for incoming messages...')
     pending_messages = db.messages.get_pending_messages_unique()
     for message in pending_messages:
         group = db.groups.get_by_id(message.group)
@@ -67,7 +67,7 @@ def process_pending_messages(db: AppDbContext, core_path: str):
                 output=error)
         except BaseException:
             exception = decrypt_exception()
-            print(f'Error orccured: {exception}')
+            print(f'Error occured while checking for messages: {exception}')
 
 
 def background_worker(connection_string: str, core_path: str):
