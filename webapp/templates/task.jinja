@@ -14,6 +14,28 @@
       Перейти к условию задачи №{{ task.id }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}.
     </a>
   </h6>
+  <div>
+    <h6 class="card-title fw-bold">
+      Состояние задачи
+    </h6>
+    <h6 class="card-subtitle mb-2 text-muted">
+      В данной секции Вы можете отслеживать состояние отправленного задания.
+    </h6>
+    {% if status == None %}
+      <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
+    {% else %}
+      <div>Состояние задания:</div>
+      <div class="badge alert-{{ status_enum.color }} mt-2 mb-2" style="font-size: inherit">
+        {{ status_enum.name }}
+      </div>
+      {% if status.output is not none and status.output %}
+        <div>Подробные сведения об ошибке:</div>
+        <div class="text-muted mb-2" style="white-space: pre">{{ status.output }}</div>
+      {% else %}
+        <div class="mb-2"></div>
+      {% endif %}
+    {% endif %}
+  </div>
   <div class="card m-auto mt-3">
     <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
       <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
@@ -53,25 +75,5 @@
       </div>
     </form>
   </div>
-  <h6 class="card-title fw-bold mt-3">
-    Состояние задачи
-  </h6>
-  <h6 class="card-subtitle mb-2 text-muted">
-    В данной секции Вы можете отслеживать состояние отправленного задания.
-  </h6>
-  {% if status == None %}
-    <div>После отправки выполненного задания Вы сможете отслеживать его статус.</div>
-  {% else %}
-    <div>Состояние задания:</div>
-    <div class="badge alert-{{ status_enum.color }} mt-2 mb-2" style="font-size: inherit">
-      {{ status_enum.name }}
-    </div>
-    {% if status.output is not none and status.output %}
-      <div>Подробные сведения об ошибке:</div>
-      <div class="text-muted mb-5" style="white-space: pre">{{ status.output }}</div>
-    {% else %}
-      <div class="mb-4"></div>
-    {% endif %}
-  {% endif %}
 </div>
 {% endblock %}
