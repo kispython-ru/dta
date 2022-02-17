@@ -20,7 +20,7 @@ def find_task_status(
     for status in statuses:
         if status.group == group.id and status.variant == variant.id and status.task == task.id:
             return TaskStatusEnum(status.status).code
-    return "—"
+    return "–"
 
 
 @blueprint.route("/", methods=['GET'])

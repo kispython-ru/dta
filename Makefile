@@ -5,7 +5,7 @@ image:
 container:
 	docker run -it --net=host flask-app
 pep8:
-	cd app && autopep8 --aggressive --aggressive --in-place --recursive .
+	cd webapp && autopep8 --aggressive --aggressive --in-place --recursive .
 test:
 	cd tests && pytest
 test-verbose:

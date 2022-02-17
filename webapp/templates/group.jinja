@@ -4,45 +4,45 @@
   <h5 class="card-title fw-bold">
     Варианты заданий группы <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
   </h5>
-  <h6 class="card-subtitle mb-2 text-muted">
+  <h6 class="card-subtitle mb-3 text-muted">
     Список вариантов для студентов группы {{ group.title }}. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
   </h6>
-  <h6 class="card-subtitle mb-4 text-muted">
-    <a href="http://sovietov.com/kispython/{{ group.title }}.html">
-      Сборник задач для группы {{ group.title }} по вариантам.
-    </a>
-  </h6>
-  <div class="card">
-    <div class="card-body">
-      <table class="table mb-0">
-        <thead>
+  <div class="mb-5" style="overflow-x:auto">
+    <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
+      <thead>
+        <tr>
+          <th scope="col" style="width:100px">Вариант</th>
+          {% for task in tasks %}
+            <td scope="col" class="text-center" tooltip="{{ task.title }}">
+              <a class="text-decoration-none"
+                 target="__blank"
+                 href="http://sovietov.com/kispython/{{ task.id }}/{{ group.title }}.html">
+                Зачада №{{ task.id }}
+              </a>
+            </td>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody style="border-top: 0px">
+        {% for variant in variants %}
           <tr>
-            <th scope="col" style="width: 15%;">Вариант</th>
+            <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
+              <span class="p-1 d-block">{{ variant.id + 1 }}</span>
+            </td>
             {% for task in tasks %}
-              <td scope="col" tooltip="{{ task.title }}">
-                <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id }}</span>
+              {% set task_status = find_task_status(statuses, task, variant, group) %}
+              <td scope="col" style="border-bottom: 0; padding: 0">
+                <a class="d-block text-center text-decoration-none p-1"
+                   {% if task_status == '+' %}style="background-color:#e3ffee"{% endif %}
+                   href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
+                  {{ task_status }}
+                </a>
               </td>
             {% endfor %}
           </tr>
-        </thead>
-        <tbody>
-          {% for variant in variants %}
-            <tr>
-              <th scope="col" style="width: 15%;border-bottom: 0">
-                {{ variant.id + 1 }}
-              </th>
-              {% for task in tasks %}
-                <td scope="col" style="border-bottom: 0">
-                  <a style="text-decoration:none" href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
-                    {{ find_task_status(statuses, task, variant, group) }}
-                  </a>
-                </td>
-              {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}
