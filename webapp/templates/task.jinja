@@ -2,18 +2,20 @@
 {% block content %}
 <div class="container mt-3">
   <h5 class="card-title fw-bold">
-    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id }}</span>,
+    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
     группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h5>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ task.id }} (вариант №{{ variant.id + 1 }}, группа {{ group.title }}).
+    Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} (вариант №{{ variant.id + 1 }}, группа {{ group.title }}).
   </h6>
-  <h6 class="card-subtitle mb-4 text-muted">
-    <a class="text-decoration-none" href="http://sovietov.com/kispython/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
-      Перейти к условию задачи №{{ task.id }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}.
+  <div class="card-subtitle mb-4 mt-2">
+    <a class="text-decoration-none btn btn-primary"
+       target="__blank"
+       href="http://sovietov.com/kispython/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
+      Перейти к условию задачи №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}.
     </a>
-  </h6>
+  </div>
   <div>
     <h6 class="card-title fw-bold">
       Состояние задачи

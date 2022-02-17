@@ -24,8 +24,7 @@ def upgrade():
     )
     op.create_table(
         'tasks',
-        sa.Column("id", sa.Integer, primary_key=True, nullable=False),
-        sa.Column("title", sa.String, unique=True, nullable=False),
+        sa.Column("id", sa.Integer, primary_key=True, nullable=False)
     )
     op.create_table(
         'variants',

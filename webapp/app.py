@@ -33,7 +33,7 @@ def seed_database(app: Flask):
         db.groups.delete_all()
         db.groups.create_by_names(groups)
         db.tasks.delete_all()
-        db.tasks.create_by_names(tasks)
+        db.tasks.create_by_ids(tasks)
         db.variants.delete_all()
         db.variants.create_by_ids(range(0, 39 + 1))
     print("Successfully seeded the dabatase!")

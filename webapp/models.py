@@ -11,7 +11,6 @@ class Group(Base):
 class Task(Base):
     __tablename__ = 'tasks'
     id = sa.Column('id', sa.Integer, primary_key=True, nullable=False)
-    title = sa.Column('title', sa.String, unique=True, nullable=False)
 
 
 class Variant(Base):

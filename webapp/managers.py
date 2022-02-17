@@ -39,9 +39,9 @@ class TaskManager():
         task = self.session.query(Task).get(id)
         return task
 
-    def create_by_names(self, names: List[str]):
-        for name in names:
-            group = Task(title=name)
+    def create_by_ids(self, ids: List[int]):
+        for id in ids:
+            group = Task(id=id)
             self.session.add(group)
         self.session.commit()
 
