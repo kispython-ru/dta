@@ -29,9 +29,12 @@ def find_task_status(
 def dashboard(session: Session):
     db = AppDbContext(session)
     groups = db.groups.get_all()
+    groupings = {}
+    for group in groups:
+        groupings.setdefault(group.title[:4], []).append(group)
     return render_template(
         "dashboard.jinja",
-        groups=groups,
+        groupings=groupings,
         find_task_status=find_task_status)
 
 

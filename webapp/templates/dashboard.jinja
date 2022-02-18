@@ -6,10 +6,17 @@
     Нажмите на группу, чтобы перейти к вариантам заданий группы.
   </h6>
   <div>
-    {% for group in groups %}
-      <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
-        {{ group.title }}
-      </a>
+    {% for key, grouping in groupings.items() %}
+      <div>
+        <small class="mb-2 text-muted d-block">
+          <span>{{ key }}</span>
+        </small>
+        {% for group in grouping %}
+          <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
+            {{ group.title }}
+          </a>
+        {% endfor %}
+      </div>
     {% endfor %}
   </div>
 </div>
