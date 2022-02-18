@@ -30,7 +30,7 @@ def check_solution(
     from check_solution import check_solution
     (ok, error) = check_solution(
         group=group.title,
-        task=str(task.id),
+        task=task.id,
         variant=variant.id,
         code=message.code)
     return (ok, error)
