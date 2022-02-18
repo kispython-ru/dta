@@ -17,7 +17,7 @@
               <a class="text-decoration-none"
                  target="__blank"
                  href="http://sovietov.com/kispython/{{ task.id }}/{{ group.title }}.html">
-                Зачада №{{ task.id + 1 }}
+                №{{ task.id + 1 }}
               </a>
             </td>
           {% endfor %}
@@ -34,6 +34,7 @@
               <td scope="col" style="border-bottom: 0; padding: 0">
                 <a class="d-block text-center text-decoration-none p-1"
                    {% if task_status == '+' %}style="background-color:#e3ffee"{% endif %}
+                   {% if task_status == 'x' %}style="background-color:#ffe3ee"{% endif %}
                    href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
                   {{ task_status }}
                 </a>
