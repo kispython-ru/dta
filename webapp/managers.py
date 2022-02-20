@@ -193,7 +193,16 @@ class MessageManager():
         return message
 
     def get_all(self) -> List[Message]:
-        all = self.session.query(Message).all()
+        all = self.session.query(Message) \
+            .order_by(Message.time.desc()) \
+            .all()
+        return all
+
+    def get_latest(self, count: int) -> List[Message]:
+        all = self.session.query(Message) \
+            .order_by(Message.time.desc()) \
+            .limit(count) \
+            .all()
         return all
 
     def get_pending_messages(self) -> List[Message]:

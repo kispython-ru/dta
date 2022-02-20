@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from flask import Blueprint, render_template, make_response, current_app as app
 from webapp.forms import MessageForm
 from webapp.managers import AppDbContext, TaskStatusEnum
@@ -93,15 +93,16 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
         status_enum=status_enum)
 
 
-@blueprint.route("/csv/<token>", methods=['GET'])
+@blueprint.route('/csv/<token>/<count>', methods=['GET'])
+@blueprint.route("/csv/<token>", methods=['GET'], defaults={'count': None})
 @handle_errors(error_code=401)
 @use_session()
-def export(session: Session, token: str):
+def export(session: Session, token: str, count: Union[int, None]):
     configured_token = app.config["CSV_TOKEN"]
     if configured_token != token:
         raise ValueError("Access is denied.")
     db = AppDbContext(session)
-    messages = db.messages.get_all()
+    messages = db.messages.get_all() if count is None else db.messages.get_latest(count)
     rows = [['ID', 'Время отправки', 'Группа',
              'Задача', 'Вариант', 'IP', 'Текст программы']]
     for message in messages:
@@ -115,7 +116,7 @@ def export(session: Session, token: str):
             message.code
         ])
     si = io.StringIO()
-    cw = csv.writer(si)
+    cw = csv.writer(si, delimiter=';')
     cw.writerows(rows)
     value = si.getvalue()
     output = make_response(value)
