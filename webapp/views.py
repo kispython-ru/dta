@@ -23,6 +23,13 @@ def find_task_status(
     return "–"
 
 
+def get_real_ip() -> str:
+    ip_forward_headers = request.headers.getlist("X-Forwarded-For")
+    if ip_forward_headers:
+        return ip_forward_headers[0]
+    return request.remote_addr
+
+
 @blueprint.route("/", methods=['GET'])
 @handle_errors()
 @use_session()
@@ -68,7 +75,7 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
     form = MessageForm()
     if form.validate_on_submit():
         code = form.code.data
-        ip = request.remote_addr
+        ip = get_real_ip()
         message = db.messages.submit_task(
             task_id, variant_id, group_id, code, ip)
         if message is None:
