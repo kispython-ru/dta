@@ -93,30 +93,39 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
         status_enum=status_enum)
 
 
-@blueprint.route('/csv/<token>/<count>', methods=['GET'])
-@blueprint.route("/csv/<token>", methods=['GET'], defaults={'count': None})
+@blueprint.route('/csv/<separator>/<token>/<count>', methods=['GET'])
+@blueprint.route("/csv/<separator>/<token>",
+                 methods=['GET'], defaults={'count': None})
 @handle_errors(error_code=401)
 @use_session()
-def export(session: Session, token: str, count: Union[int, None]):
+def export(session: Session, separator: str,
+           token: str, count: Union[int, None]):
     configured_token = app.config["CSV_TOKEN"]
     if configured_token != token:
         raise ValueError("Access is denied.")
     db = AppDbContext(session)
     messages = db.messages.get_all() if count is None else db.messages.get_latest(count)
-    rows = [['ID', 'Время отправки', 'Группа',
-             'Задача', 'Вариант', 'IP', 'Текст программы']]
+    groups = db.groups.get_all()
+    group_titles = {}
+    for group in groups:
+        group_titles[group.id] = group.title
+    rows = [['Id', 'Time', 'Group', 'Task', 'Variant', 'IP', 'Code']]
     for message in messages:
+        group_title = group_titles[message.group]
+        time = message.time.strftime("%Y-%m-%d %H:%M:%S")
+        task = message.task + 1
         rows.append([
             message.id,
-            message.time,
-            message.group,
-            message.task,
+            time,
+            group_title,
+            task,
             message.variant,
             message.ip,
             message.code
         ])
     si = io.StringIO()
-    cw = csv.writer(si, delimiter=';')
+    delimiter = ';' if separator == 'semicolon' else ','
+    cw = csv.writer(si, delimiter=delimiter)
     cw.writerows(rows)
     value = si.getvalue()
     output = make_response(value)
