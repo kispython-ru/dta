@@ -93,10 +93,13 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
         status_enum=status_enum)
 
 
-@blueprint.route("/csv/bWVzc2FnZXM=", methods=['GET'])
-@handle_errors()
+@blueprint.route("/csv/<token>", methods=['GET'])
+@handle_errors(error_code=401)
 @use_session()
-def export(session: Session):
+def export(session: Session, token: str):
+    configured_token = app.config["CSV_TOKEN"]
+    if configured_token != token:
+        raise ValueError("Access is denied.")
     db = AppDbContext(session)
     messages = db.messages.get_all()
     rows = [['ID', 'Время отправки', 'Группа',
