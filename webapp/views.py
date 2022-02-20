@@ -109,7 +109,7 @@ def export(session: Session, separator: str,
     group_titles = {}
     for group in groups:
         group_titles[group.id] = group.title
-    rows = [['Id', 'Time', 'Group', 'Task', 'Variant', 'IP', 'Code']]
+    rows = [['ID', 'Время', 'Группа', 'Задача', 'Вариант', 'IP', 'Код']]
     for message in messages:
         group_title = group_titles[message.group]
         time = message.time.strftime("%Y-%m-%d %H:%M:%S")
@@ -127,7 +127,8 @@ def export(session: Session, separator: str,
     delimiter = ';' if separator == 'semicolon' else ','
     cw = csv.writer(si, delimiter=delimiter)
     cw.writerows(rows)
-    value = si.getvalue()
+    bom = u'\uFEFF'
+    value = bom + si.getvalue()
     output = make_response(value)
     output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
     output.headers["Content-type"] = "text/csv"
