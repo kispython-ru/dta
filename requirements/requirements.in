@@ -9,3 +9,6 @@ psycopg2-binary==2.9.3
 Flask-Bcrypt==0.7.1
 radon==5.1.0
 waitress==2.0.0
+
+# for linux
+greenlet==1.1.2
