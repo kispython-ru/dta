@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.lint.txt
+          pip install -r requirements/requirements.lint.txt
       - name: Run linters
         run: make lint
   test:
@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.test.txt
+          pip install -r requirements/requirements.test.txt
       - name: Run tests
         run: make test
       - name: Upload coverage to Codecov
