@@ -1,22 +1,28 @@
+import csv
+import io
 from typing import List, Union
-from flask import Blueprint, render_template, make_response, current_app as app
+
+from sqlalchemy.orm import Session
+
+from flask import Blueprint
+from flask import current_app as app
+from flask import make_response, render_template, request
+
 from webapp.forms import MessageForm
 from webapp.managers import AppDbContext, TaskStatusEnum
 from webapp.models import Group, Task, TaskStatus, Variant
 from webapp.utils import handle_errors, use_session
-from sqlalchemy.orm import Session
-from flask import request
-import io
-import csv
 
-blueprint = Blueprint('views', __name__)
+
+blueprint = Blueprint("views", __name__)
 
 
 def find_task_status(
         statuses: List[TaskStatus],
         task: Task,
         variant: Variant,
-        group: Group):
+        group: Group,
+):
     for status in statuses:
         if status.group == group.id and status.variant == variant.id and status.task == task.id:
             return TaskStatusEnum(status.status).code
@@ -30,7 +36,7 @@ def get_real_ip() -> str:
     return request.remote_addr
 
 
-@blueprint.route("/", methods=['GET'])
+@blueprint.route("/", methods=["GET"])
 @handle_errors()
 @use_session()
 def dashboard(session: Session):
@@ -42,10 +48,11 @@ def dashboard(session: Session):
     return render_template(
         "dashboard.jinja",
         groupings=groupings,
-        find_task_status=find_task_status)
+        find_task_status=find_task_status,
+    )
 
 
-@blueprint.route("/group/<group_id>", methods=['GET'])
+@blueprint.route("/group/<group_id>", methods=["GET"])
 @handle_errors()
 @use_session()
 def group(session: Session, group_id: int):
@@ -60,11 +67,14 @@ def group(session: Session, group_id: int):
         group=group,
         tasks=tasks,
         statuses=statuses,
-        find_task_status=find_task_status)
+        find_task_status=find_task_status,
+    )
 
 
-@blueprint.route("/group/<group_id>/variant/<variant_id>/task/<task_id>",
-                 methods=['GET', 'POST'])
+@blueprint.route(
+    "/group/<group_id>/variant/<variant_id>/task/<task_id>",
+    methods=["GET", "POST"],
+)
 @handle_errors()
 @use_session()
 def task(session: Session, group_id: int, variant_id: int, task_id: int):
@@ -87,7 +97,8 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
             variant=variant,
             group=group,
             task=task,
-            status=status)
+            status=status,
+        )
     status = db.statuses.get_task_status(task_id, variant_id, group_id)
     status_enum = TaskStatusEnum(status.status) if status is not None else None
     return render_template(
@@ -97,16 +108,23 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
         group=group,
         task=task,
         status=status,
-        status_enum=status_enum)
+        status_enum=status_enum,
+    )
 
 
-@blueprint.route('/csv/<separator>/<token>/<count>', methods=['GET'])
-@blueprint.route("/csv/<separator>/<token>",
-                 methods=['GET'], defaults={'count': None})
+@blueprint.route("/csv/<separator>/<token>/<count>", methods=["GET"])
+@blueprint.route(
+    "/csv/<separator>/<token>",
+    methods=["GET"], defaults={"count": None},
+)
 @handle_errors(error_code=401)
 @use_session()
-def export(session: Session, separator: str,
-           token: str, count: Union[int, None]):
+def export(
+    session: Session,
+    separator: str,
+    token: str,
+    count: Union[int, None],
+):
     configured_token = app.config["CSV_TOKEN"]
     if configured_token != token:
         raise ValueError("Access is denied.")
@@ -116,7 +134,7 @@ def export(session: Session, separator: str,
     group_titles = {}
     for group in groups:
         group_titles[group.id] = group.title
-    rows = [['ID', 'Время', 'Группа', 'Задача', 'Вариант', 'IP', 'Код']]
+    rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Код"]]
     for message in messages:
         group_title = group_titles[message.group]
         time = message.time.strftime("%Y-%m-%d %H:%M:%S")
@@ -128,13 +146,13 @@ def export(session: Session, separator: str,
             task,
             message.variant,
             message.ip,
-            message.code
+            message.code,
         ])
     si = io.StringIO()
-    delimiter = ';' if separator == 'semicolon' else ','
+    delimiter = ";" if separator == "semicolon" else ","
     cw = csv.writer(si, delimiter=delimiter)
     cw.writerows(rows)
-    bom = u'\uFEFF'
+    bom = u"\uFEFF"
     value = bom + si.getvalue()
     output = make_response(value)
     output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
