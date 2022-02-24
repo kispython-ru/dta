@@ -1,9 +1,0 @@
--c requirements.txt
-
-pytest==7.0.1
-pytest-cov==3.0.0
-pytest-flask==1.2.0
-pytest-alembic==0.7.0
-
-# for linux
-greenlet==1.1.2
