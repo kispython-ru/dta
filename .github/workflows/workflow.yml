@@ -30,7 +30,6 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction
-      - name: Install dependencies
       - name: Run linters
         run: |
           source .venv/bin/activate
