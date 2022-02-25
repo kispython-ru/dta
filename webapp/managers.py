@@ -64,8 +64,8 @@ class VariantManager:
         return variant
 
     def create_by_ids(self, ids: List[int]):
-        for task_id in ids:
-            task = Variant(id=task_id)
+        for variant_id in ids:
+            task = Variant(id=variant_id)
             self.session.add(task)
         self.session.commit()
 
