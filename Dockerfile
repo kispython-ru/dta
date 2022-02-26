@@ -17,7 +17,7 @@ RUN apt-get update -q \
         libssl-dev \
         zlib1g-dev \
         libffi-dev \
-        sudo 
+        sudo
 
 # Install pyenv and the required python version.
 RUN git clone https://github.com/yyuu/pyenv.git /root/.pyenv \

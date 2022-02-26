@@ -1,21 +1,24 @@
-from multiprocessing import Process
-from flask import Blueprint, current_app as app
-from webapp.managers import AppDbContext, TaskStatusEnum
-from webapp.utils import create_session_manually
-import time
 import sys
-import os
+import time
 import traceback
-from webapp.models import Group, Message, Task, Variant
+from multiprocessing import Process
 
-blueprint = Blueprint('worker', __name__)
+from flask import Blueprint
+from flask import current_app as app
+
+from webapp.managers import AppDbContext, TaskStatusEnum
+from webapp.models import Group, Message, Task, Variant
+from webapp.utils import create_session_manually
+
+
+blueprint = Blueprint("worker", __name__)
 
 
 def decrypt_exception() -> str:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(
         exc_type, exc_value, exc_traceback)
-    log = ''.join('!! ' + line for line in lines)
+    log = "".join("!! " + line for line in lines)
     return log
 
 
@@ -32,7 +35,8 @@ def check_solution(
         group=group.title,
         task=task.id,
         variant=variant.id,
-        code=message.code)
+        code=message.code,
+    )
     return (ok, error)
 
 
@@ -47,33 +51,35 @@ def process_pending_messages(db: AppDbContext, core_path: str):
     pending_messages = db.messages.get_pending_messages_unique()
     message_count = len(pending_messages)
     if message_count > 0:
-        print(f'Processing {message_count} incoming messages...')
+        print(f"Processing {message_count} incoming messages...")
     for message in pending_messages:
         group = db.groups.get_by_id(message.group)
         task = db.tasks.get_by_id(message.task)
         variant = db.variants.get_by_id(message.variant)
-        print(f'g-{message.group}, t-{message.task}, v-{message.variant}')
+        print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         try:
             (ok, error) = check_solution(core_path, group, task, variant, message)
-            print(f'Check result: {ok}, {error}')
+            print(f"Check result: {ok}, {error}")
             status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed
             db.messages.mark_as_processed(
                 task=message.task,
                 variant=message.variant,
-                group=message.group)
+                group=message.group,
+            )
             db.statuses.update_status(
                 task=message.task,
                 variant=message.variant,
                 group=message.group,
                 status=status,
-                output=error)
+                output=error,
+            )
         except BaseException:
             exception = decrypt_exception()
-            print(f'Error occured while checking for messages: {exception}')
+            print(f"Error occured while checking for messages: {exception}")
 
 
 def background_worker(connection_string: str, core_path: str):
-    print(f'Starting background worker for database: {connection_string}')
+    print(f"Starting background worker for database: {connection_string}")
     while True:
         time.sleep(10)
         with create_session_manually(connection_string) as session:
@@ -82,13 +88,13 @@ def background_worker(connection_string: str, core_path: str):
                 process_pending_messages(db, core_path)
             except BaseException:
                 exception = decrypt_exception()
-                print(f'Error orccured inside the loop: {exception}')
+                print(f"Error orccured inside the loop: {exception}")
 
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    connection_string = app.config['CONNECTION_STRING']
-    core_path = app.config['CORE_PATH']
+    connection_string = app.config["CONNECTION_STRING"]
+    core_path = app.config["CORE_PATH"]
     process = Process(
         target=background_worker, args=(
             connection_string, core_path))

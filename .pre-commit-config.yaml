@@ -1,0 +1,29 @@
+repos:
+- repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+  rev: '2.3.5'
+  hooks:
+    - id: editorconfig-checker
+      name: Run editorconfig-checker
+      alias: ec
+- repo: https://github.com/pycqa/flake8
+  rev: '3.9.2'
+  hooks:
+    - id: flake8
+      name: Run linter
+      additional_dependencies: [
+        pep8-naming,
+        flake8-commas,
+        flake8-flask,
+        flake8-docstrings,
+        flake8-multiline-containers,
+        flake8-polyfill,
+        flake8-quotes,
+        flake8-variables-names
+      ]
+      verbose: true
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+    - id: isort
+      name: Run isort
+      alias: isort -qc .

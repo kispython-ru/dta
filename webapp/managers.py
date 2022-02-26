@@ -1,8 +1,10 @@
 import datetime
-from typing import List
-from webapp.models import Task, Group, TaskStatus, Variant, Message
-from sqlalchemy.orm import Session
 from enum import IntEnum
+from typing import List
+
+from sqlalchemy.orm import Session
+
+from webapp.models import Group, Message, Task, TaskStatus, Variant
 
 
 class GroupManager():
@@ -13,8 +15,8 @@ class GroupManager():
         groups = self.session.query(Group).all()
         return groups
 
-    def get_by_id(self, id: int) -> Group:
-        group = self.session.query(Group).get(id)
+    def get_by_id(self, group_id: int) -> Group:
+        group = self.session.query(Group).get(group_id)
         return group
 
     def create_by_names(self, names: List[str]):
@@ -35,13 +37,13 @@ class TaskManager():
         tasks = self.session.query(Task).all()
         return tasks
 
-    def get_by_id(self, id: int) -> Task:
-        task = self.session.query(Task).get(id)
+    def get_by_id(self, task_id: int) -> Task:
+        task = self.session.query(Task).get(task_id)
         return task
 
     def create_by_ids(self, ids: List[int]):
-        for id in ids:
-            group = Task(id=id)
+        for task_id in ids:
+            group = Task(id=task_id)
             self.session.add(group)
         self.session.commit()
 
@@ -49,7 +51,7 @@ class TaskManager():
         self.session.query(Task).delete()
 
 
-class VariantManager():
+class VariantManager:
     def __init__(self, session: Session):
         self.session = session
 
@@ -57,13 +59,13 @@ class VariantManager():
         variants = self.session.query(Variant).all()
         return variants
 
-    def get_by_id(self, id: int) -> Variant:
-        variant = self.session.query(Variant).get(id)
+    def get_by_id(self, variant_id: int) -> Variant:
+        variant = self.session.query(Variant).get(variant_id)
         return variant
 
     def create_by_ids(self, ids: List[int]):
-        for id in ids:
-            task = Variant(id=id)
+        for variant_id in ids:
+            task = Variant(id=variant_id)
             self.session.add(task)
         self.session.commit()
 
@@ -83,7 +85,7 @@ class TaskStatusEnum(IntEnum):
             self.Submitted: "Отправлено",
             self.Checking: "Проверяется",
             self.Checked: "Принято",
-            self.Failed: "Ошибка!"
+            self.Failed: "Ошибка!",
         }[self]
 
     @property
@@ -92,7 +94,7 @@ class TaskStatusEnum(IntEnum):
             self.Submitted: "?",
             self.Checking: "...",
             self.Checked: "+",
-            self.Failed: "x"
+            self.Failed: "x",
         }[self]
 
     @property
@@ -101,7 +103,7 @@ class TaskStatusEnum(IntEnum):
             self.Submitted: "primary",
             self.Checking: "warning",
             self.Checked: "success",
-            self.Failed: "danger"
+            self.Failed: "danger",
         }[self]
 
 
@@ -160,7 +162,7 @@ class TaskStatusManager():
             time=now,
             code=code,
             output=None,
-            status=status
+            status=status,
         )
         self.session.add(task_status)
         self.session.commit()
@@ -186,24 +188,24 @@ class MessageManager():
             time=now,
             code=code,
             ip=ip,
-            processed=False
+            processed=False,
         )
         self.session.add(message)
         self.session.commit()
         return message
 
     def get_all(self) -> List[Message]:
-        all = self.session.query(Message) \
-            .order_by(Message.time.desc()) \
-            .all()
-        return all
+        messages = self.session.query(Message).order_by(Message.time.desc()).all()
+        return messages
 
     def get_latest(self, count: int) -> List[Message]:
-        all = self.session.query(Message) \
-            .order_by(Message.time.desc()) \
-            .limit(count) \
+        latest_messages = (
+            self.session.query(Message)
+            .order_by(Message.time.desc())
+            .limit(count)
             .all()
-        return all
+        )
+        return latest_messages
 
     def get_pending_messages(self) -> List[Message]:
         pending = self.session.query(Message) \

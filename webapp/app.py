@@ -1,32 +1,36 @@
 import logging
 import os
+
 from flask import Flask
-from webapp.utils import create_session, load_config_files
+
 import alembic.config
 import webapp.views as views
-from webapp.managers import AppDbContext
 import webapp.worker as worker
+from webapp.managers import AppDbContext
+from webapp.utils import create_session, load_config_files
 
 
 def migrate_database(connection_string: str):
     alembic.config.main(
-        prog='alembic',
+        prog="alembic",
         argv=[
-            '--raiseerr',
-            '-x',
-            f'connection_string={connection_string}',
-            'upgrade',
-            'head'])
+            "--raiseerr",
+            "-x",
+            f"connection_string={connection_string}",
+            "upgrade",
+            "head",
+        ],
+    )
 
 
 def seed_database(app: Flask):
     print("Checking if we need to seed the database...")
-    if os.environ.get('SEED') is None:
+    if os.environ.get("SEED") is None:
         print("We don't need to seed the database.")
         return
     print("Seeding the database now...")
     with app.app_context():
-        core_path = app.config['CORE_PATH']
+        core_path = app.config["CORE_PATH"]
         groups, tasks = worker.load_tests(core_path)
         session = create_session()
         db = AppDbContext(session)
@@ -40,7 +44,7 @@ def seed_database(app: Flask):
 
 
 def read_configuration():
-    config_path = os.environ.get('CONFIG_PATH')
+    config_path = os.environ.get("CONFIG_PATH")
     configuration_directory = config_path if config_path is not None else os.getcwd()
     return load_config_files(configuration_directory)
 
@@ -53,6 +57,6 @@ def create_app():
     app.register_blueprint(views.blueprint)
     app.register_blueprint(worker.blueprint)
     logging.basicConfig(level=logging.DEBUG)
-    migrate_database(config['CONNECTION_STRING'])
+    migrate_database(config["CONNECTION_STRING"])
     seed_database(app)
     return app
