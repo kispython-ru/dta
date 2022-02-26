@@ -17,6 +17,7 @@ psycopg2-binary = "^2.9.3"
 Flask-Bcrypt = "^0.7.1"
 radon = "^5.1.0"
 waitress = "^2.0.0"
+pyproject-flake8 = "^0.0.1-alpha.2"
 
 [tool.poetry.dev-dependencies]
 beautifulsoup4 = "^4.10.0"
@@ -36,7 +37,6 @@ pytest = "7.0.1"
 pytest-cov = "3.0.0"
 pytest-flask = "1.2.0"
 pytest-alembic = "0.7.0"
-greenlet = "1.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -77,3 +77,24 @@ filterwarnings = [
     "default",
     "error"
 ]
+
+[tool.flake8]
+max-line-length = "120"
+show-source = "true"
+statistics = "true"
+inline-quotes = "double"
+ignore = """
+    W504,
+    D100,D101,D102,D103,D104,D105,D106,D107,
+    D401
+"""
+exclude = """
+    .venv,
+    venv*,
+    .git,
+    */alembic/versions*
+    *__pycache__*
+"""
+per-file-ignores = """
+    */models.py:VNE003
+"""
