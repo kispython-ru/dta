@@ -5,7 +5,7 @@ fix:
 .PHONY: lint
 lint:
 	ec
-	flake8
+	pflake8
 	isort -qc .
 
 .PHONY: test
