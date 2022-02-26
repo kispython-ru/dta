@@ -1,4 +1,8 @@
-Use `poetry install` in order to install all the required dependencies. If you are using [code](https://code.visualstudio.com/), press `Ctrl+Shift+P` in order to activate poetry virtual environment after installation. Run unit tests via `make test`, run the app via `make flask`, run the linter as `make pep8`. If you prefer to use containers, there are `make image` and `make container` scripts that will build a Docker image and run the app inside the image. A sample run script for production might look like as follows:
+[![codecov](https://codecov.io/gh/worldbeater/dta/branch/main/graph/badge.svg)](https://codecov.io/gh/worldbeater/dta)
+
+### Digital Teaching Assistant UI
+
+Use `poetry install` in order to install all the required dependencies. If you are using [code](https://code.visualstudio.com/), press `Ctrl+Shift+P` in order to activate poetry virtual environment after installation. Run unit tests via `make test`, run the app via `make flask`, run the linter as `make lint`. If you prefer to use containers, there are `make image` and `make container` scripts that will build a Docker image and run the app inside the image. A sample run script for production might look like as follows:
 
 ```sh
 # Use the following if you'd like to seed the database:
