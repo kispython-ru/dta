@@ -2,5 +2,5 @@ import uuid
 
 
 def unique_id() -> str:
-    id = uuid.uuid4()
-    return str(id)
+    unique_id = uuid.uuid4()
+    return str(unique_id)

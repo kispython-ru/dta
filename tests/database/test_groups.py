@@ -8,7 +8,7 @@ def test_group_creation(session: Session):
     group_manager = GroupManager(session)
     group_name = unique_id()
 
-    group_manager.create_by_names([ group_name ])
+    group_manager.create_by_names([group_name])
     groups = group_manager.get_all()
 
     group_exists = any(group.title == group_name for group in groups)
