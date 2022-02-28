@@ -1,26 +1,23 @@
 import logging
 import os
+from typing import Union
 
 from flask import Flask
 
-import alembic.config
 import webapp.views as views
 import webapp.worker as worker
+from alembic import command
+from alembic.config import Config
 from webapp.managers import AppDbContext
 from webapp.utils import create_session, load_config_files
 
 
-def migrate_database(connection_string: str):
-    alembic.config.main(
-        prog="alembic",
-        argv=[
-            "--raiseerr",
-            "-x",
-            f"connection_string={connection_string}",
-            "upgrade",
-            "head",
-        ],
-    )
+def migrate_database(connection_string: str, alembic_ini_path: str, alembic_script_path: Union[str, None] = None):
+    alembic_config = Config(alembic_ini_path)
+    alembic_config.set_main_option("sqlalchemy.url", connection_string)
+    if alembic_script_path is not None:
+        alembic_config.set_main_option("script_location", alembic_script_path)
+    command.upgrade(alembic_config, "head")
 
 
 def seed_database(app: Flask):
@@ -43,20 +40,24 @@ def seed_database(app: Flask):
     print("Successfully seeded the dabatase!")
 
 
-def read_configuration():
-    config_path = os.environ.get("CONFIG_PATH")
-    configuration_directory = config_path if config_path is not None else os.getcwd()
-    return load_config_files(configuration_directory)
-
-
-def create_app():
-    config = read_configuration()
+def configure_app(config_path: str, alembic_ini_path: str, alembic_script_path: Union[str, None] = None) -> Flask:
+    config = load_config_files(config_path)
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     app.config.update(config)
     app.register_blueprint(views.blueprint)
     app.register_blueprint(worker.blueprint)
     logging.basicConfig(level=logging.DEBUG)
-    migrate_database(config["CONNECTION_STRING"])
+    migrate_database(
+        connection_string=config["CONNECTION_STRING"],
+        alembic_ini_path=alembic_ini_path,
+        alembic_script_path=alembic_script_path,
+    )
     seed_database(app)
     return app
+
+
+def create_app() -> Flask:
+    config_path = os.environ.get("CONFIG_PATH")
+    configuration_directory = config_path if config_path is not None else os.getcwd()
+    return configure_app(configuration_directory, "alembic.ini", None)
