@@ -25,6 +25,9 @@
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
     группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h5>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} (вариант №{{ variant.id + 1 }}, группа {{ group.title }}).
+  </h6>
   <div class="card-subtitle mb-4 mt-2">
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
