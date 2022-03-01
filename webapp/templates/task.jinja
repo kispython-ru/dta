@@ -1,6 +1,13 @@
 {% extends 'layout.jinja' %}
 {% block content %}
 <div class="container mt-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Цифровой ассистент преподавателя</a></li>
+      <li class="breadcrumb-item"><a href="/group/{{ group.id }}">Группа {{ group.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Задача №{{ task.id + 1 }}, вариант {{ variant.id + 1 }}</li>
+    </ol>
+  </nav>
   <h5 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
