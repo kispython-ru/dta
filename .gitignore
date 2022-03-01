@@ -1,6 +1,7 @@
 # Code
 .vscode
 .idea
+config.local.json
 
 # LocalDB
 *.db
