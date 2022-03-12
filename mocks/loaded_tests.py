@@ -1,0 +1,1 @@
+GROUPS, TASKS, TESTS = ["ITEM-1"], [0, 1], [{ "ITEM-1": [list(range(40)), list(range(40))] }]
