@@ -27,4 +27,8 @@ image:
 container:
 	docker run -it --net=host flask-app
 
+.PHONY: migration
+migration:
+	cd webapp && alembic revision -m "$(TITLE)"
+
 .DEFAULT_GOAL :=
