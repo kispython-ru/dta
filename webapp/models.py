@@ -36,7 +36,7 @@ class TaskStatus(Base):
         nullable=False,
     )
     group = sa.Column(
-        "title",
+        "group",
         sa.Integer,
         sa.ForeignKey("groups.id"),
         primary_key=True,
