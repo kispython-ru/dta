@@ -1,7 +1,7 @@
 {
     "TEMPLATES_AUTO_RELOAD": true,
     "CONNECTION_STRING": "sqlite:///web-app.db",
-    "CORE_PATH": "DTA_DIRECTORY",
+    "CORE_PATH": "./mocks",
     "CSV_TOKEN": "CHANGE_ME",
     "SECRET_KEY": "CHANGE_ME"
 }
