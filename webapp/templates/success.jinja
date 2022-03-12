@@ -1,5 +1,29 @@
 {% extends 'layout.jinja' %}
 {% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse container">
+    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/">
+          Цифровой ассистент преподавателя
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/group/{{ group.id }}">
+          Группа {{ group.title }}
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
+          Задача №{{ task.id + 1 }}, вариант №{{ variant.id + 1 }}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Уведомление
+      </li>
+    </ol>
+  </div>
+</nav>
 <div class="container mt-3">
   <h5 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
