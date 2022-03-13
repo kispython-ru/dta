@@ -29,7 +29,7 @@ def test_group_fetching_by_id(session: Session):
 
 
 def test_group_fetching_by_prefix(session: Session):
-    prefix = "example-prefix"
+    prefix = "example_prefix"
     one = prefix + unique_id()
     two = prefix + unique_id()
     three = unique_id()

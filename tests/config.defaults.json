@@ -3,5 +3,6 @@
     "CONNECTION_STRING": "sqlite:///web-app.db",
     "CORE_PATH": "./mocks",
     "CSV_TOKEN": "CHANGE_ME",
-    "SECRET_KEY": "CHANGE_ME"
+    "SECRET_KEY": "CHANGE_ME",
+    "DISABLE_BACKGROUND_WORKER": true
 }

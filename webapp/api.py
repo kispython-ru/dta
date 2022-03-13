@@ -24,14 +24,21 @@ def group_prefixes(db: AppDbContext):
 @use_db()
 def group(db: AppDbContext, prefix: str):
     groups = db.groups.get_by_prefix(prefix)
-    variants = db.variants.get_all()
     dtos = []
     for group in groups:
         dtos.append({
             "id": group.id,
             "title": group.title,
-            "variants": len(variants),
         })
+    return jsonify(dtos)
+
+
+@blueprint.route("/variant/list", methods=["GET"])
+@handle_api_errors()
+@use_db()
+def variant_list(db: AppDbContext):
+    variants = db.variants.get_all()
+    dtos = [variant.id for variant in variants]
     return jsonify(dtos)
 
 

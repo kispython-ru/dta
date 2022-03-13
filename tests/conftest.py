@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from flask import Flask
+from flask.testing import FlaskClient
 
 from webapp.app import configure_app
 from webapp.models import create_session_manually
@@ -29,7 +30,7 @@ def session(app: Flask) -> Session:
 
 
 @pytest.fixture()
-def client(app: Flask):
+def client(app: Flask) -> FlaskClient:
     return app.test_client()
 
 
