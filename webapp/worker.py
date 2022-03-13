@@ -84,7 +84,7 @@ def background_worker(connection_string: str, core_path: str):
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    if app.config["DISABLE_BACKGROUND_WORKER"] is True:
+    if app.config.get("DISABLE_BACKGROUND_WORKER") is True:
         return
     connection_string = app.config["CONNECTION_STRING"]
     core_path = app.config["CORE_PATH"]
