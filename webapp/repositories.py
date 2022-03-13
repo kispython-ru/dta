@@ -23,6 +23,10 @@ class GroupRepository:
             groupings.setdefault(key, []).append(group)
         return groupings
 
+    def get_by_prefix(self, prefix: str) -> List[Group]:
+        groups = self.session.query(Group).filter(Group.title.startswith(prefix)).all()
+        return groups
+
     def get_by_id(self, group_id: int) -> Group:
         group = self.session.query(Group).get(group_id)
         return group
