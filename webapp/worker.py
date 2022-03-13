@@ -7,8 +7,7 @@ from flask import Blueprint
 from flask import current_app as app
 
 from webapp.managers import AppDbContext, TaskStatusEnum
-from webapp.models import Group, Message, Task, Variant
-from webapp.utils import create_session_manually
+from webapp.models import Group, Message, Task, Variant, create_session_manually
 
 
 blueprint = Blueprint("worker", __name__)

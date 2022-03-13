@@ -1,6 +1,24 @@
 import sqlalchemy as sa
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
 
-from webapp.utils import Base
+from flask import current_app as app
+
+
+Base = declarative_base()
+
+
+def create_session_manually(connection_string: str) -> Session:
+    engine = create_engine(connection_string)
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    return factory()
+
+
+def create_session() -> Session:
+    connection_string = app.config["CONNECTION_STRING"]
+    return create_session_manually(connection_string)
 
 
 class Group(Base):

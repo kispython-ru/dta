@@ -4,12 +4,14 @@ from typing import Union
 
 from flask import Flask
 
+import webapp.api as api
 import webapp.views as views
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
 from webapp.managers import AppDbContext
-from webapp.utils import create_session, load_config_files
+from webapp.models import create_session
+from webapp.utils import load_config_files
 
 
 def migrate_database(connection_string: str, alembic_ini_path: str, alembic_script_path: Union[str, None] = None):
@@ -47,6 +49,7 @@ def configure_app(config_path: str, alembic_ini_path: str, alembic_script_path: 
     app.config.update(config)
     app.register_blueprint(views.blueprint)
     app.register_blueprint(worker.blueprint)
+    app.register_blueprint(api.blueprint)
     logging.basicConfig(level=logging.DEBUG)
     migrate_database(
         connection_string=config["CONNECTION_STRING"],

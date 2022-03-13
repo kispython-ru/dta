@@ -2,16 +2,13 @@ import json
 import os
 from functools import wraps
 
-from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
 
 from flask import current_app as app
 from flask.templating import render_template
 
-
-Base = declarative_base()
+from webapp.managers import AppDbContext
+from webapp.models import create_session
 
 
 def handle_errors(
@@ -36,13 +33,14 @@ def handle_errors(
     return wrapper
 
 
-def use_session():
+def use_db():
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             session = create_session()
             try:
-                return fn(session, *args, **kwargs)
+                db = AppDbContext(session)
+                return fn(db, *args, **kwargs)
             except IntegrityError:
                 session.rollback()
                 raise
@@ -50,18 +48,6 @@ def use_session():
                 session.close()
         return decorator
     return wrapper
-
-
-def create_session() -> Session:
-    connection_string = app.config["CONNECTION_STRING"]
-    return create_session_manually(connection_string)
-
-
-def create_session_manually(connection_string: str) -> Session:
-    engine = create_engine(connection_string)
-    Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine)
-    return factory()
 
 
 def load_config_files(directory_name: str):

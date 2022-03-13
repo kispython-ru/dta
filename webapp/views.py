@@ -2,8 +2,6 @@ import csv
 import io
 from typing import List, Union
 
-from sqlalchemy.orm import Session
-
 from flask import Blueprint
 from flask import current_app as app
 from flask import make_response, render_template, request
@@ -11,7 +9,7 @@ from flask import make_response, render_template, request
 from webapp.forms import MessageForm
 from webapp.managers import AppDbContext, TaskStatusEnum
 from webapp.models import Group, Task, TaskStatus, Variant
-from webapp.utils import handle_errors, use_session
+from webapp.utils import handle_errors, use_db
 
 
 blueprint = Blueprint("views", __name__)
@@ -38,25 +36,16 @@ def get_real_ip() -> str:
 
 @blueprint.route("/", methods=["GET"])
 @handle_errors()
-@use_session()
-def dashboard(session: Session):
-    db = AppDbContext(session)
-    groups = db.groups.get_all()
-    groupings = {}
-    for group in groups:
-        groupings.setdefault(group.title[:4], []).append(group)
-    return render_template(
-        "dashboard.jinja",
-        groupings=groupings,
-        find_task_status=find_task_status,
-    )
+@use_db()
+def dashboard(db: AppDbContext):
+    groupings = db.groups.get_groupings()
+    return render_template("dashboard.jinja", groupings=groupings)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
 @handle_errors()
-@use_session()
-def group(session: Session, group_id: int):
-    db = AppDbContext(session)
+@use_db()
+def group(db: AppDbContext, group_id: int):
     group = db.groups.get_by_id(group_id)
     variants = db.variants.get_all()
     tasks = db.tasks.get_all()
@@ -76,9 +65,8 @@ def group(session: Session, group_id: int):
     methods=["GET", "POST"],
 )
 @handle_errors()
-@use_session()
-def task(session: Session, group_id: int, variant_id: int, task_id: int):
-    db = AppDbContext(session)
+@use_db()
+def task(db: AppDbContext, group_id: int, variant_id: int, task_id: int):
     variant = db.variants.get_by_id(variant_id)
     group = db.groups.get_by_id(group_id)
     task = db.tasks.get_by_id(task_id)
@@ -118,9 +106,9 @@ def task(session: Session, group_id: int, variant_id: int, task_id: int):
     methods=["GET"], defaults={"count": None},
 )
 @handle_errors(error_code=401)
-@use_session()
+@use_db()
 def export(
-    session: Session,
+    db: AppDbContext,
     separator: str,
     token: str,
     count: Union[int, None],
@@ -128,7 +116,6 @@ def export(
     configured_token = app.config["CSV_TOKEN"]
     if configured_token != token:
         raise ValueError("Access is denied.")
-    db = AppDbContext(session)
     messages = db.messages.get_all() if count is None else db.messages.get_latest(count)
     groups = db.groups.get_all()
     group_titles = {}

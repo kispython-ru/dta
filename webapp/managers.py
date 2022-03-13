@@ -1,19 +1,27 @@
 import datetime
 from enum import IntEnum
-from typing import List
+from typing import Dict, List
 
 from sqlalchemy.orm import Session
 
 from webapp.models import Group, Message, Task, TaskStatus, Variant
 
 
-class GroupManager():
+class GroupManager:
     def __init__(self, session: Session):
         self.session = session
 
     def get_all(self) -> List[Group]:
         groups = self.session.query(Group).all()
         return groups
+
+    def get_groupings(self) -> Dict[str, List[Group]]:
+        groups = self.get_all()
+        groupings: Dict[str, List[Group]] = {}
+        for group in groups:
+            key = group.title.split("-")[0]
+            groupings.setdefault(key, []).append(group)
+        return groupings
 
     def get_by_id(self, group_id: int) -> Group:
         group = self.session.query(Group).get(group_id)
@@ -29,7 +37,7 @@ class GroupManager():
         self.session.query(Group).delete()
 
 
-class TaskManager():
+class TaskManager:
     def __init__(self, session: Session):
         self.session = session
 
@@ -107,7 +115,7 @@ class TaskStatusEnum(IntEnum):
         }[self]
 
 
-class TaskStatusManager():
+class TaskStatusManager:
     def __init__(self, session: Session):
         self.session = session
 
@@ -169,7 +177,7 @@ class TaskStatusManager():
         return task_status
 
 
-class MessageManager():
+class MessageManager:
     def __init__(self, session: Session):
         self.session = session
 
@@ -233,7 +241,7 @@ class MessageManager():
         self.session.commit()
 
 
-class AppDbContext():
+class AppDbContext:
     def __init__(self, session: Session):
         self.session = session
 
