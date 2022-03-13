@@ -90,6 +90,7 @@ class TaskStatusEnum(IntEnum):
     Checking = 1
     Checked = 2
     Failed = 3
+    NotSubmitted = 4
 
     @property
     def name(self):
@@ -98,6 +99,7 @@ class TaskStatusEnum(IntEnum):
             self.Checking: "Проверяется",
             self.Checked: "Принято",
             self.Failed: "Ошибка!",
+            self.NotSubmitted: "Не отправлено",
         }[self]
 
     @property
@@ -107,6 +109,7 @@ class TaskStatusEnum(IntEnum):
             self.Checking: "...",
             self.Checked: "+",
             self.Failed: "x",
+            self.NotSubmitted: "-",
         }[self]
 
     @property
@@ -116,6 +119,7 @@ class TaskStatusEnum(IntEnum):
             self.Checking: "warning",
             self.Checked: "success",
             self.Failed: "danger",
+            self.NotSubmitted: "secondary",
         }[self]
 
 

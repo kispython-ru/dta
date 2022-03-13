@@ -10,13 +10,13 @@ class TaskStatusManager:
     def __init__(self, db: AppDbContext):
         self.db = db
 
-    def find_task_status(self, group_id: int, variant_id: int, task_id: int):
+    def find_task_status(self, group_id: int, variant_id: int, task_id: int) -> TaskStatusEnum:
         statuses = self.db.statuses.get_all()
         for status in statuses:
             if status.group == group_id and status.variant == variant_id and status.task == task_id:
                 enum = TaskStatusEnum(status.status)
-                return enum.code
-        return "–"
+                return enum
+        return TaskStatusEnum.NotSubmitted
 
 
 class ExportManager:
