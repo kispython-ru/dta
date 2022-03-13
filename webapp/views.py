@@ -51,9 +51,7 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
     if form.validate_on_submit():
         code = form.code.data
         ip = get_real_ip(request)
-        message = db.messages.submit_task(tid, vid, gid, code, ip)
-        if message is None:
-            raise ValueError("Unable to accept the submission.")
+        db.messages.submit_task(tid, vid, gid, code, ip)
         status = db.statuses.submit_task(tid, vid, gid, code)
         return render_template(
             "success.jinja",
