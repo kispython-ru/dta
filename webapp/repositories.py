@@ -131,6 +131,12 @@ class TaskStatusRepository:
         statuses = self.session.query(TaskStatus).all()
         return statuses
 
+    def get_by_group(self, group: int) -> List[TaskStatus]:
+        statuses = self.session.query(TaskStatus) \
+            .filter_by(group=group) \
+            .all()
+        return statuses
+
     def get_task_status(
             self,
             task: int,

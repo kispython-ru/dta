@@ -5,7 +5,7 @@ from flask import current_app as app
 from flask import make_response, render_template, request
 
 from webapp.forms import MessageForm
-from webapp.managers import ExportManager, TaskStatusManager
+from webapp.managers import ExportManager, find_task_status
 from webapp.repositories import AppDbContext, TaskStatusEnum
 from webapp.utils import get_real_ip, handle_errors, use_db
 
@@ -25,10 +25,8 @@ def dashboard(db: AppDbContext):
 @handle_errors(error_code=404)
 @use_db()
 def group(db: AppDbContext, group_id: int):
-    def find_task_status(gid: int, vid: int, tid: int):
-        return statuses.find_task_status(gid, vid, tid)
-    statuses = TaskStatusManager(db)
     group = db.groups.get_by_id(group_id)
+    statuses = db.statuses.get_by_group(group.id)
     variants = db.variants.get_all()
     tasks = db.tasks.get_all()
     return render_template(
@@ -36,6 +34,7 @@ def group(db: AppDbContext, group_id: int):
         variants=variants,
         group=group,
         tasks=tasks,
+        statuses=statuses,
         find_task_status=find_task_status,
     )
 

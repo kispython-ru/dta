@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from webapp.managers import TaskStatusManager
+from webapp.managers import find_task_status
 from webapp.repositories import AppDbContext
 from webapp.utils import handle_api_errors, use_db
 
@@ -39,15 +39,15 @@ def group(db: AppDbContext, prefix: str):
 @handle_api_errors()
 @use_db()
 def task_list(db: AppDbContext, gid: int, vid: int):
-    statuses = TaskStatusManager(db)
     variant = db.variants.get_by_id(vid)
-    group = db.groups.get_by_id(gid)
     tasks = db.tasks.get_all()
+    group = db.groups.get_by_id(gid)
+    statuses = db.statuses.get_by_group(group.id)
     dtos = []
     for task in tasks:
         variant_id = variant.id + 1
         source = f"http://sovietov.com/kispython/{task.id}/{group.title}.html#вариант-{variant_id}"
-        status = statuses.find_task_status(group.id, variant.id, task.id)
+        status = find_task_status(statuses, group.id, variant.id, task.id)
         dtos.append({
             "id": task.id,
             "source": source,
