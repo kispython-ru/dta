@@ -9,8 +9,8 @@ import webapp.views as views
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
-from webapp.managers import AppDbContext
 from webapp.models import create_session
+from webapp.repositories import AppDbContext
 from webapp.utils import load_config_files
 
 

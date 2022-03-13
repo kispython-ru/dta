@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from tests.utils import unique_id
 
-from webapp.managers import GroupManager
+from webapp.repositories import GroupRepository
 
 
 def test_group_creation(session: Session):
-    group_manager = GroupManager(session)
+    group_manager = GroupRepository(session)
     group_name = unique_id()
 
     group_manager.create_by_names([group_name])
@@ -16,7 +16,7 @@ def test_group_creation(session: Session):
 
 
 def test_group_fetching_by_id(session: Session):
-    group_manager = GroupManager(session)
+    group_manager = GroupRepository(session)
     group_name = unique_id()
     group_manager.create_by_names([group_name])
 

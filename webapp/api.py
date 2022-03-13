@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from webapp.managers import AppDbContext
+from webapp.repositories import AppDbContext
 from webapp.utils import handle_errors, use_db
 
 

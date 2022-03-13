@@ -4,11 +4,12 @@ from functools import wraps
 
 from sqlalchemy.exc import IntegrityError
 
+from flask import Request
 from flask import current_app as app
 from flask.templating import render_template
 
-from webapp.managers import AppDbContext
 from webapp.models import create_session
+from webapp.repositories import AppDbContext
 
 
 def handle_errors(
@@ -48,6 +49,13 @@ def use_db():
                 session.close()
         return decorator
     return wrapper
+
+
+def get_real_ip(request: Request) -> str:
+    ip_forward_headers = request.headers.getlist("X-Forwarded-For")
+    if ip_forward_headers:
+        return ip_forward_headers[0]
+    return request.remote_addr
 
 
 def load_config_files(directory_name: str):
