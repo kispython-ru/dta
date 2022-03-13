@@ -44,7 +44,7 @@
               <span class="p-1 d-block">{{ variant.id + 1 }}</span>
             </td>
             {% for task in tasks %}
-              {% set task_status = find_task_status(statuses, task, variant, group) %}
+              {% set task_status = find_task_status(group.id, variant.id, task.id).code %}
               <td scope="col" style="border-bottom: 0; padding: 0">
                 <a class="d-block text-center text-decoration-none p-1"
                    {% if task_status == '+' %}style="background-color:#e3ffee"{% endif %}

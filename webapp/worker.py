@@ -1,25 +1,16 @@
 import sys
 import time
-import traceback
 from multiprocessing import Process
 
 from flask import Blueprint
 from flask import current_app as app
 
-from webapp.managers import AppDbContext, TaskStatusEnum
-from webapp.models import Group, Message, Task, Variant
-from webapp.utils import create_session_manually
+from webapp.models import Group, Message, Task, Variant, create_session_manually
+from webapp.repositories import AppDbContext, TaskStatusEnum
+from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("worker", __name__)
-
-
-def decrypt_exception() -> str:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    lines = traceback.format_exception(
-        exc_type, exc_value, exc_traceback)
-    log = "".join("!! " + line for line in lines)
-    return log
 
 
 def check_solution(
@@ -74,7 +65,7 @@ def process_pending_messages(db: AppDbContext, core_path: str):
                 output=error,
             )
         except BaseException:
-            exception = decrypt_exception()
+            exception = get_exception_info()
             print(f"Error occured while checking for messages: {exception}")
 
 
@@ -87,7 +78,7 @@ def background_worker(connection_string: str, core_path: str):
             try:
                 process_pending_messages(db, core_path)
             except BaseException:
-                exception = decrypt_exception()
+                exception = get_exception_info()
                 print(f"Error orccured inside the loop: {exception}")
 
 

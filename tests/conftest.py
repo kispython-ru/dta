@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from flask import Flask
 
 from webapp.app import configure_app
-from webapp.utils import create_session_manually
+from webapp.models import create_session_manually
 
 
 @pytest.fixture()

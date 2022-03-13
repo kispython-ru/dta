@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from tests.utils import unique_id
 
-from webapp.managers import GroupManager
+from webapp.repositories import GroupRepository
 
 
 def test_group_creation(session: Session):
-    group_manager = GroupManager(session)
+    group_manager = GroupRepository(session)
     group_name = unique_id()
 
     group_manager.create_by_names([group_name])
@@ -16,7 +16,7 @@ def test_group_creation(session: Session):
 
 
 def test_group_fetching_by_id(session: Session):
-    group_manager = GroupManager(session)
+    group_manager = GroupRepository(session)
     group_name = unique_id()
     group_manager.create_by_names([group_name])
 
@@ -26,3 +26,18 @@ def test_group_fetching_by_id(session: Session):
     group = group_manager.get_by_id(group_id)
     assert group.id == group_id
     assert group.title == group_name
+
+
+def test_group_fetching_by_prefix(session: Session):
+    prefix = "example-prefix"
+    one = prefix + unique_id()
+    two = prefix + unique_id()
+    three = unique_id()
+
+    group_manager = GroupRepository(session)
+    group_manager.create_by_names([one, two, three])
+    groups = group_manager.get_by_prefix(prefix)
+
+    assert any(group.title == one for group in groups)
+    assert any(group.title == two for group in groups)
+    assert not(any(group.title == three for group in groups))

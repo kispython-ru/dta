@@ -1,258 +1,69 @@
-import datetime
-from enum import IntEnum
-from typing import List
+import csv
+import io
+from typing import Dict, List, Union
 
-from sqlalchemy.orm import Session
-
-from webapp.models import Group, Message, Task, TaskStatus, Variant
-
-
-class GroupManager():
-    def __init__(self, session: Session):
-        self.session = session
-
-    def get_all(self) -> List[Group]:
-        groups = self.session.query(Group).all()
-        return groups
-
-    def get_by_id(self, group_id: int) -> Group:
-        group = self.session.query(Group).get(group_id)
-        return group
-
-    def create_by_names(self, names: List[str]):
-        for name in names:
-            group = Group(title=name)
-            self.session.add(group)
-        self.session.commit()
-
-    def delete_all(self):
-        self.session.query(Group).delete()
+from webapp.models import Message
+from webapp.repositories import AppDbContext, TaskStatusEnum
 
 
-class TaskManager():
-    def __init__(self, session: Session):
-        self.session = session
+class TaskStatusManager:
+    def __init__(self, db: AppDbContext):
+        self.db = db
 
-    def get_all(self) -> List[Task]:
-        tasks = self.session.query(Task).all()
-        return tasks
-
-    def get_by_id(self, task_id: int) -> Task:
-        task = self.session.query(Task).get(task_id)
-        return task
-
-    def create_by_ids(self, ids: List[int]):
-        for task_id in ids:
-            group = Task(id=task_id)
-            self.session.add(group)
-        self.session.commit()
-
-    def delete_all(self):
-        self.session.query(Task).delete()
+    def find_task_status(self, group_id: int, variant_id: int, task_id: int) -> TaskStatusEnum:
+        statuses = self.db.statuses.get_all()
+        for status in statuses:
+            if status.group == group_id and status.variant == variant_id and status.task == task_id:
+                enum = TaskStatusEnum(status.status)
+                return enum
+        return TaskStatusEnum.NotSubmitted
 
 
-class VariantManager:
-    def __init__(self, session: Session):
-        self.session = session
+class ExportManager:
+    def __init__(self, db: AppDbContext):
+        self.db = db
 
-    def get_all(self) -> List[Variant]:
-        variants = self.session.query(Variant).all()
-        return variants
+    def export_messages(self, count: Union[int, None], separator: str) -> str:
+        messages = self.get_latest_messages(count)
+        group_titles = self.get_group_titles()
+        table = self.create_table(messages, group_titles)
+        delimiter = ";" if separator == "semicolon" else ","
+        output = self.create_csv(table, delimiter)
+        return output
 
-    def get_by_id(self, variant_id: int) -> Variant:
-        variant = self.session.query(Variant).get(variant_id)
-        return variant
+    def create_csv(self, table: List[List[str]], delimiter: str):
+        si = io.StringIO()
+        cw = csv.writer(si, delimiter=delimiter)
+        cw.writerows(table)
+        bom = u"\uFEFF"
+        value = bom + si.getvalue()
+        return value
 
-    def create_by_ids(self, ids: List[int]):
-        for variant_id in ids:
-            task = Variant(id=variant_id)
-            self.session.add(task)
-        self.session.commit()
+    def create_table(self, messages: List[Message], group_titles: Dict[int, str]) -> List[List[str]]:
+        rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Код"]]
+        for message in messages:
+            group_title = group_titles[message.group]
+            time = message.time.strftime("%Y-%m-%d %H:%M:%S")
+            task = message.task + 1
+            rows.append([
+                message.id,
+                time,
+                group_title,
+                task,
+                message.variant,
+                message.ip,
+                message.code,
+            ])
+        return rows
 
-    def delete_all(self):
-        self.session.query(Variant).delete()
+    def get_group_titles(self) -> Dict[int, str]:
+        groups = self.db.groups.get_all()
+        group_titles: Dict[int, str] = {}
+        for group in groups:
+            group_titles[group.id] = group.title
+        return group_titles
 
-
-class TaskStatusEnum(IntEnum):
-    Submitted = 0
-    Checking = 1
-    Checked = 2
-    Failed = 3
-
-    @property
-    def name(self):
-        return {
-            self.Submitted: "Отправлено",
-            self.Checking: "Проверяется",
-            self.Checked: "Принято",
-            self.Failed: "Ошибка!",
-        }[self]
-
-    @property
-    def code(self):
-        return {
-            self.Submitted: "?",
-            self.Checking: "...",
-            self.Checked: "+",
-            self.Failed: "x",
-        }[self]
-
-    @property
-    def color(self):
-        return {
-            self.Submitted: "primary",
-            self.Checking: "warning",
-            self.Checked: "success",
-            self.Failed: "danger",
-        }[self]
-
-
-class TaskStatusManager():
-    def __init__(self, session: Session):
-        self.session = session
-
-    def get_all(self) -> List[TaskStatus]:
-        statuses = self.session.query(TaskStatus).all()
-        return statuses
-
-    def get_task_status(
-            self,
-            task: int,
-            variant: int,
-            group: int) -> TaskStatus:
-        status = self.session.query(TaskStatus) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .first()
-        return status
-
-    def update_status(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            status: int,
-            output: str):
-        existing = self.get_task_status(task, variant, group)
-        if existing is not None:
-            if existing.status == TaskStatusEnum.Checked:
-                return  # We've already accepted this task!
-        self.session.query(TaskStatus) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .update({"status": status, "output": output})
-        self.session.commit()
-
-    def submit_task(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str) -> TaskStatus:
-        existing = self.get_task_status(task, variant, group)
-        if existing is not None:
-            if existing.status == TaskStatusEnum.Checked:
-                return  # We've already accepted this task!
-            self.session.delete(existing)
-            self.session.commit()
-        now = datetime.datetime.now()
-        status = TaskStatusEnum.Submitted
-        task_status = TaskStatus(
-            task=task,
-            variant=variant,
-            group=group,
-            time=now,
-            code=code,
-            output=None,
-            status=status,
-        )
-        self.session.add(task_status)
-        self.session.commit()
-        return task_status
-
-
-class MessageManager():
-    def __init__(self, session: Session):
-        self.session = session
-
-    def submit_task(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str,
-            ip: str) -> Message:
-        now = datetime.datetime.now()
-        message = Message(
-            task=task,
-            variant=variant,
-            group=group,
-            time=now,
-            code=code,
-            ip=ip,
-            processed=False,
-        )
-        self.session.add(message)
-        self.session.commit()
-        return message
-
-    def get_all(self) -> List[Message]:
-        messages = self.session.query(Message).order_by(Message.time.desc()).all()
-        return messages
-
-    def get_latest(self, count: int) -> List[Message]:
-        latest_messages = (
-            self.session.query(Message)
-            .order_by(Message.time.desc())
-            .limit(count)
-            .all()
-        )
-        return latest_messages
-
-    def get_pending_messages(self) -> List[Message]:
-        pending = self.session.query(Message) \
-            .filter_by(processed=False) \
-            .order_by(Message.time.desc()) \
-            .all()
-        return pending
-
-    def get_pending_messages_unique(self) -> List[Message]:
-        pending_messages = self.get_pending_messages()
-        unique_messages = []
-        seen_keys = []
-        for message in pending_messages:
-            key = (message.group, message.variant, message.task)
-            if key in seen_keys:
-                continue
-            seen_keys.append(key)
-            unique_messages.append(message)
-        return unique_messages
-
-    def mark_as_processed(self, task: int, variant: int, group: int):
-        self.session.query(Message) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .update({"processed": True})
-        self.session.commit()
-
-
-class AppDbContext():
-    def __init__(self, session: Session):
-        self.session = session
-
-    @property
-    def groups(self) -> GroupManager:
-        return GroupManager(self.session)
-
-    @property
-    def tasks(self) -> TaskManager:
-        return TaskManager(self.session)
-
-    @property
-    def variants(self) -> VariantManager:
-        return VariantManager(self.session)
-
-    @property
-    def statuses(self) -> TaskStatusManager:
-        return TaskStatusManager(self.session)
-
-    @property
-    def messages(self) -> MessageManager:
-        return MessageManager(self.session)
+    def get_latest_messages(self, count: Union[int, None]) -> List[Message]:
+        if count is None:
+            return self.db.messages.get_all()
+        return self.db.messages.get_latest(count)

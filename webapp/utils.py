@@ -1,17 +1,18 @@
 import json
 import os
+import sys
+import traceback
 from functools import wraps
 
-from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
 
+from flask import Request
 from flask import current_app as app
+from flask import jsonify
 from flask.templating import render_template
 
-
-Base = declarative_base()
+from webapp.models import create_session
+from webapp.repositories import AppDbContext
 
 
 def handle_errors(
@@ -36,13 +37,27 @@ def handle_errors(
     return wrapper
 
 
-def use_session():
+def handle_api_errors(error_code=500):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except Exception as error:
+                app.logger.error(error)
+                return jsonify({"error": error_code})
+        return decorator
+    return wrapper
+
+
+def use_db():
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
             session = create_session()
             try:
-                return fn(session, *args, **kwargs)
+                db = AppDbContext(session)
+                return fn(db, *args, **kwargs)
             except IntegrityError:
                 session.rollback()
                 raise
@@ -52,16 +67,19 @@ def use_session():
     return wrapper
 
 
-def create_session() -> Session:
-    connection_string = app.config["CONNECTION_STRING"]
-    return create_session_manually(connection_string)
+def get_real_ip(request: Request) -> str:
+    ip_forward_headers = request.headers.getlist("X-Forwarded-For")
+    if ip_forward_headers:
+        return ip_forward_headers[0]
+    return request.remote_addr
 
 
-def create_session_manually(connection_string: str) -> Session:
-    engine = create_engine(connection_string)
-    Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine)
-    return factory()
+def get_exception_info() -> str:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(
+        exc_type, exc_value, exc_traceback)
+    log = "".join("!! " + line for line in lines)
+    return log
 
 
 def load_config_files(directory_name: str):
