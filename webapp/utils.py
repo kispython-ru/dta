@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+import traceback
 from functools import wraps
 
 from sqlalchemy.exc import IntegrityError
@@ -56,6 +58,14 @@ def get_real_ip(request: Request) -> str:
     if ip_forward_headers:
         return ip_forward_headers[0]
     return request.remote_addr
+
+
+def get_exception_info() -> str:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(
+        exc_type, exc_value, exc_traceback)
+    log = "".join("!! " + line for line in lines)
+    return log
 
 
 def load_config_files(directory_name: str):
