@@ -40,15 +40,8 @@ class ExportManager:
             group_title = group_titles[message.group]
             time = message.time.strftime("%Y-%m-%d %H:%M:%S")
             task = message.task + 1
-            rows.append([
-                message.id,
-                time,
-                group_title,
-                task,
-                message.variant,
-                message.ip,
-                message.code,
-            ])
+            variant = message.variant + 1
+            rows.append([message.id, time, group_title, task, variant, message.ip, message.code])
         return rows
 
     def get_group_titles(self) -> Dict[int, str]:

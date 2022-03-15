@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 
 from webapp.managers import find_task_status
-from webapp.repositories import AppDbContext
+from webapp.repositories import AppDbContext, TaskStatusEnum
 from webapp.utils import handle_api_errors, use_db
 
 
@@ -62,3 +62,20 @@ def task_list(db: AppDbContext, gid: int, vid: int):
             "status_name": status.name,
         })
     return jsonify(dtos)
+
+
+@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
+@handle_api_errors()
+@use_db()
+def task(db: AppDbContext, gid: int, vid: int, tid: int):
+    variant = db.variants.get_by_id(vid)
+    group = db.groups.get_by_id(gid)
+    task = db.tasks.get_by_id(tid)
+    status_model = db.statuses.get_task_status(task.id, variant.id, group.id)
+    status = TaskStatusEnum(status_model.status)
+    return jsonify({
+        "id": task.id,
+        "source": f"http://sovietov.com/kispython/{task.id}/{group.title}.html#вариант-{variant.id}",
+        "status": status.value,
+        "status_name": status.name,
+    })

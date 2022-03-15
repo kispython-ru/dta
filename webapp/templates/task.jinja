@@ -51,7 +51,7 @@
       </div>
       {% if status.output is not none and status.output %}
         <div>Подробные сведения об ошибке:</div>
-        <div class="text-muted mb-2" style="white-space: pre">{{ status.output }}</div>
+        <div class="text-muted mb-2" style="white-space: pre">{{ status.output | e }}</div>
       {% else %}
         <div class="mb-2"></div>
       {% endif %}
