@@ -62,24 +62,3 @@ filterwarnings = [
     "default",
     "error"
 ]
-
-[tool.flake8]
-max-line-length = "120"
-show-source = "true"
-statistics = "true"
-inline-quotes = "double"
-ignore = """
-    W504,
-    D100,D101,D102,D103,D104,D105,D106,D107,
-    D401
-"""
-exclude = """
-    .venv,
-    venv*,
-    .git,
-    */alembic/versions*
-    *__pycache__*
-"""
-per-file-ignores = """
-    */models.py:VNE003
-"""
