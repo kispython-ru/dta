@@ -5,7 +5,9 @@ from multiprocessing import Process
 from flask import Blueprint
 from flask import current_app as app
 
-from webapp.models import Group, Message, Task, Variant, create_session_manually
+from webapp.models import (
+    Group, Message, Task, Variant, create_session_manually,
+)
 from webapp.repositories import AppDbContext, TaskStatusEnum
 from webapp.utils import get_exception_info
 
@@ -49,7 +51,13 @@ def process_pending_messages(db: AppDbContext, core_path: str):
         variant = db.variants.get_by_id(message.variant)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         try:
-            (ok, error) = check_solution(core_path, group, task, variant, message)
+            (ok, error) = check_solution(
+                core_path,
+                group,
+                task,
+                variant,
+                message
+            )
             print(f"Check result: {ok}, {error}")
             status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed
             db.messages.mark_as_processed(

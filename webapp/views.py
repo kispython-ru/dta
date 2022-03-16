@@ -39,7 +39,10 @@ def group(db: AppDbContext, group_id: int):
     )
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET", "POST"])
+@blueprint.route(
+    "/group/<gid>/variant/<vid>/task/<tid>",
+    methods=["GET", "POST"]
+)
 @handle_errors(error_code=404)
 @use_db()
 def task(db: AppDbContext, gid: int, vid: int, tid: int):
@@ -74,7 +77,11 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/csv/<sep>/<token>/<count>", methods=["GET"])
-@blueprint.route("/csv/<sep>/<token>", methods=["GET"], defaults={"count": None})
+@blueprint.route(
+    "/csv/<sep>/<token>",
+    methods=["GET"],
+    defaults={"count": None}
+)
 @handle_errors(error_code=401)
 @use_db()
 def export(db: AppDbContext, sep: str, token: str, count: Union[int, None]):

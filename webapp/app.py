@@ -14,7 +14,11 @@ from webapp.repositories import AppDbContext
 from webapp.utils import load_config_files
 
 
-def migrate_database(connection_string: str, alembic_ini_path: str, alembic_script_path: Union[str, None] = None):
+def migrate_database(
+    connection_string: str,
+    alembic_ini_path: str,
+    alembic_script_path: Union[str, None] = None
+):
     alembic_config = Config(alembic_ini_path)
     alembic_config.set_main_option("sqlalchemy.url", connection_string)
     if alembic_script_path is not None:
@@ -42,7 +46,11 @@ def seed_database(app: Flask):
     print("Successfully seeded the dabatase!")
 
 
-def configure_app(config_path: str, alembic_ini_path: str, alembic_script_path: Union[str, None] = None) -> Flask:
+def configure_app(
+    config_path: str,
+    alembic_ini_path: str,
+    alembic_script_path: Union[str, None] = None
+) -> Flask:
     config = load_config_files(config_path)
     app = Flask(__name__)
     app.url_map.strict_slashes = False
@@ -61,6 +69,6 @@ def configure_app(config_path: str, alembic_ini_path: str, alembic_script_path: 
 
 
 def create_app() -> Flask:
-    config_path = os.environ.get("CONFIG_PATH")
-    configuration_directory = config_path if config_path is not None else os.getcwd()
+    path = os.environ.get("CONFIG_PATH")
+    configuration_directory = path if path is not None else os.getcwd()
     return configure_app(configuration_directory, "alembic.ini", None)

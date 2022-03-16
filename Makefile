@@ -4,8 +4,7 @@ fix:
 
 .PHONY: lint
 lint:
-	ec
-	pflake8
+	pycodestyle ./**/*.py
 	isort -qc .
 
 .PHONY: test

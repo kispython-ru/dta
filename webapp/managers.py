@@ -6,9 +6,16 @@ from webapp.models import Message, TaskStatus
 from webapp.repositories import AppDbContext, TaskStatusEnum
 
 
-def find_task_status(statuses: List[TaskStatus], group_id: int, variant_id: int, task_id: int) -> TaskStatusEnum:
+def find_task_status(
+    statuses: List[TaskStatus],
+    group_id: int,
+    variant_id: int,
+    task_id: int
+) -> TaskStatusEnum:
     for status in statuses:
-        if status.group == group_id and status.variant == variant_id and status.task == task_id:
+        if status.group == group_id and \
+           status.variant == variant_id and \
+           status.task == task_id:
             enum = TaskStatusEnum(status.status)
             return enum
     return TaskStatusEnum.NotSubmitted
@@ -34,14 +41,26 @@ class ExportManager:
         value = bom + si.getvalue()
         return value
 
-    def create_table(self, messages: List[Message], group_titles: Dict[int, str]) -> List[List[str]]:
+    def create_table(
+        self,
+        messages: List[Message],
+        group_titles: Dict[int, str]
+    ) -> List[List[str]]:
         rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Код"]]
         for message in messages:
             group_title = group_titles[message.group]
             time = message.time.strftime("%Y-%m-%d %H:%M:%S")
             task = message.task + 1
             variant = message.variant + 1
-            rows.append([message.id, time, group_title, task, variant, message.ip, message.code])
+            rows.append([
+                message.id,
+                time,
+                group_title,
+                task,
+                variant,
+                message.ip,
+                message.code
+            ])
         return rows
 
     def get_group_titles(self) -> Dict[int, str]:
