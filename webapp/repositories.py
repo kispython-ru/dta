@@ -24,7 +24,9 @@ class GroupRepository:
         return groupings
 
     def get_by_prefix(self, prefix: str) -> List[Group]:
-        groups = self.session.query(Group).filter(Group.title.startswith(prefix)).all()
+        groups = self.session.query(Group) \
+            .filter(Group.title.startswith(prefix)) \
+            .all()
         return groups
 
     def get_by_id(self, group_id: int) -> Group:
@@ -217,7 +219,9 @@ class MessageRepository:
         return message
 
     def get_all(self) -> List[Message]:
-        messages = self.session.query(Message).order_by(Message.time.desc()).all()
+        messages = self.session.query(Message) \
+            .order_by(Message.time.desc()) \
+            .all()
         return messages
 
     def get_latest(self, count: int) -> List[Message]:

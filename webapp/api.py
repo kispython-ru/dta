@@ -50,10 +50,11 @@ def task_list(db: AppDbContext, gid: int, vid: int):
     tasks = db.tasks.get_all()
     group = db.groups.get_by_id(gid)
     statuses = db.statuses.get_by_group(group.id)
+    path = "http://sovietov.com/kispython"
     dtos = []
     for task in tasks:
         variant_id = variant.id + 1
-        source = f"http://sovietov.com/kispython/{task.id}/{group.title}.html#вариант-{variant_id}"
+        source = f"{path}/{task.id}/{group.title}.html#вариант-{variant_id}"
         status = find_task_status(statuses, group.id, variant.id, task.id)
         dtos.append({
             "id": task.id,
@@ -73,9 +74,10 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
     task = db.tasks.get_by_id(tid)
     status_model = db.statuses.get_task_status(task.id, variant.id, group.id)
     status = TaskStatusEnum(status_model.status)
+    path = "http://sovietov.com/kispython"
     return jsonify({
         "id": task.id,
-        "source": f"http://sovietov.com/kispython/{task.id}/{group.title}.html#вариант-{variant.id}",
+        "source": f"{path}/{task.id}/{group.title}.html#вариант-{variant.id}",
         "status": status.value,
         "status_name": status.name,
     })
