@@ -64,7 +64,7 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
             status=status,
         )
     status = db.statuses.get_task_status(tid, vid, gid)
-    status_enum = TaskStatusEnum(status.status) if status is not None else None
+    status_enum = status.status if status is not None else None
     return render_template(
         "task.jinja",
         form=form,

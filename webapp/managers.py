@@ -2,8 +2,8 @@ import csv
 import io
 from typing import Dict, List, Union
 
-from webapp.models import Message, TaskStatus
-from webapp.repositories import AppDbContext, TaskStatusEnum
+from webapp.models import Message, TaskStatus, TaskStatusEnum
+from webapp.repositories import AppDbContext
 
 
 def find_task_status(
@@ -16,8 +16,7 @@ def find_task_status(
         if status.group == group_id and \
            status.variant == variant_id and \
            status.task == task_id:
-            enum = TaskStatusEnum(status.status)
-            return enum
+            return status.status
     return TaskStatusEnum.NotSubmitted
 
 

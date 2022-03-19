@@ -1,10 +1,11 @@
 import datetime
-from enum import IntEnum
 from typing import Dict, List
 
 from sqlalchemy.orm import Session
 
-from webapp.models import Group, Message, Task, TaskStatus, Variant
+from webapp.models import (
+    Group, Message, Task, TaskStatus, TaskStatusEnum, Variant,
+)
 
 
 class GroupRepository:
@@ -85,44 +86,6 @@ class VariantRepository:
 
     def delete_all(self):
         self.session.query(Variant).delete()
-
-
-class TaskStatusEnum(IntEnum):
-    Submitted = 0
-    Checking = 1
-    Checked = 2
-    Failed = 3
-    NotSubmitted = 4
-
-    @property
-    def name(self):
-        return {
-            self.Submitted: "Отправлено",
-            self.Checking: "Проверяется",
-            self.Checked: "Принято",
-            self.Failed: "Ошибка!",
-            self.NotSubmitted: "Не отправлено",
-        }[self]
-
-    @property
-    def code(self):
-        return {
-            self.Submitted: "?",
-            self.Checking: "...",
-            self.Checked: "+",
-            self.Failed: "x",
-            self.NotSubmitted: "-",
-        }[self]
-
-    @property
-    def color(self):
-        return {
-            self.Submitted: "primary",
-            self.Checking: "warning",
-            self.Checked: "success",
-            self.Failed: "danger",
-            self.NotSubmitted: "secondary",
-        }[self]
 
 
 class TaskStatusRepository:
