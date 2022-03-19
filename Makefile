@@ -20,7 +20,7 @@ flask:
 
 .PHONY: flask-win
 flask-win:
-	cd webapp && set FLASK_APP=app && set FLASK_ENV=development && flask run
+	cd webapp && set "FLASK_APP=app" && set "FLASK_ENV=development" && flask run
 
 .PHONY: image
 image:
