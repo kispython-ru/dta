@@ -6,6 +6,7 @@ from flask import make_response, render_template, request
 
 from webapp.forms import MessageForm
 from webapp.managers import ExportManager, find_task_status
+from webapp.models import TaskStatus
 from webapp.repositories import AppDbContext, TaskStatusEnum
 from webapp.utils import get_real_ip, handle_errors, use_db
 
@@ -49,8 +50,10 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
     variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
     task = db.tasks.get_by_id(tid)
+    status = db.statuses.get_task_status(tid, vid, gid)
+    checked = status is not None and status.status == TaskStatusEnum.Checked
     form = MessageForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit() and not checked:
         code = form.code.data
         ip = get_real_ip(request)
         db.messages.submit_task(tid, vid, gid, code, ip)
@@ -63,8 +66,6 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
             task=task,
             status=status,
         )
-    status = db.statuses.get_task_status(tid, vid, gid)
-    status_enum = status.status if status is not None else None
     return render_template(
         "task.jinja",
         form=form,
@@ -72,7 +73,6 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
         group=group,
         task=task,
         status=status,
-        status_enum=status_enum,
     )
 
 

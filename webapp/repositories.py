@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from sqlalchemy.orm import Session
 
@@ -106,7 +106,7 @@ class TaskStatusRepository:
             self,
             task: int,
             variant: int,
-            group: int) -> TaskStatus:
+            group: int) -> Union[TaskStatus, None]:
         status = self.session.query(TaskStatus) \
             .filter_by(task=task, variant=variant, group=group) \
             .first()
