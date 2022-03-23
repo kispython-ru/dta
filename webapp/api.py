@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 
 from webapp.managers import find_task_status
-from webapp.models import TaskStatus
+from webapp.models import TaskStatus, TaskStatusEnum
 from webapp.repositories import AppDbContext
 from webapp.utils import handle_api_errors, use_db
 
@@ -73,11 +73,14 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
     variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
     task = db.tasks.get_by_id(tid)
-    task_status = db.statuses.get_task_status(task.id, variant.id, group.id)
+    ts = db.statuses.get_task_status(task.id, variant.id, group.id)
+    error_message = ts.output if ts is not None else ""
+    status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
     path = "http://sovietov.com/kispython"
     return jsonify({
         "id": task.id,
         "source": f"{path}/{task.id}/{group.title}.html#вариант-{variant.id}",
-        "status": task_status.status.value,
-        "status_name": task_status.status.name,
+        "status": status.value,
+        "status_name": status.name,
+        "error_message": error_message,
     })
