@@ -1,5 +1,3 @@
-import collections
-
 from sqlalchemy.orm import Session
 from tests.utils import unique_id_int
 from tests.utils import unique_id
