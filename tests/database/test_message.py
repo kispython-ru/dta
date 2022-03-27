@@ -1,5 +1,4 @@
 import copy
-import time
 
 from sqlalchemy.orm import Session
 from tests.utils import unique_id_int
