@@ -36,6 +36,6 @@ migration:
 
 .PHONY: logo
 logo:
-		python DTA_logo.py
+	python DTA_logo.py
 
 .DEFAULT_GOAL :=
