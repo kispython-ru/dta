@@ -34,4 +34,8 @@ container:
 migration:
 	cd webapp && alembic revision -m "$(TITLE)"
 
+.PHONY: logo
+logo:
+		python DTA_logo.py
+
 .DEFAULT_GOAL :=
