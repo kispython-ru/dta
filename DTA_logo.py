@@ -7,23 +7,33 @@ class DTA:
     def __init__(self):
         self.WIDTH = 255
         self.HEIGHT = 177
+        # transparent
+        self.trns = '#ffffff00'
         self.logo = Image.new('RGBA',
                               (self.WIDTH, self.HEIGHT),
-                              '#ffffff00')
+                              self.trns)
         self.draw = ImageDraw.Draw(self.logo)
         self.x = 0
         self.y = 0
-        # transparent
-        self.trns = '#ffffff00'
         self.black = '161619'
 
     def save(self):
+        # можно указать свой путь
         self.logo.save('DTA_logo.png')
 
     def show(self):
         self.logo.show()
 
+    def makeLogo(self, letters=False):
+        if letters:
+            self.drawLogoWithLetters()
+            self.save()
+        else:
+            self.drawLogoWithoutLetters()
+            self.save()
+
     def __blueSnake(self):
+        self.HEIGHT = 177
         color = '#3571A4'
         self.x = 0
         self.y = 0
@@ -87,33 +97,70 @@ class DTA:
         self.x = 110
         self.y = 0
         snake_width = 30
+        self.HEIGHT = 165
         self.draw.rectangle((self.x, self.y,
-                             self.x + snake_width, self.HEIGHT),
+                             self.x + snake_width, self.HEIGHT - 28),
                             color)
-        self.draw.rectangle((self.x + 12, self.HEIGHT - 25,
-                             self.x + 20, self.HEIGHT - 16),
+        self.draw.rectangle((self.x + snake_width - 2, self.HEIGHT - 57,
+                             self.x + 2 * snake_width - 2, self.HEIGHT),
+                            color)
+        self.draw.rectangle((self.x + 41, self.HEIGHT - 25,
+                             self.x + 49, self.HEIGHT - 16),
                             self.trns)
         # eye
-        self.draw.point(((self.x + 13, self.HEIGHT - 24),
-                         (self.x + 13, self.HEIGHT - 17),
-                         (self.x + 19, self.HEIGHT - 24),
-                         (self.x + 19, self.HEIGHT - 17)),
+        self.draw.point(((self.x + 42, self.HEIGHT - 24),
+                         (self.x + 42, self.HEIGHT - 17),
+                         (self.x + 48, self.HEIGHT - 24),
+                         (self.x + 48, self.HEIGHT - 17)),
                         color)
-        self.__drawEyeLines([self.x + 12, self.x + 15,
-                             self.x + 18, self.x + 20],
+        self.__drawEyeLines([self.x + 41, self.x + 44,
+                             self.x + 47, self.x + 49],
                             [self.HEIGHT - 22, self.HEIGHT - 25,
                              self.HEIGHT - 19, self.HEIGHT - 16,
                              self.HEIGHT - 22, self.HEIGHT - 19], color)
-        # nose (head)
-        self.__drawPol(self.x, self.HEIGHT,
+        # body (bottom)
+        self.__drawPol(self.x, self.HEIGHT - 28,
                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 22],
                   [-24, -19, -17, -15, -13, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
+        # nose (head)
+        self.__drawPol(self.x + 28, self.HEIGHT,
+                  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 22],
+                  [-24, -19, -17, -15, -13, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
+        self.__drawPol(self.x + 2 * snake_width - 2,
+                       self.HEIGHT - 57,
+                  [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -13, -15, -17, -19, -22],
+                  [24, 19, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
         # tail
         self.__drawPol(self.x, self.y,
                   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 22],
                   [24, 19, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+        # details
+        self.draw.line(((self.x + snake_width - 4, self.HEIGHT - 27),
+                           (self.x + snake_width - 2, self.HEIGHT - 27),
+                           (self.x + snake_width - 2, self.HEIGHT - 23)),
+                       color)
+        self.draw.point((self.x + snake_width - 3, self.HEIGHT - 26),
+                        color)
+        self.draw.line(((self.x + snake_width + 1, self.HEIGHT - 61),
+                        (self.x + snake_width + 1, self.HEIGHT - 58),
+                        (self.x + snake_width + 3, self.HEIGHT - 58)),
+                       color)
+        self.draw.point((self.x + snake_width + 2, self.HEIGHT - 59),
+                        color)
 
-    def drawLogo(self):
+    def drawLogoWithoutLetters(self):
+        self.WIDTH = 179
+        self.HEIGHT = 165
+        self.logo = self.logo.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)
+        self.draw = ImageDraw.Draw(self.logo)
+        self.__blueSnake()
+        self.__yellowSnake()
+
+    def drawLogoWithLetters(self):
+        self.WIDTH = 255
+        self.HEIGHT = 177
+        self.logo = self.logo.resize((self.WIDTH, self.HEIGHT), Image.ANTIALIAS)
+        self.draw = ImageDraw.Draw(self.logo)
         self.__blueSnake()
         self.__yellowSnake()
         self.__letters()
@@ -181,7 +228,7 @@ class DTA:
         color = '#161619'
         # 2 snakes + 1 space in 5 px
         self.x = 146
-        self.y = 71
+        self.y = 38
         # letters height
         letters_h = 58
         # letter 'A'
@@ -313,13 +360,11 @@ class DTA:
                        self.trns)
 
 DTA_logo = DTA()
-DTA_logo.drawLogo()
-DTA_logo.save()
+# Можно передать параметр letters со значением true,
+# чтобы получить логотип с текстом
+# DTA_logo.makeLogo(letters=True)
+DTA_logo.makeLogo()
 DTA_logo.show()
 
 # made by Plintus
 # (Быкова С., ИКБО-20-20)
-
-
-
-
