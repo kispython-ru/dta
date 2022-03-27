@@ -36,9 +36,13 @@ class GroupRepository:
 
     def create_by_names(self, names: List[str]):
         for name in names:
-            group = Group(title=name)
-            self.session.add(group)
+            self.create(name)
+
+    def create(self, name: str) -> Group:
+        group = Group(title=name)
+        self.session.add(group)
         self.session.commit()
+        return group
 
     def delete_all(self):
         self.session.query(Group).delete()

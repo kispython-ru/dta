@@ -6,7 +6,6 @@ from flask import make_response, render_template, request
 
 from webapp.forms import MessageForm
 from webapp.managers import ExportManager, find_task_status
-from webapp.models import TaskStatus
 from webapp.repositories import AppDbContext, TaskStatusEnum
 from webapp.utils import get_real_ip, handle_errors, use_db
 
