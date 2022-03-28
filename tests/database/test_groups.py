@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from tests.utils import unique_id
+from tests.utils import unique_str
 
 from webapp.repositories import GroupRepository
 
 
 def test_group_creation(session: Session):
     group_manager = GroupRepository(session)
-    group_name = unique_id()
+    group_name = unique_str()
 
     group_manager.create_by_names([group_name])
     groups = group_manager.get_all()
@@ -17,7 +17,7 @@ def test_group_creation(session: Session):
 
 def test_group_fetching_by_id(session: Session):
     group_manager = GroupRepository(session)
-    group_name = unique_id()
+    group_name = unique_str()
     group_manager.create_by_names([group_name])
 
     groups = group_manager.get_all()
@@ -30,9 +30,9 @@ def test_group_fetching_by_id(session: Session):
 
 def test_group_fetching_by_prefix(session: Session):
     prefix = "example_prefix"
-    one = prefix + unique_id()
-    two = prefix + unique_id()
-    three = unique_id()
+    one = prefix + unique_str()
+    two = prefix + unique_str()
+    three = unique_str()
 
     group_manager = GroupRepository(session)
     group_manager.create_by_names([one, two, three])
