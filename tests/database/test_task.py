@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from tests.utils import unique_id_int
+from tests.utils import unique_int
 
 from webapp.repositories import TaskRepository
 
 
 def test_task_creation(session: Session):
     task_manager = TaskRepository(session)
-    task_name = unique_id_int()
+    task_name = unique_int()
 
     task_manager.create_by_ids([task_name])
     tasks = task_manager.get_all()
@@ -17,7 +17,7 @@ def test_task_creation(session: Session):
 
 def test_task_fetching_by_id(session: Session):
     task_manager = TaskRepository(session)
-    task_name = unique_id_int()
+    task_name = unique_int()
     task_manager.create_by_ids([task_name])
 
     tasks = task_manager.get_all()

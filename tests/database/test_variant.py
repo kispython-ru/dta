@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from tests.utils import unique_id_int
+from tests.utils import unique_int
 
 from webapp.repositories import VariantRepository
 
 
 def test_variant_creation(session: Session):
     variant_manager = VariantRepository(session)
-    variant_name = unique_id_int()
+    variant_name = unique_int()
 
     variant_manager.create_by_ids([variant_name])
     variants = variant_manager.get_all()
@@ -17,7 +17,7 @@ def test_variant_creation(session: Session):
 
 def test_variant_fetching_by_id(session: Session):
     variant_manager = VariantRepository(session)
-    variant_name = unique_id_int()
+    variant_name = unique_int()
     variant_manager.create_by_ids([variant_name])
 
     variants = variant_manager.get_all()
