@@ -1,29 +1,25 @@
-from sqlalchemy.orm import Session
 from tests.utils import unique_int
 
-from webapp.repositories import TaskRepository
+from webapp.repositories import AppDatabase
 
 
-def test_task_creation(session: Session):
-    task_manager = TaskRepository(session)
+def test_task_creation(db: AppDatabase):
     task_name = unique_int()
 
-    task_manager.create_by_ids([task_name])
-    tasks = task_manager.get_all()
+    db.tasks.create_by_ids([task_name])
+    tasks = db.tasks.get_all()
 
-    tasks_exists = any(task.id == task_name for task in tasks)
-    assert tasks_exists
+    assert any(task.id == task_name for task in tasks)
 
 
-def test_task_fetching_by_id(session: Session):
-    task_manager = TaskRepository(session)
+def test_task_fetching_by_id(db: AppDatabase):
     task_name = unique_int()
-    task_manager.create_by_ids([task_name])
+    db.tasks.create_by_ids([task_name])
 
-    tasks = task_manager.get_all()
+    tasks = db.tasks.get_all()
     task_id = next(task.id for task in tasks if task.id == task_name)
 
-    task = task_manager.get_by_id(task_id)
+    task = db.tasks.get_by_id(task_id)
     assert task.id == task_id
     assert task.id == task_name
 
