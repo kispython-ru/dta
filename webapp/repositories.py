@@ -1,20 +1,50 @@
 import datetime
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, Union
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from webapp.models import (
     Group, Message, Task, TaskStatus, TaskStatusEnum, Variant,
+    create_session_maker,
 )
 
 
-class GroupRepository:
+class DbContext:
     def __init__(self, session: Session):
         self.session = session
 
+    def __enter__(self) -> Session:
+        return self.session
+
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val, trace):
+        if exc_type is not None and exc_type is IntegrityError:
+            self.session.rollback()
+        self.session.close()
+
+
+class DbContextManager:
+    def __init__(self, get_connection: Callable[[], str]):
+        self.get_connection = get_connection
+        self.session_maker = None
+
+    def create_session(self) -> DbContext:
+        if self.session_maker is None:
+            connection_string = self.get_connection()
+            self.session_maker = create_session_maker(connection_string)
+        session = self.session_maker(expire_on_commit=False)
+        context = DbContext(session)
+        return context
+
+
+class GroupRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
     def get_all(self) -> List[Group]:
-        groups = self.session.query(Group).all()
-        return groups
+        with self.db.create_session() as session:
+            groups = session.query(Group).all()
+            return groups
 
     def get_groupings(self) -> Dict[str, List[Group]]:
         groups = self.get_all()
@@ -25,96 +55,114 @@ class GroupRepository:
         return groupings
 
     def get_by_prefix(self, prefix: str) -> List[Group]:
-        groups = self.session.query(Group) \
-            .filter(Group.title.startswith(prefix)) \
-            .all()
-        return groups
+        with self.db.create_session() as session:
+            groups = session.query(Group) \
+                .filter(Group.title.startswith(prefix)) \
+                .all()
+            return groups
 
     def get_by_id(self, group_id: int) -> Group:
-        group = self.session.query(Group).get(group_id)
-        return group
+        with self.db.create_session() as session:
+            group = session.query(Group).get(group_id)
+            return group
 
     def create_by_names(self, names: List[str]):
         for name in names:
             self.create(name)
 
     def create(self, name: str) -> Group:
-        group = Group(title=name)
-        self.session.add(group)
-        self.session.commit()
-        return group
+        with self.db.create_session() as session:
+            group = Group(title=name)
+            session.add(group)
+            session.commit()
+            return group
 
     def delete_all(self):
-        self.session.query(Group).delete()
+        with self.db.create_session() as session:
+            session.query(Group).delete()
+            session.commit()
 
 
 class TaskRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, db: DbContextManager):
+        self.db = db
 
     def get_all(self) -> List[Task]:
-        tasks = self.session.query(Task).all()
-        return tasks
+        with self.db.create_session() as session:
+            tasks = session.query(Task).all()
+            return tasks
 
     def get_by_id(self, task_id: int) -> Task:
-        task = self.session.query(Task).get(task_id)
-        return task
+        with self.db.create_session() as session:
+            task = session.query(Task).get(task_id)
+            return task
 
     def create_by_ids(self, ids: List[int]):
-        for task_id in ids:
-            group = Task(id=task_id)
-            self.session.add(group)
-        self.session.commit()
+        with self.db.create_session() as session:
+            for task_id in ids:
+                group = Task(id=task_id)
+                session.add(group)
+            session.commit()
 
     def delete_all(self):
-        self.session.query(Task).delete()
+        with self.db.create_session() as session:
+            session.query(Task).delete()
+            session.commit()
 
 
 class VariantRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, db: DbContextManager):
+        self.db = db
 
     def get_all(self) -> List[Variant]:
-        variants = self.session.query(Variant).all()
-        return variants
+        with self.db.create_session() as session:
+            variants = session.query(Variant).all()
+            return variants
 
     def get_by_id(self, variant_id: int) -> Variant:
-        variant = self.session.query(Variant).get(variant_id)
-        return variant
+        with self.db.create_session() as session:
+            variant = session.query(Variant).get(variant_id)
+            return variant
 
     def create_by_ids(self, ids: List[int]):
-        for variant_id in ids:
-            task = Variant(id=variant_id)
-            self.session.add(task)
-        self.session.commit()
+        with self.db.create_session() as session:
+            for variant_id in ids:
+                task = Variant(id=variant_id)
+                session.add(task)
+            session.commit()
 
     def delete_all(self):
-        self.session.query(Variant).delete()
+        with self.db.create_session() as session:
+            session.query(Variant).delete()
+            session.commit()
 
 
 class TaskStatusRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, db: DbContextManager):
+        self.db = db
 
     def get_all(self) -> List[TaskStatus]:
-        statuses = self.session.query(TaskStatus).all()
-        return statuses
+        with self.db.create_session() as session:
+            statuses = session.query(TaskStatus).all()
+            return statuses
 
     def get_by_group(self, group: int) -> List[TaskStatus]:
-        statuses = self.session.query(TaskStatus) \
-            .filter_by(group=group) \
-            .all()
-        return statuses
+        with self.db.create_session() as session:
+            statuses = session.query(TaskStatus) \
+                .filter_by(group=group) \
+                .all()
+            return statuses
 
     def get_task_status(
             self,
             task: int,
             variant: int,
             group: int) -> Union[TaskStatus, None]:
-        status = self.session.query(TaskStatus) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .first()
-        return status
+        with self.db.create_session() as session:
+            status = session.query(TaskStatus) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .first()
+            return status
 
     def update_status(
             self,
@@ -127,10 +175,11 @@ class TaskStatusRepository:
         if existing is not None:
             if existing.status == TaskStatusEnum.Checked:
                 return  # We've already accepted this task!
-        self.session.query(TaskStatus) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .update({"status": status, "output": output})
-        self.session.commit()
+        with self.db.create_session() as session:
+            session.query(TaskStatus) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .update({"status": status, "output": output})
+            session.commit()
 
     def submit_task(
             self,
@@ -138,31 +187,33 @@ class TaskStatusRepository:
             variant: int,
             group: int,
             code: str) -> TaskStatus:
-        existing = self.get_task_status(task, variant, group)
-        if existing is not None:
-            if existing.status == TaskStatusEnum.Checked:
-                return  # We've already accepted this task!
-            self.session.delete(existing)
-            self.session.commit()
-        now = datetime.datetime.now()
-        status = TaskStatusEnum.Submitted
-        task_status = TaskStatus(
-            task=task,
-            variant=variant,
-            group=group,
-            time=now,
-            code=code,
-            output=None,
-            status=status,
-        )
-        self.session.add(task_status)
-        self.session.commit()
-        return task_status
+        with self.db.create_session() as session:
+            existing: TaskStatus = session.query(TaskStatus) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .first()
+            if existing is not None:
+                if existing.status == TaskStatusEnum.Checked:
+                    return  # We've already accepted this task!
+                session.delete(existing)
+            now = datetime.datetime.now()
+            status = TaskStatusEnum.Submitted
+            task_status = TaskStatus(
+                task=task,
+                variant=variant,
+                group=group,
+                time=now,
+                code=code,
+                output=None,
+                status=status,
+            )
+            session.add(task_status)
+            session.commit()
+            return task_status
 
 
 class MessageRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, db: DbContextManager):
+        self.db = db
 
     def submit_task(
             self,
@@ -171,41 +222,43 @@ class MessageRepository:
             group: int,
             code: str,
             ip: str) -> Message:
-        now = datetime.datetime.now()
-        message = Message(
-            task=task,
-            variant=variant,
-            group=group,
-            time=now,
-            code=code,
-            ip=ip,
-            processed=False,
-        )
-        self.session.add(message)
-        self.session.commit()
-        return message
+        with self.db.create_session() as session:
+            now = datetime.datetime.now()
+            message = Message(
+                task=task,
+                variant=variant,
+                group=group,
+                time=now,
+                code=code,
+                ip=ip,
+                processed=False,
+            )
+            session.add(message)
+            session.commit()
+            return message
 
     def get_all(self) -> List[Message]:
-        messages = self.session.query(Message) \
-            .order_by(Message.time.desc()) \
-            .all()
-        return messages
+        with self.db.create_session() as session:
+            messages = session.query(Message) \
+                .order_by(Message.time.desc()) \
+                .all()
+            return messages
 
     def get_latest(self, count: int) -> List[Message]:
-        latest_messages = (
-            self.session.query(Message)
-            .order_by(Message.time.desc())
-            .limit(count)
-            .all()
-        )
-        return latest_messages
+        with self.db.create_session() as session:
+            latest_messages = session.query(Message) \
+                .order_by(Message.time.desc()) \
+                .limit(count) \
+                .all()
+            return latest_messages
 
     def get_pending_messages(self) -> List[Message]:
-        pending = self.session.query(Message) \
-            .filter_by(processed=False) \
-            .order_by(Message.time.desc()) \
-            .all()
-        return pending
+        with self.db.create_session() as session:
+            pending = session.query(Message) \
+                .filter_by(processed=False) \
+                .order_by(Message.time.desc()) \
+                .all()
+            return pending
 
     def get_pending_messages_unique(self) -> List[Message]:
         pending_messages = self.get_pending_messages()
@@ -220,32 +273,18 @@ class MessageRepository:
         return unique_messages
 
     def mark_as_processed(self, task: int, variant: int, group: int):
-        self.session.query(Message) \
-            .filter_by(task=task, variant=variant, group=group) \
-            .update({"processed": True})
-        self.session.commit()
+        with self.db.create_session() as session:
+            session.query(Message) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .update({"processed": True})
+            session.commit()
 
 
-class AppDbContext:
-    def __init__(self, session: Session):
-        self.session = session
-
-    @property
-    def groups(self) -> GroupRepository:
-        return GroupRepository(self.session)
-
-    @property
-    def tasks(self) -> TaskRepository:
-        return TaskRepository(self.session)
-
-    @property
-    def variants(self) -> VariantRepository:
-        return VariantRepository(self.session)
-
-    @property
-    def statuses(self) -> TaskStatusRepository:
-        return TaskStatusRepository(self.session)
-
-    @property
-    def messages(self) -> MessageRepository:
-        return MessageRepository(self.session)
+class AppDatabase:
+    def __init__(self, get_connection: Callable[[], str]):
+        db = DbContextManager(get_connection)
+        self.groups = GroupRepository(db)
+        self.variants = VariantRepository(db)
+        self.tasks = TaskRepository(db)
+        self.statuses = TaskStatusRepository(db)
+        self.messages = MessageRepository(db)

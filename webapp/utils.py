@@ -4,15 +4,10 @@ import sys
 import traceback
 from functools import wraps
 
-from sqlalchemy.exc import IntegrityError
-
 from flask import Request
 from flask import current_app as app
 from flask import jsonify
 from flask.templating import render_template
-
-from webapp.models import create_session
-from webapp.repositories import AppDbContext
 
 
 def handle_errors(
@@ -46,23 +41,6 @@ def handle_api_errors(error_code=500):
             except Exception as error:
                 app.logger.error(error)
                 return jsonify({"error": error_code})
-        return decorator
-    return wrapper
-
-
-def use_db():
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            session = create_session()
-            try:
-                db = AppDbContext(session)
-                return fn(db, *args, **kwargs)
-            except IntegrityError:
-                session.rollback()
-                raise
-            finally:
-                session.close()
         return decorator
     return wrapper
 

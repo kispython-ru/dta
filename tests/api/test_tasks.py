@@ -7,19 +7,19 @@ from tests.utils import unique_int, unique_str
 from flask.testing import FlaskClient
 
 from webapp.models import TaskStatusEnum
-from webapp.repositories import AppDbContext
+from webapp.repositories import AppDatabase
 
 
-def test_task_status_list_fetching(session: Session, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(session)
+def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
+    (group, variant, task) = arrange_test_task_status(db)
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
     assert responce.is_json
     assert any([item for item in responce.json if item["id"] == task])
 
 
-def test_task_status_fetching(session: Session, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(session)
+def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
+    (group, variant, task) = arrange_test_task_status(db)
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
 
     assert responce.is_json
@@ -28,8 +28,8 @@ def test_task_status_fetching(session: Session, client: FlaskClient):
     assert responce.json['status_name'] == TaskStatusEnum.NotSubmitted.name
 
 
-def test_task_solution_submission(session: Session, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(session)
+def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
+    (group, variant, task) = arrange_test_task_status(db)
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",
         data=json.dumps(dict(code="main = lambda x: 42")),
@@ -44,8 +44,8 @@ def test_task_solution_submission(session: Session, client: FlaskClient):
     assert response.json["error_message"] is None
 
 
-def test_unauthorized_submission(session: Session, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(session)
+def test_unauthorized_submission(db: AppDatabase, client: FlaskClient):
+    (group, variant, task) = arrange_test_task_status(db)
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",
         data=json.dumps(dict(code="main = lambda x: 42")),
@@ -57,8 +57,7 @@ def test_unauthorized_submission(session: Session, client: FlaskClient):
     assert response.json["error"] == 500
 
 
-def arrange_test_task_status(session: Session) -> Tuple[int, int, int]:
-    db = AppDbContext(session)
+def arrange_test_task_status(db: AppDatabase) -> Tuple[int, int, int]:
     variant = unique_int()
     group_name = unique_str()
     task = unique_int()
