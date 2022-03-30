@@ -195,6 +195,7 @@ class TaskStatusRepository:
                 if existing.status == TaskStatusEnum.Checked:
                     return  # We've already accepted this task!
                 session.delete(existing)
+                session.commit()
             now = datetime.datetime.now()
             status = TaskStatusEnum.Submitted
             task_status = TaskStatus(
