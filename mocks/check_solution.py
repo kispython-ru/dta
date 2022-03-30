@@ -1,2 +1,2 @@
 def check_solution(group, task, variant, code):
-    return True, ""
+    return False, ""
