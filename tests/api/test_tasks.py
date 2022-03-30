@@ -1,7 +1,6 @@
 import json
 from typing import Tuple
 
-from sqlalchemy.orm import Session
 from tests.utils import unique_int, unique_str
 
 from flask.testing import FlaskClient
