@@ -6,25 +6,25 @@ from flask import make_response, render_template, request
 
 from webapp.forms import MessageForm
 from webapp.managers import ExportManager, find_task_status
-from webapp.repositories import AppDbContext, TaskStatusEnum
-from webapp.utils import get_real_ip, handle_errors, use_db
+from webapp.repositories import AppDatabase, TaskStatusEnum
+from webapp.utils import get_real_ip, handle_errors
 
 
 blueprint = Blueprint("views", __name__)
+db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
+exports = ExportManager(db.groups, db.messages)
 
 
 @blueprint.route("/", methods=["GET"])
 @handle_errors(error_code=404)
-@use_db()
-def dashboard(db: AppDbContext):
+def dashboard():
     groupings = db.groups.get_groupings()
     return render_template("dashboard.jinja", groupings=groupings)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
 @handle_errors(error_code=404)
-@use_db()
-def group(db: AppDbContext, group_id: int):
+def group(group_id: int):
     group = db.groups.get_by_id(group_id)
     statuses = db.statuses.get_by_group(group.id)
     variants = db.variants.get_all()
@@ -44,8 +44,7 @@ def group(db: AppDbContext, group_id: int):
     methods=["GET", "POST"]
 )
 @handle_errors(error_code=404)
-@use_db()
-def task(db: AppDbContext, gid: int, vid: int, tid: int):
+def task(gid: int, vid: int, tid: int):
     variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
     task = db.tasks.get_by_id(tid)
@@ -82,12 +81,10 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
     defaults={"count": None}
 )
 @handle_errors(error_code=401)
-@use_db()
-def export(db: AppDbContext, sep: str, token: str, count: Union[int, None]):
+def export(sep: str, token: str, count: Union[int, None]):
     if app.config["CSV_TOKEN"] != token:
         raise ValueError("Access is denied.")
-    export = ExportManager(db)
-    value = export.export_messages(count, sep)
+    value = exports.export_messages(count, sep)
     output = make_response(value)
     output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
     output.headers["Content-type"] = "text/csv"

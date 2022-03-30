@@ -1,16 +1,14 @@
-from sqlalchemy.orm import Session
 from tests.utils import unique_int, unique_str
 
 from flask.testing import FlaskClient
 
-from webapp.repositories import GroupRepository, VariantRepository
+from webapp.repositories import AppDatabase
 
 
-def test_group_prefixes(session: Session, client: FlaskClient):
+def test_group_prefixes(db: AppDatabase, client: FlaskClient):
     prefix_one = "prefix_one-"
     prefix_two = "prefix_two-"
-    group_manager = GroupRepository(session)
-    group_manager.create_by_names([
+    db.groups.create_by_names([
         prefix_one + unique_str(),
         prefix_two + unique_str()
     ])
@@ -23,11 +21,10 @@ def test_group_prefixes(session: Session, client: FlaskClient):
     assert "prefix_two" in response.json["prefixes"]
 
 
-def test_group_fetching(session: Session, client: FlaskClient):
+def test_group_fetching(db: AppDatabase, client: FlaskClient):
     prefix_one = unique_str()
     prefix_two = unique_str()
-    group_manager = GroupRepository(session)
-    group_manager.create_by_names([
+    db.groups.create_by_names([
         prefix_one + unique_str(),
         prefix_two + unique_str(),
         prefix_one + unique_str()
@@ -41,11 +38,10 @@ def test_group_fetching(session: Session, client: FlaskClient):
     assert response.json[1]["title"].startswith(prefix_one)
 
 
-def test_variant_fetching(session: Session, client: FlaskClient):
+def test_variant_fetching(db: AppDatabase, client: FlaskClient):
     variant_one = unique_int()
     variant_two = unique_int()
-    variant_manager = VariantRepository(session)
-    variant_manager.create_by_ids([variant_one, variant_two])
+    db.variants.create_by_ids([variant_one, variant_two])
 
     response = client.get("/api/v1/variant/list")
 

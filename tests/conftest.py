@@ -1,13 +1,12 @@
 import os
 
 import pytest
-from sqlalchemy.orm import Session
 
 from flask import Flask
 from flask.testing import FlaskClient
 
 from webapp.app import configure_app
-from webapp.models import create_session_manually
+from webapp.repositories import AppDatabase
 
 
 @pytest.fixture()
@@ -23,10 +22,10 @@ def app() -> Flask:
 
 
 @pytest.fixture()
-def session(app: Flask) -> Session:
+def db(app: Flask) -> AppDatabase:
     connection_string = app.config["CONNECTION_STRING"]
-    session = create_session_manually(connection_string)
-    return session
+    db = AppDatabase(lambda: connection_string)
+    return db
 
 
 @pytest.fixture()

@@ -5,18 +5,18 @@ from flask import jsonify, request
 from webapp.forms import CodeLength
 from webapp.managers import find_task_status
 from webapp.models import TaskStatusEnum
-from webapp.repositories import AppDbContext
-from webapp.utils import get_real_ip, handle_api_errors, use_db
+from webapp.repositories import AppDatabase
+from webapp.utils import get_real_ip, handle_api_errors
 
 
 base_path = "http://sovietov.com/kispython"
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
+db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])
 @handle_api_errors()
-@use_db()
-def group_prefixes(db: AppDbContext):
+def group_prefixes():
     groupings = db.groups.get_groupings()
     keys = list(groupings.keys())
     return jsonify(dict(prefixes=keys))
@@ -24,8 +24,7 @@ def group_prefixes(db: AppDbContext):
 
 @blueprint.route("/group/<prefix>", methods=["GET"])
 @handle_api_errors()
-@use_db()
-def group(db: AppDbContext, prefix: str):
+def group(prefix: str):
     groups = db.groups.get_by_prefix(prefix)
     dtos = [dict(id=group.id, title=group.title) for group in groups]
     return jsonify(dtos)
@@ -33,8 +32,7 @@ def group(db: AppDbContext, prefix: str):
 
 @blueprint.route("/variant/list", methods=["GET"])
 @handle_api_errors()
-@use_db()
-def variant_list(db: AppDbContext):
+def variant_list():
     variants = db.variants.get_all()
     dtos = [variant.id for variant in variants]
     return jsonify(dtos)
@@ -42,8 +40,7 @@ def variant_list(db: AppDbContext):
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/list", methods=["GET"])
 @handle_api_errors()
-@use_db()
-def task_list(db: AppDbContext, gid: int, vid: int):
+def task_list(gid: int, vid: int):
     variant = db.variants.get_by_id(vid)
     tasks = db.tasks.get_all()
     group = db.groups.get_by_id(gid)
@@ -64,8 +61,7 @@ def task_list(db: AppDbContext, gid: int, vid: int):
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 @handle_api_errors()
-@use_db()
-def task(db: AppDbContext, gid: int, vid: int, tid: int):
+def task(gid: int, vid: int, tid: int):
     variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
     task = db.tasks.get_by_id(tid)
@@ -84,8 +80,7 @@ def task(db: AppDbContext, gid: int, vid: int, tid: int):
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
 @handle_api_errors()
-@use_db()
-def submit_task(db: AppDbContext, gid: int, vid: int, tid: int):
+def submit_task(gid: int, vid: int, tid: int):
     if app.config["API_TOKEN"] != request.headers.get("token"):
         raise ValueError("Access is denied.")
     if not CodeLength.min < len(request.json["code"]) < CodeLength.max:
