@@ -5,14 +5,13 @@ from multiprocessing import Process
 from flask import Blueprint
 from flask import current_app as app
 
-from webapp.models import (
-    Group, Message, Task, Variant, create_session_manually,
-)
-from webapp.repositories import AppDbContext, TaskStatusEnum
+from webapp.models import Group, Message, Task, Variant
+from webapp.repositories import AppDatabase, TaskStatusEnum
 from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("worker", __name__)
+db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 def check_solution(
@@ -40,7 +39,7 @@ def load_tests(core_path: str):
     return GROUPS, TASKS
 
 
-def process_pending_messages(db: AppDbContext, core_path: str):
+def process_pending_messages(core_path: str):
     pending_messages = db.messages.get_pending_messages_unique()
     message_count = len(pending_messages)
     if message_count > 0:
@@ -81,13 +80,11 @@ def background_worker(connection_string: str, core_path: str):
     print(f"Starting background worker for database: {connection_string}")
     while True:
         time.sleep(10)
-        with create_session_manually(connection_string) as session:
-            db = AppDbContext(session)
-            try:
-                process_pending_messages(db, core_path)
-            except BaseException:
-                exception = get_exception_info()
-                print(f"Error orccured inside the loop: {exception}")
+        try:
+            process_pending_messages(core_path)
+        except BaseException:
+            exception = get_exception_info()
+            print(f"Error occured inside the loop: {exception}")
 
 
 @blueprint.before_app_first_request
