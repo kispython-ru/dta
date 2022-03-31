@@ -120,12 +120,9 @@ class TaskStatus(Base):
     )
 
     def __eq__(self, other):
-        if self.task == other.task and self.variant == other.variant and \
+        return self.task == other.task and self.variant == other.variant and \
            self.group == other.group and self.time == other.time and \
-           self.code == other.code and self.output == other.output and self.status == other.status:
-            return True
-        else:
-            return False
+           self.code == other.code and self.output == other.output and self.status == other.status
 
 
 class Message(Base):
@@ -166,10 +163,7 @@ class Message(Base):
         })
 
     def __eq__(self, other):
-        if self.task == other.task and self.variant == other.variant and \
+        return self.task == other.task and self.variant == other.variant and \
            self.group == other.group and self.time == other.time and \
            self.code == other.code and self.ip == other.ip and \
-           self.processed == other.processed and self.id == other.id:
-            return True
-        else:
-            return False
+           self.processed == other.processed and self.id == other.id

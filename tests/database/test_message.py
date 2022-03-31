@@ -3,7 +3,7 @@ from tests.utils import unique_int, unique_str
 from webapp.repositories import AppDatabase
 
 
-def test_creation(db: AppDatabase):
+def test_message_creation(db: AppDatabase):
     task = unique_int()
     variant = unique_int()
     group = unique_int()
@@ -16,7 +16,7 @@ def test_creation(db: AppDatabase):
     assert any(message.task == task for message in messages)
 
 
-def test_get_latest(db: AppDatabase):
+def test_message_get_latest(db: AppDatabase):
     task_1 = unique_int()
     task_2 = unique_int()
     variant = unique_int()
@@ -36,7 +36,7 @@ def test_get_latest(db: AppDatabase):
     assert message == message_latest
 
 
-def test_mark_at_process(db: AppDatabase):
+def test_message_mark_at_process(db: AppDatabase):
     task = unique_int()
     variant = unique_int()
     group = unique_int()
@@ -57,7 +57,7 @@ def test_mark_at_process(db: AppDatabase):
     assert message.processed == True
 
 
-def test_get_pending(db: AppDatabase):
+def test_message_get_pending(db: AppDatabase):
     task_1 = unique_int()
     task_2 = unique_int()
     task_3 = unique_int()
@@ -81,7 +81,7 @@ def test_get_pending(db: AppDatabase):
     assert message == message_pending
 
 
-def test_pending_unique(db: AppDatabase):
+def test_message_pending_unique(db: AppDatabase):
     task = unique_int()
     variant = unique_int()
     group = unique_int()

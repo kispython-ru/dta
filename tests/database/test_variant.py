@@ -4,21 +4,17 @@ from webapp.repositories import AppDatabase
 
 
 def test_variant_creation(db: AppDatabase):
-    variant_name = unique_int()
+    variant_id = unique_int()
 
-    db.variants.create_by_ids([variant_name])
+    db.variants.create_by_ids([variant_id])
     variants = db.variants.get_all()
 
-    assert any(variant.id == variant_name for variant in variants)
+    assert any(variant.id == variant_id for variant in variants)
 
 
 def test_variant_fetching_by_id(db: AppDatabase):
-    variant_name = unique_int()
-    db.variants.create_by_ids([variant_name])
+    variant_id = unique_int()
+    db.variants.create_by_ids([variant_id])
 
-    variants = db.variants.get_all()
-    variant_id = next(variant.id for variant in variants if variant.id == variant_name)
-
-    variant = db.variants.get_by_id(variant_name)
+    variant = db.variants.get_by_id(variant_id)
     assert variant.id == variant_id
-    assert variant.id == variant_name
