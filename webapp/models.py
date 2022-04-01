@@ -122,7 +122,8 @@ class TaskStatus(Base):
     def __eq__(self, other):
         return self.task == other.task and self.variant == other.variant and \
            self.group == other.group and self.time == other.time and \
-           self.code == other.code and self.output == other.output and self.status == other.status
+           self.code == other.code and self.output == other.output and \
+           self.status == other.status
 
 
 class Message(Base):

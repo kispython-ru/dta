@@ -1,7 +1,7 @@
 from tests.utils import unique_int, unique_str
 
-from webapp.repositories import AppDatabase
 from webapp.models import TaskStatusEnum
+from webapp.repositories import AppDatabase
 
 
 def test_task_status_creation(db: AppDatabase):
@@ -42,6 +42,7 @@ def test_task_status_get_task_status(db: AppDatabase):
     assert task_status.variant == variant
     assert task_status.group == group
     assert task_status.code == code
+    assert task_status.status == TaskStatusEnum.Submitted
 
 
 def test_task_status_update_status(db: AppDatabase):
