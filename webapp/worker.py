@@ -78,7 +78,7 @@ def process_pending_messages(core_path: str):
 
 def background_worker(connection_string: str, core_path: str):
     print(f"Starting background worker for database: {connection_string}")
-    while True:
+    while not app.config.get("DISABLE_BACKGROUND_WORKER"):
         time.sleep(10)
         try:
             process_pending_messages(core_path)

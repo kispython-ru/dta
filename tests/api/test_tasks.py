@@ -1,7 +1,6 @@
 import json
-from typing import Tuple
 
-from tests.utils import unique_int, unique_str
+from tests.utils import arrange_test_task_status
 
 from flask.testing import FlaskClient
 
@@ -58,16 +57,3 @@ def test_unauthorized_submission(db: AppDatabase, client: FlaskClient):
 
     assert response.json is not None
     assert response.json["error"] == 500
-
-
-def arrange_test_task_status(db: AppDatabase) -> Tuple[int, int, int]:
-    variant = unique_int()
-    group_name = unique_str()
-    task = unique_int()
-
-    db.variants.create_by_ids([variant])
-    db.groups.create(group_name)
-    db.tasks.create_by_ids([task])
-
-    group = db.groups.get_by_prefix(group_name)[0].id
-    return (group, variant, task)

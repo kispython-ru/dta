@@ -1,4 +1,4 @@
-from tests.utils import unique_int, unique_str
+from tests.utils import unique_str
 
 from flask.testing import FlaskClient
 

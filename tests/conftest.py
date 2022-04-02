@@ -10,22 +10,14 @@ from webapp.repositories import AppDatabase
 
 
 @pytest.fixture()
-def app() -> Flask:
-    src = os.getcwd()
-    tests = os.path.join(src, "tests")
-    app = configure_app(
-        config_path=tests,
-        alembic_ini_path="webapp/alembic.ini",
-        alembic_script_path="webapp/alembic",
-    )
-    yield app
+def app(request) -> Flask:
+    enable_worker = hasattr(request, 'param') and request.param is True
+    yield create_app(enable_worker=enable_worker)
 
 
 @pytest.fixture()
 def db(app: Flask) -> AppDatabase:
-    connection_string = app.config["CONNECTION_STRING"]
-    db = AppDatabase(lambda: connection_string)
-    return db
+    return AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 @pytest.fixture()
@@ -33,6 +25,14 @@ def client(app: Flask) -> FlaskClient:
     return app.test_client()
 
 
-@pytest.fixture()
-def runner(app: Flask):
-    return app.test_cli_runner()
+def create_app(*, enable_worker: bool = False) -> Flask:
+    src = os.getcwd()
+    tests = os.path.join(src, "tests")
+    app = configure_app(
+        config_path=tests,
+        alembic_ini_path="webapp/alembic.ini",
+        alembic_script_path="webapp/alembic",
+    )
+    if enable_worker:
+        app.config["DISABLE_BACKGROUND_WORKER"] = False
+    return app

@@ -1,0 +1,28 @@
+import json
+
+import pytest
+from tests.utils import arrange_test_task_status, timeout_assert
+
+from flask import Flask
+from flask.testing import FlaskClient
+
+from webapp.models import TaskStatusEnum
+from webapp.repositories import AppDatabase
+
+
+@pytest.mark.skip(reason="Broken")
+@pytest.mark.parametrize('app', ([True]), indirect=True)
+def test_background_task_check(db: AppDatabase, client: FlaskClient, app: Flask):
+    (group, variant, task) = arrange_test_task_status(db)
+    url = f"/api/v1/group/{group}/variant/{variant}/task/{task}"
+
+    response = client.post(
+        url,
+        data=json.dumps(dict(code="main = lambda x: 42")),
+        headers=dict(token="CHANGE_ME"),
+        content_type='application/json'
+    )
+
+    assert response.json["status"] == TaskStatusEnum.Submitted
+    timeout_assert(lambda: client.get(url).json["status"] == TaskStatusEnum.Failed)
+    app.config.update(DISABLE_BACKGROUND_WORKER=True)
