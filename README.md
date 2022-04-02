@@ -4,7 +4,7 @@
 
 ### Setting Up Development Environment
 
-#### Ubuntu KDE
+#### Ubuntu 20.04 LTS
 
 1. Install [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html). [pyenv](https://github.com/pyenv/pyenv) can help with switching among different Python versions.
 

@@ -1,4 +1,3 @@
-
 from tests.utils import unique_int
 
 from flask.testing import FlaskClient
