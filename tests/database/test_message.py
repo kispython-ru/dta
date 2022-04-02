@@ -21,16 +21,11 @@ def test_message_get_latest(db: AppDatabase):
 
     task_2 = unique_int()
     db.tasks.create_by_ids([task_2])
-
     db.messages.submit_task(task_1, variant, group, code, ip)
     db.messages.submit_task(task_2, variant, group, code, ip)
 
-    messages_list = db.messages.get_all()
-    message_latest = messages_list[0:2]
-
-    message = db.messages.get_latest(2)
-    assert len(message) == len(message_latest)
-    assert message == message_latest
+    latest = db.messages.get_latest(2)
+    assert len(latest) == 2
 
 
 def test_message_mark_at_process(db: AppDatabase):
