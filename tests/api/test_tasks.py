@@ -11,6 +11,7 @@ from webapp.repositories import AppDatabase
 
 def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_test_task_status(db)
+
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
     assert responce.is_json
@@ -19,6 +20,7 @@ def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
 
 def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_test_task_status(db)
+
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
 
     assert responce.is_json
@@ -29,6 +31,7 @@ def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
 
 def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_test_task_status(db)
+
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",
         data=json.dumps(dict(code="main = lambda x: 42")),
@@ -45,6 +48,7 @@ def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
 
 def test_unauthorized_submission(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_test_task_status(db)
+
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",
         data=json.dumps(dict(code="main = lambda x: 42")),
