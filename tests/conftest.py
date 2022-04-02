@@ -1,4 +1,5 @@
 import os
+import signal
 
 import pytest
 
@@ -10,29 +11,24 @@ from webapp.repositories import AppDatabase
 
 
 @pytest.fixture()
-def app() -> Flask:
+def app(request) -> Flask:
     src = os.getcwd()
     tests = os.path.join(src, "tests")
-    app = configure_app(
-        config_path=tests,
-        alembic_ini_path="webapp/alembic.ini",
-        alembic_script_path="webapp/alembic",
-    )
+    app = configure_app(tests, "webapp/alembic.ini", "webapp/alembic")
+    enable_worker = hasattr(request, 'param') and request.param is True
+    if enable_worker:
+        app.config["DISABLE_BACKGROUND_WORKER"] = False
     yield app
+    if enable_worker:
+        worker_pid = app.config["WORKER_PID"]
+        os.kill(worker_pid, signal.SIGTERM)
 
 
 @pytest.fixture()
 def db(app: Flask) -> AppDatabase:
-    connection_string = app.config["CONNECTION_STRING"]
-    db = AppDatabase(lambda: connection_string)
-    return db
+    return AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 @pytest.fixture()
 def client(app: Flask) -> FlaskClient:
     return app.test_client()
-
-
-@pytest.fixture()
-def runner(app: Flask):
-    return app.test_cli_runner()
