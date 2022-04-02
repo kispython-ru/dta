@@ -79,12 +79,12 @@ def process_pending_messages(core_path: str):
 def background_worker(connection_string: str, core_path: str):
     print(f"Starting background worker for database: {connection_string}")
     while True:
-        time.sleep(10)
         try:
             process_pending_messages(core_path)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
+        time.sleep(10)
 
 
 @blueprint.before_app_first_request
@@ -97,3 +97,4 @@ def start_background_worker():
         target=background_worker, args=(
             connection_string, core_path))
     process.start()
+    app.config["WORKER_PID"] = process.pid

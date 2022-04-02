@@ -1,4 +1,5 @@
 import os
+import signal
 
 import pytest
 
@@ -12,7 +13,11 @@ from webapp.repositories import AppDatabase
 @pytest.fixture()
 def app(request) -> Flask:
     enable_worker = hasattr(request, 'param') and request.param is True
-    yield create_app(enable_worker=enable_worker)
+    app = create_app(enable_worker=enable_worker)
+    yield app
+    if enable_worker:
+        worker_pid = app.config["WORKER_PID"]
+        os.kill(worker_pid, signal.SIGTERM)
 
 
 @pytest.fixture()
