@@ -9,7 +9,6 @@ from webapp.repositories import AppDatabase
 from webapp.utils import get_real_ip, handle_api_errors
 
 
-base_path = "http://sovietov.com/kispython"
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
@@ -45,10 +44,11 @@ def task_list(gid: int, vid: int):
     tasks = db.tasks.get_all()
     group = db.groups.get_by_id(gid)
     statuses = db.statuses.get_by_group(group.id)
+    base_url = app.config["TASK_BASE_URL"]
     dtos = []
     for task in tasks:
         vid = variant.id + 1
-        source = f"{base_path}/{task.id}/{group.title}.html#вариант-{vid}"
+        source = f"{base_url}/{task.id}/{group.title}.html#вариант-{vid}"
         status = find_task_status(statuses, group.id, variant.id, task.id)
         dtos.append(dict(
             id=task.id,
@@ -68,7 +68,8 @@ def task(gid: int, vid: int, tid: int):
     ts = db.statuses.get_task_status(task.id, variant.id, group.id)
     error_message = ts.output if ts is not None else ""
     status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
-    source = f"{base_path}/{task.id}/{group.title}.html#вариант-{variant.id}"
+    base_url = app.config["TASK_BASE_URL"]
+    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id}"
     return jsonify(dict(
         id=task.id,
         source=source,
@@ -96,7 +97,8 @@ def submit_task(gid: int, vid: int, tid: int):
     ts = db.statuses.submit_task(task.id, variant.id, group.id, code)
     error_message = ts.output if ts is not None else ""
     status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
-    source = f"{base_path}/{task.id}/{group.title}.html#вариант-{variant.id}"
+    base_url = app.config["TASK_BASE_URL"]
+    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id}"
     return jsonify(dict(
         id=task.id,
         source=source,

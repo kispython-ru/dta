@@ -5,5 +5,6 @@
     "CSV_TOKEN": "CHANGE_ME",
     "API_TOKEN": "CHANGE_ME",
     "SECRET_KEY": "CHANGE_ME",
-    "DISABLE_BACKGROUND_WORKER": true
+    "DISABLE_BACKGROUND_WORKER": true,
+    "TASK_BASE_URL": "http://sovietov.com/kispython"
 }

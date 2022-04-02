@@ -29,6 +29,7 @@ def group(group_id: int):
     statuses = db.statuses.get_by_group(group.id)
     variants = db.variants.get_all()
     tasks = db.tasks.get_all()
+    task_base_url = app.config["TASK_BASE_URL"]
     return render_template(
         "group.jinja",
         variants=variants,
@@ -36,6 +37,7 @@ def group(group_id: int):
         tasks=tasks,
         statuses=statuses,
         find_task_status=find_task_status,
+        task_base_url=task_base_url,
     )
 
 
@@ -64,6 +66,7 @@ def task(gid: int, vid: int, tid: int):
             task=task,
             status=status,
         )
+    task_base_url=app.config["TASK_BASE_URL"]
     return render_template(
         "task.jinja",
         form=form,
@@ -71,6 +74,7 @@ def task(gid: int, vid: int, tid: int):
         group=group,
         task=task,
         status=status,
+        task_base_url=task_base_url,
     )
 
 
