@@ -1,3 +1,5 @@
+from werkzeug.exceptions import HTTPException
+
 from flask import Blueprint
 from flask import current_app as app
 from flask import jsonify, request
@@ -6,7 +8,7 @@ from webapp.forms import CodeLength
 from webapp.managers import find_task_status
 from webapp.models import TaskStatusEnum
 from webapp.repositories import AppDatabase
-from webapp.utils import get_real_ip, handle_api_errors
+from webapp.utils import get_real_ip
 
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -14,7 +16,6 @@ db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])
-@handle_api_errors()
 def group_prefixes():
     groupings = db.groups.get_groupings()
     keys = list(groupings.keys())
@@ -22,7 +23,6 @@ def group_prefixes():
 
 
 @blueprint.route("/group/<prefix>", methods=["GET"])
-@handle_api_errors()
 def group(prefix: str):
     groups = db.groups.get_by_prefix(prefix)
     dtos = [dict(id=group.id, title=group.title) for group in groups]
@@ -30,7 +30,6 @@ def group(prefix: str):
 
 
 @blueprint.route("/variant/list", methods=["GET"])
-@handle_api_errors()
 def variant_list():
     variants = db.variants.get_all()
     dtos = [variant.id for variant in variants]
@@ -38,7 +37,6 @@ def variant_list():
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/list", methods=["GET"])
-@handle_api_errors()
 def task_list(gid: int, vid: int):
     variant = db.variants.get_by_id(vid)
     tasks = db.tasks.get_all()
@@ -60,7 +58,6 @@ def task_list(gid: int, vid: int):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-@handle_api_errors()
 def task(gid: int, vid: int, tid: int):
     variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
@@ -80,7 +77,6 @@ def task(gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-@handle_api_errors()
 def submit_task(gid: int, vid: int, tid: int):
     if app.config["API_TOKEN"] != request.headers.get("token"):
         raise ValueError("Access is denied.")
@@ -106,3 +102,9 @@ def submit_task(gid: int, vid: int, tid: int):
         status_name=status.name,
         error_message=error_message,
     ))
+
+
+@blueprint.errorhandler(Exception)
+def handle_api_errors(error):
+    error_code = error.code if isinstance(error, HTTPException) else 500
+    return jsonify(dict(error=error_code))
