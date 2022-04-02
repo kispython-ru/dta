@@ -6,30 +6,18 @@
 
 #### Ubuntu KDE
 
-1. Install [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html). Such tool as [pyenv](https://github.com/pyenv/pyenv) can help with switching among different Python versions. Make sure `python` is added to `PATH`.
+1. Install [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html). [pyenv](https://github.com/pyenv/pyenv) can help with switching among different Python versions.
 
-2. Install the [poetry](https://github.com/python-poetry/poetry) build system:
+2. Install [poetry](https://github.com/python-poetry/poetry), install project dependencies, activate [venv](https://python-poetry.org/docs/cli/#shell):
 ```bash
 pip install poetry
-```
-
-3. Install the packages required by the DTA web application:
-```bash
-poetry install
-```
-
-4. Activate the virtual environment with the installed packages:
-```bash
+poetry install # Execute from repository root
 poetry shell
 ```
 
-5. Run the tests:
+3. Run the tests and launch the web server:
 ```bash
 make test
-```
-
-6. Launch the web server:
-```
 make flask
 ```
 
@@ -37,28 +25,23 @@ make flask
 
 1. Install [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html). Make sure `python` is added to `PATH`. You can check this by navigating to `System (Control Panel)` -> `Advanced system settings` -> `Environment Variables` -> `System Variables` -> `PATH` -> `Edit`.
 
-2. Install the [poetry](https://github.com/python-poetry/poetry) build system:
+2. Install the [Chocolatey](https://chocolatey.org/install) package manager.
+
+3. Install the [GNU make](https://community.chocolatey.org/packages/make) utility by typing:
+```bash
+choco install make
+```
+
+4. Install [poetry](https://github.com/python-poetry/poetry), install project dependencies, activate [venv](https://python-poetry.org/docs/cli/#shell):
 ```bash
 pip install poetry
-```
-
-3. Install the packages required by the DTA web application:
-```bash
-poetry install
-```
-
-4. Activate virtual environment with the installed packages:
-```bash
+poetry install # Execute from repository root
 poetry shell
 ```
 
-5. Run the tests:
+5. Run the tests and launch the web server:
 ```bash
 make test
-```
-
-6. Launch the web server:
-```bash
 make flask-win
 ```
 
