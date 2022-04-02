@@ -1,6 +1,6 @@
 import json
 
-from tests.utils import arrange_test_task_status
+from tests.utils import arrange_task
 
 from flask.testing import FlaskClient
 
@@ -9,7 +9,7 @@ from webapp.repositories import AppDatabase
 
 
 def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(db)
+    (group, variant, task) = arrange_task(db)
 
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
@@ -18,7 +18,7 @@ def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
 
 
 def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(db)
+    (group, variant, task) = arrange_task(db)
 
     responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
 
@@ -29,7 +29,7 @@ def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
 
 
 def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(db)
+    (group, variant, task) = arrange_task(db)
 
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",
@@ -46,7 +46,7 @@ def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
 
 
 def test_unauthorized_submission(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_test_task_status(db)
+    (group, variant, task) = arrange_task(db)
 
     response = client.post(
         f"/api/v1/group/{group}/variant/{variant}/task/{task}",

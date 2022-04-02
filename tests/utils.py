@@ -27,7 +27,7 @@ def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
             break
 
 
-def arrange_test_task_status(db: AppDatabase) -> Tuple[int, int, int]:
+def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
     variant = unique_int()
     group_name = unique_str()
     task = unique_int()
