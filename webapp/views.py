@@ -90,7 +90,7 @@ def export(s: str, token: str, count: Union[int, None]):
 
 
 @blueprint.errorhandler(Exception)
-def handle_api_error(error):
+def handle_views_errors(error):
     error_code = error.code if isinstance(error, HTTPException) else 500
     return render_template(
         "error.jinja",
