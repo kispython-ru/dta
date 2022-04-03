@@ -330,22 +330,6 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtualenv"]
 
 [[package]]
-name = "pytest-flask"
-version = "1.2.0"
-description = "A set of py.test fixtures to test Flask applications."
-category = "dev"
-optional = false
-python-versions = ">=3.5"
-
-[package.dependencies]
-Flask = "*"
-pytest = ">=5.2"
-Werkzeug = ">=0.7"
-
-[package.extras]
-docs = ["sphinx", "sphinx-rtd-theme"]
-
-[[package]]
 name = "radon"
 version = "5.1.0"
 description = "Code Metrics in Python"
@@ -454,6 +438,7 @@ email = ["email-validator"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
+
 content-hash = "d24c3d47ef1775e0f6876e00499476174b037bc04a4ffca9c454b0c93eaa591a"
 
 [metadata.files]
@@ -729,10 +714,6 @@ pytest-alembic = [
 pytest-cov = [
     {file = "pytest-cov-3.0.0.tar.gz", hash = "sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470"},
     {file = "pytest_cov-3.0.0-py3-none-any.whl", hash = "sha256:578d5d15ac4a25e5f961c938b85a05b09fdaae9deef3bb6de9a6e766622ca7a6"},
-]
-pytest-flask = [
-    {file = "pytest-flask-1.2.0.tar.gz", hash = "sha256:46fde652f77777bf02dc91205aec4ce20cdf2acbbbd66a918ab91f5c14693d3d"},
-    {file = "pytest_flask-1.2.0-py3-none-any.whl", hash = "sha256:fe25b39ad0db09c3d1fe728edecf97ced85e774c775db259a6d25f0270a4e7c9"},
 ]
 radon = [
     {file = "radon-5.1.0-py2.py3-none-any.whl", hash = "sha256:fa74e018197f1fcb54578af0f675d8b8e2342bd8e0b72bef8197bc4c9e645f36"},

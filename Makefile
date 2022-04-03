@@ -38,4 +38,8 @@ migration:
 logo:
 	python DTA_logo.py
 
+.PHONY: seed
+seed:
+	cd webapp && export SEED=1 && export FLASK_APP=app && export FLASK_ENV=development && flask run
+
 .DEFAULT_GOAL :=

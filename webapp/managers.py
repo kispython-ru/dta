@@ -3,7 +3,7 @@ import io
 from typing import Dict, List, Union
 
 from webapp.models import Message, TaskStatus, TaskStatusEnum
-from webapp.repositories import AppDbContext
+from webapp.repositories import GroupRepository, MessageRepository
 
 
 def find_task_status(
@@ -21,8 +21,9 @@ def find_task_status(
 
 
 class ExportManager:
-    def __init__(self, db: AppDbContext):
-        self.db = db
+    def __init__(self, groups: GroupRepository, messages: MessageRepository):
+        self.groups = groups
+        self.messages = messages
 
     def export_messages(self, count: Union[int, None], separator: str) -> str:
         messages = self.get_latest_messages(count)
@@ -63,7 +64,7 @@ class ExportManager:
         return rows
 
     def get_group_titles(self) -> Dict[int, str]:
-        groups = self.db.groups.get_all()
+        groups = self.groups.get_all()
         group_titles: Dict[int, str] = {}
         for group in groups:
             group_titles[group.id] = group.title
@@ -71,5 +72,5 @@ class ExportManager:
 
     def get_latest_messages(self, count: Union[int, None]) -> List[Message]:
         if count is None:
-            return self.db.messages.get_all()
-        return self.db.messages.get_latest(count)
+            return self.messages.get_all()
+        return self.messages.get_latest(count)

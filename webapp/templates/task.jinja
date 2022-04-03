@@ -31,7 +31,7 @@
   <div class="card-subtitle mb-4 mt-2">
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
-       href="http://sovietov.com/kispython/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
+       href="{{ task_base_url }}/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
       Перейти к условию задачи №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}.
     </a>
   </div>
