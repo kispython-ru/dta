@@ -51,7 +51,7 @@
       </div>
       {% if status.output is not none and status.output %}
         <div>Подробные сведения об ошибке:</div>
-        <div class="text-muted mb-2" style="white-space: pre">{{ status.output | e }}</div>
+        <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.output | e }}</div>
       {% else %}
         <div class="mb-2"></div>
       {% endif %}
@@ -65,6 +65,7 @@
       </div>
       <div class="form-group mb-2">
         <textarea
+          id="code-textarea"
           name="code"
           type="text"
           class="form-control"
@@ -97,4 +98,11 @@
     </form>
   </div>
 </div>
+
+{% if highlight_syntax %}
+  <script type="text/javascript"> 
+    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true })
+  </script>
+{% endif %}
+
 {% endblock %}

@@ -66,6 +66,7 @@ def task(gid: int, vid: int, tid: int):
             status=status,
         )
     task_base_url = app.config["TASK_BASE_URL"]
+    highlight_syntax = app.config["HIGHLIGHT_SYNTAX"]
     return render_template(
         "task.jinja",
         form=form,
@@ -74,6 +75,7 @@ def task(gid: int, vid: int, tid: int):
         task=task,
         status=status,
         task_base_url=task_base_url,
+        highlight_syntax=highlight_syntax,
     )
 
 
