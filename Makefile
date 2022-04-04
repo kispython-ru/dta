@@ -36,7 +36,7 @@ migration:
 
 .PHONY: logo
 logo:
-	python DTA_logo.py
+	python logo.py
 
 .PHONY: seed
 seed:
