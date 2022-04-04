@@ -99,8 +99,10 @@
   </div>
 </div>
 
-<script type="text/javascript"> 
-  CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true })
-</script>
+{% if highlight_syntax %}
+  <script type="text/javascript"> 
+    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true })
+  </script>
+{% endif %}
 
 {% endblock %}
