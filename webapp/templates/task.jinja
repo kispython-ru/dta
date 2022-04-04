@@ -65,6 +65,7 @@
       </div>
       <div class="form-group mb-2">
         <textarea
+          id="code-textarea"
           name="code"
           type="text"
           class="form-control"
@@ -97,4 +98,11 @@
     </form>
   </div>
 </div>
+
+{% if highlight_syntax %}
+  <script type="text/javascript"> 
+    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true })
+  </script>
+{% endif %}
+
 {% endblock %}
