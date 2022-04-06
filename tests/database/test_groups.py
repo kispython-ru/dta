@@ -1,42 +1,37 @@
-from sqlalchemy.orm import Session
 from tests.utils import unique_str
 
-from webapp.repositories import GroupRepository
+from webapp.repositories import AppDatabase
 
 
-def test_group_creation(session: Session):
-    group_manager = GroupRepository(session)
+def test_group_creation(db: AppDatabase):
     group_name = unique_str()
+    db.groups.create_by_names([group_name])
 
-    group_manager.create_by_names([group_name])
-    groups = group_manager.get_all()
+    groups = db.groups.get_all()
 
-    group_exists = any(group.title == group_name for group in groups)
-    assert group_exists
+    assert any(group.title == group_name for group in groups)
 
 
-def test_group_fetching_by_id(session: Session):
-    group_manager = GroupRepository(session)
+def test_group_fetching_by_id(db: AppDatabase):
     group_name = unique_str()
-    group_manager.create_by_names([group_name])
+    db.groups.create_by_names([group_name])
 
-    groups = group_manager.get_all()
+    groups = db.groups.get_all()
     group_id = next(group.id for group in groups if group.title == group_name)
+    group = db.groups.get_by_id(group_id)
 
-    group = group_manager.get_by_id(group_id)
     assert group.id == group_id
     assert group.title == group_name
 
 
-def test_group_fetching_by_prefix(session: Session):
+def test_group_fetching_by_prefix(db: AppDatabase):
     prefix = "example_prefix"
     one = prefix + unique_str()
     two = prefix + unique_str()
     three = unique_str()
 
-    group_manager = GroupRepository(session)
-    group_manager.create_by_names([one, two, three])
-    groups = group_manager.get_by_prefix(prefix)
+    db.groups.create_by_names([one, two, three])
+    groups = db.groups.get_by_prefix(prefix)
 
     assert any(group.title == one for group in groups)
     assert any(group.title == two for group in groups)

@@ -3,24 +3,17 @@ import enum
 import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
-
-from flask import current_app as app
+from sqlalchemy.orm import sessionmaker
 
 
 Base = declarative_base()
 
 
-def create_session_manually(connection_string: str) -> Session:
+def create_session_maker(connection_string: str) -> sessionmaker:
     engine = create_engine(connection_string)
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine)
-    return factory()
-
-
-def create_session() -> Session:
-    connection_string = app.config["CONNECTION_STRING"]
-    return create_session_manually(connection_string)
+    return factory
 
 
 class Group(Base):
@@ -126,6 +119,17 @@ class TaskStatus(Base):
         nullable=False
     )
 
+    def __eq__(self, other):
+        if isinstance(other, TaskStatus):
+            return self.task == other.task and \
+                self.variant == other.variant and \
+                self.group == other.group and \
+                self.time == other.time and \
+                self.code == other.code and \
+                self.output == other.output and \
+                self.status == other.status
+        return super.__eq__(self, other)
+
 
 class Message(Base):
     __tablename__ = "messages"
@@ -163,3 +167,15 @@ class Message(Base):
             "ip": self.ip,
             "processed": self.processed,
         })
+
+    def __eq__(self, other):
+        if isinstance(other, Message):
+            return self.task == other.task and \
+                self.variant == other.variant and \
+                self.group == other.group and \
+                self.time == other.time and \
+                self.code == other.code and \
+                self.ip == other.ip and \
+                self.processed == other.processed and \
+                self.id == other.id
+        return super.__eq__(self, other)
