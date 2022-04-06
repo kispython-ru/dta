@@ -1,4 +1,4 @@
-from tests.utils import unique_int, unique_str
+from tests.utils import unique_str
 
 from flask.testing import FlaskClient
 
@@ -36,16 +36,3 @@ def test_group_fetching(db: AppDatabase, client: FlaskClient):
     assert len(response.json) == 2
     assert response.json[0]["title"].startswith(prefix_one)
     assert response.json[1]["title"].startswith(prefix_one)
-
-
-def test_variant_fetching(db: AppDatabase, client: FlaskClient):
-    variant_one = unique_int()
-    variant_two = unique_int()
-    db.variants.create_by_ids([variant_one, variant_two])
-
-    response = client.get("/api/v1/variant/list")
-
-    assert response.is_json
-    assert len(response.json) != 0
-    assert variant_one in response.json
-    assert variant_two in response.json

@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Length
 
 class CodeLength:
     min = 10
-    max = 2500
+    max = 10000
 
 
 class MessageForm(FlaskForm):

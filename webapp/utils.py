@@ -2,47 +2,8 @@ import json
 import os
 import sys
 import traceback
-from functools import wraps
 
 from flask import Request
-from flask import current_app as app
-from flask import jsonify
-from flask.templating import render_template
-
-
-def handle_errors(
-        error_message="Error has occured.",
-        error_code=500,
-        error_redirect="/",
-):
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                return fn(*args, **kwargs)
-            except Exception as error:
-                app.logger.error(error)
-                return render_template(
-                    "error.jinja",
-                    error_code=error_code,
-                    error_message=error_message,
-                    error_redirect=error_redirect,
-                )
-        return decorator
-    return wrapper
-
-
-def handle_api_errors(error_code=500):
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                return fn(*args, **kwargs)
-            except Exception as error:
-                app.logger.error(error)
-                return jsonify({"error": error_code})
-        return decorator
-    return wrapper
 
 
 def get_real_ip(request: Request) -> str:

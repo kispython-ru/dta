@@ -15,6 +15,7 @@ class DbContext:
         self.session = session
 
     def __enter__(self) -> Session:
+        self.session.execute("PRAGMA foreign_keys=ON")
         return self.session
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val, trace):

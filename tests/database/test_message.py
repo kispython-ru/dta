@@ -1,12 +1,20 @@
+<<<<<<< HEAD
 from tests.utils import unique_int, unique_str
+=======
+from tests.utils import arrange_task, unique_int, unique_str
+>>>>>>> b35726f53ce8266ce7990a5177021db7b8d2a3c0
 
 from webapp.repositories import AppDatabase
 
 
 def test_message_creation(db: AppDatabase):
+<<<<<<< HEAD
     task = unique_int()
     variant = unique_int()
     group = unique_int()
+=======
+    (group, variant, task) = arrange_task(db)
+>>>>>>> b35726f53ce8266ce7990a5177021db7b8d2a3c0
     code = unique_str()
     ip = unique_str()
 
@@ -17,6 +25,7 @@ def test_message_creation(db: AppDatabase):
 
 
 def test_message_get_latest(db: AppDatabase):
+<<<<<<< HEAD
     task_1 = unique_int()
     task_2 = unique_int()
     variant = unique_int()
@@ -40,6 +49,23 @@ def test_message_mark_at_process(db: AppDatabase):
     task = unique_int()
     variant = unique_int()
     group = unique_int()
+=======
+    (group, variant, task_1) = arrange_task(db)
+    code = unique_str()
+    ip = unique_str()
+
+    task_2 = unique_int()
+    db.tasks.create_by_ids([task_2])
+    db.messages.submit_task(task_1, variant, group, code, ip)
+    db.messages.submit_task(task_2, variant, group, code, ip)
+
+    latest = db.messages.get_latest(2)
+    assert len(latest) == 2
+
+
+def test_message_mark_at_process(db: AppDatabase):
+    (group, variant, task) = arrange_task(db)
+>>>>>>> b35726f53ce8266ce7990a5177021db7b8d2a3c0
     code = unique_str()
     ip = unique_str()
 
@@ -58,6 +84,7 @@ def test_message_mark_at_process(db: AppDatabase):
 
 
 def test_message_get_pending(db: AppDatabase):
+<<<<<<< HEAD
     task_1 = unique_int()
     task_2 = unique_int()
     task_3 = unique_int()
@@ -66,6 +93,16 @@ def test_message_get_pending(db: AppDatabase):
     code = unique_str()
     ip = unique_str()
 
+=======
+    (group, variant, task_1) = arrange_task(db)
+    code = unique_str()
+    ip = unique_str()
+
+    task_2 = unique_int()
+    task_3 = unique_int()
+    db.tasks.create_by_ids([task_2, task_3])
+
+>>>>>>> b35726f53ce8266ce7990a5177021db7b8d2a3c0
     db.messages.submit_task(task_1, variant, group, code, ip)
     db.messages.submit_task(task_2, variant, group, code, ip)
     db.messages.submit_task(task_3, variant, group, code, ip)
@@ -82,9 +119,13 @@ def test_message_get_pending(db: AppDatabase):
 
 
 def test_message_pending_unique(db: AppDatabase):
+<<<<<<< HEAD
     task = unique_int()
     variant = unique_int()
     group = unique_int()
+=======
+    (group, variant, task) = arrange_task(db)
+>>>>>>> b35726f53ce8266ce7990a5177021db7b8d2a3c0
     code = unique_str()
     ip = unique_str()
 
