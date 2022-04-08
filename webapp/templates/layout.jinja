@@ -8,8 +8,6 @@
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
   {% if request.endpoint == 'views.task' and highlight_syntax %}
-  <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/codemirror.min.css') }}">
   {% endif %}
 </head>

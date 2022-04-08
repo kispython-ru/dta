@@ -100,8 +100,10 @@
 </div>
 
 {% if highlight_syntax %}
+  <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <script type="text/javascript"> 
-    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true })
+    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true, indentUnit: 4 })
   </script>
 {% endif %}
 
