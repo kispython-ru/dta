@@ -128,15 +128,15 @@ class Message(Base):
     processed = sa.Column("processed", sa.Boolean, nullable=False)
 
     def __str__(self):
-        return str({
-            "id": self.id,
-            "task": self.task,
-            "variant": self.variant,
-            "group": self.group,
-            "time": self.time,
-            "ip": self.ip,
-            "processed": self.processed,
-        })
+        return str(dict(
+            id=self.id,
+            task=self.task,
+            variant=self.variant,
+            group=self.group,
+            time=self.time,
+            ip=self.ip,
+            processed=self.processed,
+        ))
 
     def __eq__(self, other):
         if isinstance(other, Message):
@@ -149,3 +149,14 @@ class Message(Base):
                 self.processed == other.processed and \
                 self.id == other.id
         return super.__eq__(self, other)
+
+
+class FinalSeed(Base):
+    __tablename__ = "final_seeds"
+    seed = sa.Column("seed", sa.String, unique=True, nullable=False)
+    group = sa.Column(
+        "group",
+        sa.Integer,
+        sa.ForeignKey('groups.id'),
+        primary_key=True,
+        nullable=False)

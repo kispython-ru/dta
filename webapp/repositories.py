@@ -3,8 +3,10 @@ from typing import Callable, Dict, List, Union
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+import uuid
 
 from webapp.models import (
+    FinalSeed,
     Group,
     Message,
     Task,
@@ -287,6 +289,23 @@ class MessageRepository:
             session.commit()
 
 
+class FinalSeedRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def get_final_seed(self, group: int) -> Union[FinalSeed, None]:
+        with self.db.create_session() as session:
+            return session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .first()
+
+    def update_final_seed(self, group: int):
+        seed = str(uuid.uuid4())
+        with self.db.create_session() as session:
+            session.add(FinalSeed(group=group, seed=seed))
+            session.commit()
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -295,3 +314,4 @@ class AppDatabase:
         self.tasks = TaskRepository(db)
         self.statuses = TaskStatusRepository(db)
         self.messages = MessageRepository(db)
+        self.seeds = FinalSeedRepository(db)
