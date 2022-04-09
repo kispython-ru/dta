@@ -20,7 +20,7 @@ pip install poetry
 poetry install
 ```
 
-3. Run the tests and launch the app:
+3. Run tests, launch the app:
 ```bash
 poetry shell
 make test
@@ -44,7 +44,7 @@ pip install poetry
 poetry install
 ```
 
-5. Run the tests and launch the app:
+5. Run tests, launch the app:
 ```bash
 poetry shell
 make test
@@ -53,7 +53,7 @@ make flask-win
 
 ### Acknoledgements
 
-Thanks to @Plintus-bit for making the awesome logo!
+Thanks to [@Plintus-bit](https://github.com/Plintus-bit) for making the awesome logo!
 
 ### Fruther Steps
 
