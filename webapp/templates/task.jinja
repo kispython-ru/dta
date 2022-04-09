@@ -5,7 +5,9 @@
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
       <li>
         <a class="logo-container text-decoration-none" href="/">
-          <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" />
+          <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+          </div>
         </a>
       </li>
       <li class="breadcrumb-item">
@@ -20,11 +22,11 @@
   </div>
 </nav>
 <div class="container mt-3">
-  <h5 class="card-title fw-bold">
+  <h6 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
     <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
-  </h5>
+  </h6>
   <h6 class="card-subtitle mb-2 text-muted">
     Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }}.
   </h6>
@@ -32,7 +34,7 @@
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
        href="{{ task_base_url }}/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
-      Перейти к задаче №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}
+      Перейти к задаче №{{ task.id + 1 }} варианта №{{ variant.id + 1 }} группы {{ group.title }}
     </a>
   </div>
   <div>
