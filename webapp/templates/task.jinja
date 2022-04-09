@@ -3,9 +3,9 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="collapse navbar-collapse container">
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/">
-          Цифровой ассистент преподавателя
+      <li>
+        <a class="logo-container text-decoration-none" href="/">
+          <img class="logo" src="{{ url_for('static', filename='logo.svg') }}" />
         </a>
       </li>
       <li class="breadcrumb-item">
@@ -14,7 +14,7 @@
         </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        Задача №{{ task.id + 1 }}, вариант №{{ variant.id + 1 }}
+        №{{ task.id + 1 }}, вариант №{{ variant.id + 1 }}
       </li>
     </ol>
   </div>
@@ -23,16 +23,16 @@
   <h5 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
-    группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
+    <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h5>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} (вариант №{{ variant.id + 1 }}, группа {{ group.title }}).
+    Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }}.
   </h6>
   <div class="card-subtitle mb-4 mt-2">
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
        href="{{ task_base_url }}/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
-      Перейти к условию задачи №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}.
+      Перейти к задаче №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }} группы {{ group.title }}
     </a>
   </div>
   <div>
@@ -45,7 +45,6 @@
     {% if status == None %}
       <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
     {% else %}
-      <div>Состояние задания:</div>
       <div class="badge alert-{{ status.status.color }} mt-2 mb-2" style="font-size: inherit">
         {{ status.status.name }}
       </div>
@@ -99,7 +98,7 @@
   </div>
 </div>
 
-{% if highlight_syntax %}
+{% if highlight_syntax and not (status and status.status == 2) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <script type="text/javascript"> 
