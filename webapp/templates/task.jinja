@@ -99,7 +99,7 @@
   </div>
 </div>
 
-{% if highlight_syntax %}
+{% if highlight_syntax and not (status and status.status == 2) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <script type="text/javascript"> 
