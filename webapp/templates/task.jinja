@@ -16,25 +16,25 @@
         </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        №{{ task.id + 1 }}, вариант №{{ variant.id + 1 }}
+        №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
       </li>
     </ol>
   </div>
 </nav>
 <div class="container mt-3">
   <h6 class="card-title fw-bold">
-    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ task.id + 1 }}</span>,
-    вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ variant.id + 1 }}</span>,
+    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
+    вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
     группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
   </h6>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ task.id + 1 }} для варианта №{{ variant.id + 1 }}.
+    Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для варианта №{{ status.variant + 1 }}.
   </h6>
   <div class="card-subtitle mb-4 mt-2">
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
-       href="{{ task_base_url }}/{{ task.id }}/{{ group.title }}.html#вариант-{{ variant.id + 1 }}">
-      Перейти к задаче №{{ task.id + 1 }} варианта №{{ variant.id + 1 }} группы {{ group.title }}
+       href="{{ status.formulation_url }}">
+      Перейти к задаче №{{ status.task + 1 }} варианта №{{ status.variant + 1 }} группы {{ group.title }}
     </a>
   </div>
   <div>
@@ -44,22 +44,22 @@
     <h6 class="card-subtitle mb-2 text-muted">
       В данной секции Вы можете отслеживать состояние отправленного задания.
     </h6>
-    {% if status == None %}
+    {% if status.status == 4 %}
       <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
     {% else %}
-      <div class="badge alert-{{ status.status.color }} mt-2 mb-2" style="font-size: inherit">
-        {{ status.status.name }}
+      <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
+        {{ status.name }}
       </div>
-      {% if status.output is not none and status.output %}
+      {% if status.error_message is not none and status.error_message %}
         <div>Подробные сведения об ошибке:</div>
-        <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.output | e }}</div>
+        <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
       {% else %}
         <div class="mb-2"></div>
       {% endif %}
     {% endif %}
   </div>
   <div class="card m-auto mt-3 mb-5">
-    <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
+    <form class="card-body" action="{{ status.submission_url }}" method="POST">
       <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
       <div class="text-muted mb-2">
         Во избежание утери данных рекомендуется сохранять отправляемые программы локально.

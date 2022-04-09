@@ -56,36 +56,6 @@ class TaskStatusEnum(enum.IntEnum):
     Failed = 3
     NotSubmitted = 4
 
-    @property
-    def name(self):
-        return {
-            self.Submitted: "Отправлено",
-            self.Checking: "Проверяется",
-            self.Checked: "Принято",
-            self.Failed: "Ошибка!",
-            self.NotSubmitted: "Не отправлено",
-        }[self]
-
-    @property
-    def code(self):
-        return {
-            self.Submitted: "?",
-            self.Checking: "...",
-            self.Checked: "+",
-            self.Failed: "x",
-            self.NotSubmitted: "-",
-        }[self]
-
-    @property
-    def color(self):
-        return {
-            self.Submitted: "primary",
-            self.Checking: "warning",
-            self.Checked: "success",
-            self.Failed: "danger",
-            self.NotSubmitted: "secondary",
-        }[self]
-
 
 class TaskStatus(Base):
     __tablename__ = "task_statuses"

@@ -7,13 +7,15 @@ from flask import current_app as app
 from flask import make_response, render_template, request
 
 from webapp.forms import MessageForm
-from webapp.managers import ExportManager, find_task_status
-from webapp.repositories import AppDatabase, TaskStatusEnum
-from webapp.utils import get_real_ip
+from webapp.managers import AppConfigManager, ExportManager, StatusManager
+from webapp.repositories import AppDatabase
+from webapp.utils import get_exception_info, get_real_ip
 
 
 blueprint = Blueprint("views", __name__)
-db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
+config = AppConfigManager(lambda: app.config)
+db = AppDatabase(lambda: config.config.connection_string)
+manager = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
 exports = ExportManager(db.groups, db.messages)
 
 
@@ -25,64 +27,35 @@ def dashboard():
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
 def group(group_id: int):
-    group = db.groups.get_by_id(group_id)
-    statuses = db.statuses.get_by_group(group.id)
-    variants = db.variants.get_all()
-    tasks = db.tasks.get_all()
-    task_base_url = app.config["TASK_BASE_URL"]
-    return render_template(
-        "group.jinja",
-        variants=variants,
-        group=group,
-        tasks=tasks,
-        statuses=statuses,
-        find_task_status=find_task_status,
-        task_base_url=task_base_url,
-    )
+    group = manager.get_group_statuses(group_id)
+    return render_template("group.jinja", group=group)
 
 
-@blueprint.route(
-    "/group/<gid>/variant/<vid>/task/<tid>",
-    methods=["GET", "POST"]
-)
+@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
-    variant = db.variants.get_by_id(vid)
     group = db.groups.get_by_id(gid)
-    task = db.tasks.get_by_id(tid)
-    status = db.statuses.get_task_status(tid, vid, gid)
-    checked = status is not None and status.status == TaskStatusEnum.Checked
+    status = manager.get_task_status(gid, vid, tid)
     form = MessageForm()
-    if form.validate_on_submit() and not checked:
+    return render_template("task.jinja", group=group, status=status, form=form)
+
+
+@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
+def submit_task(gid: int, vid: int, tid: int):
+    group = db.groups.get_by_id(gid)
+    status = manager.get_task_status(gid, vid, tid)
+    form = MessageForm()
+    if form.validate_on_submit() and not status.checked:
         code = form.code.data
-        ip = get_real_ip(request)
-        db.messages.submit_task(tid, vid, gid, code, ip)
-        status = db.statuses.submit_task(tid, vid, gid, code)
-        return render_template(
-            "success.jinja",
-            form=form,
-            variant=variant,
-            group=group,
-            task=task,
-            status=status,
-        )
-    task_base_url = app.config["TASK_BASE_URL"]
-    highlight_syntax = app.config["HIGHLIGHT_SYNTAX"]
-    return render_template(
-        "task.jinja",
-        form=form,
-        variant=variant,
-        group=group,
-        task=task,
-        status=status,
-        task_base_url=task_base_url,
-        highlight_syntax=highlight_syntax,
-    )
+        db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
+        db.statuses.submit_task(tid, vid, gid, code)
+        return render_template("success.jinja", group=group, status=status)
+    return render_template("task.jinja", group=group, status=status, form=form)
 
 
 @blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
 @blueprint.route("/csv/<s>/<token>", methods=["GET"], defaults={"count": None})
 def export(s: str, token: str, count: Union[int, None]):
-    if app.config["CSV_TOKEN"] != token:
+    if config.config.csv_token != token:
         raise ValueError("Access is denied.")
     value = exports.export_messages(count, s)
     output = make_response(value)
@@ -94,6 +67,7 @@ def export(s: str, token: str, count: Union[int, None]):
 @blueprint.errorhandler(Exception)
 def handle_views_errors(error):
     error_code = error.code if isinstance(error, HTTPException) else 500
+    print(get_exception_info())
     return render_template(
         "error.jinja",
         error_code=error_code,

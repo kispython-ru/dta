@@ -5,13 +5,15 @@ from multiprocessing import Process
 from flask import Blueprint
 from flask import current_app as app
 
+from webapp.managers import AppConfigManager
 from webapp.models import Group, Message, Task, Variant
 from webapp.repositories import AppDatabase, TaskStatusEnum
 from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("worker", __name__)
-db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
+config = AppConfigManager(lambda: app.config)
+db = AppDatabase(lambda: config.config.connection_string)
 
 
 def check_solution(
@@ -76,8 +78,8 @@ def process_pending_messages(core_path: str):
             print(f"Error occured while checking for messages: {exception}")
 
 
-def background_worker(connection_string: str, core_path: str):
-    print(f"Starting background worker for database: {connection_string}")
+def background_worker(core_path: str):
+    print("Starting background worker...")
     while True:
         try:
             process_pending_messages(core_path)
@@ -89,12 +91,9 @@ def background_worker(connection_string: str, core_path: str):
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    if app.config.get("DISABLE_BACKGROUND_WORKER") is True:
+    if config.config.no_background_worker is True:
         return
-    connection_string = app.config["CONNECTION_STRING"]
-    core_path = app.config["CORE_PATH"]
-    process = Process(
-        target=background_worker, args=(
-            connection_string, core_path))
+    path = config.config.core_path
+    process = Process(target=background_worker, args=(path,))
     process.start()
     app.config["WORKER_PID"] = process.pid

@@ -25,7 +25,7 @@ def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
     assert responce.is_json
     assert responce.json['id'] == task
     assert responce.json['status'] == TaskStatusEnum.NotSubmitted
-    assert responce.json['status_name'] == TaskStatusEnum.NotSubmitted.name
+    assert responce.json['status_name'] == "Не отправлено"
 
 
 def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
@@ -41,7 +41,7 @@ def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
     assert response.json is not None
     assert response.json["id"] == task
     assert response.json["status"] == TaskStatusEnum.Submitted
-    assert response.json["status_name"] == TaskStatusEnum.Submitted.name
+    assert response.json["status_name"] == "Отправлено"
     assert response.json["error_message"] is None
 
 

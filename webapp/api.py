@@ -5,14 +5,15 @@ from flask import current_app as app
 from flask import jsonify, request
 
 from webapp.forms import CodeLength
-from webapp.managers import find_task_status
-from webapp.models import TaskStatusEnum
+from webapp.managers import AppConfigManager, StatusManager
 from webapp.repositories import AppDatabase
-from webapp.utils import get_real_ip
+from webapp.utils import get_exception_info, get_real_ip
 
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
-db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
+config = AppConfigManager(lambda: app.config)
+db = AppDatabase(lambda: config.config.connection_string)
+manager = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])
@@ -38,73 +39,51 @@ def variant_list():
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/list", methods=["GET"])
 def task_list(gid: int, vid: int):
-    variant = db.variants.get_by_id(vid)
-    tasks = db.tasks.get_all()
-    group = db.groups.get_by_id(gid)
-    statuses = db.statuses.get_by_group(group.id)
-    base_url = app.config["TASK_BASE_URL"]
-    dtos = []
-    for task in tasks:
-        vid = variant.id + 1
-        source = f"{base_url}/{task.id}/{group.title}.html#вариант-{vid}"
-        status = find_task_status(statuses, group.id, variant.id, task.id)
-        dtos.append(dict(
-            id=task.id,
-            source=source,
-            status=status.value,
-            status_name=status.name,
-        ))
-    return jsonify(dtos)
+    variant = manager.get_variant_statuses(gid, vid)
+    response = [dict(
+        id=status.task,
+        source=status.formulation_url,
+        status=status.status.value,
+        status_name=status.name,
+    ) for status in variant.statuses]
+    return jsonify(response)
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
-    variant = db.variants.get_by_id(vid)
-    group = db.groups.get_by_id(gid)
-    task = db.tasks.get_by_id(tid)
-    ts = db.statuses.get_task_status(task.id, variant.id, group.id)
-    error_message = ts.output if ts is not None else ""
-    status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
-    base_url = app.config["TASK_BASE_URL"]
-    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id + 1}"
+    status = manager.get_task_status(gid, vid, tid)
     return jsonify(dict(
-        id=task.id,
-        source=source,
-        status=status.value,
+        id=status.task,
+        source=status.formulation_url,
+        status=status.status.value,
         status_name=status.name,
-        error_message=error_message,
+        error_message=status.error_message,
     ))
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
 def submit_task(gid: int, vid: int, tid: int):
-    if app.config["API_TOKEN"] != request.headers.get("token"):
+    token = request.headers.get("token")
+    if config.config.api_token != token:
         raise ValueError("Access is denied.")
-    if not CodeLength.min < len(request.json["code"]) < CodeLength.max:
-        return ValueError("Bad request.")
-
-    variant = db.variants.get_by_id(vid)
-    group = db.groups.get_by_id(gid)
-    task = db.tasks.get_by_id(tid)
-    ip = get_real_ip(request)
     code = request.json["code"]
+    if not CodeLength.min < len(code) < CodeLength.max:
+        return ValueError("Code length is invalid.")
 
-    db.messages.submit_task(task.id, variant.id, group.id, code, ip)
-    ts = db.statuses.submit_task(task.id, variant.id, group.id, code)
-    error_message = ts.output if ts is not None else ""
-    status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
-    base_url = app.config["TASK_BASE_URL"]
-    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id + 1}"
+    db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
+    db.statuses.submit_task(tid, vid, gid, code)
+    status = manager.get_task_status(gid, vid, tid)
     return jsonify(dict(
-        id=task.id,
-        source=source,
-        status=status.value,
+        id=status.task,
+        source=status.formulation_url,
+        status=status.status.value,
         status_name=status.name,
-        error_message=error_message,
+        error_message=status.error_message,
     ))
 
 
 @blueprint.errorhandler(Exception)
 def handle_api_errors(error):
     error_code = error.code if isinstance(error, HTTPException) else 500
+    print(get_exception_info())
     return jsonify(dict(error=error_code))

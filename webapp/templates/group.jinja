@@ -18,21 +18,25 @@
 </nav>
 <div class="container mt-3">
   <h5 class="card-title fw-bold">
-    Варианты заданий группы <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
+    Варианты заданий группы
+    <span class="badge alert-secondary" style="font-size: inherit">
+      {{ group.title }}
+    </span>
   </h5>
   <h6 class="card-subtitle mb-3 text-muted">
-    Список вариантов для студентов группы {{ group.title }}. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
+    Список вариантов для студентов группы {{ group.title }}.
+    Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
   </h6>
   <div class="mb-5" style="overflow-x:auto">
     <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
       <thead>
         <tr>
           <th scope="col" style="width:100px">Вариант</th>
-          {% for task in tasks %}
-            <td scope="col" class="text-center" tooltip="{{ task.title }}">
+          {% for task in group.tasks %}
+            <td scope="col" class="text-center">
               <a class="text-decoration-none"
                  target="__blank"
-                 href="{{ task_base_url }}/{{ task.id }}/{{ group.title }}.html">
+                 href="{{ task.formulation_url }}">
                 №{{ task.id + 1 }}
               </a>
             </td>
@@ -40,19 +44,17 @@
         </tr>
       </thead>
       <tbody style="border-top: 0px">
-        {% for variant in variants %}
+        {% for variant in group.variants %}
           <tr>
             <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
               <span class="p-1 d-block">{{ variant.id + 1 }}</span>
             </td>
-            {% for task in tasks %}
-              {% set task_status = find_task_status(statuses, group.id, variant.id, task.id).code %}
+            {% for status in variant.statuses %}
               <td scope="col" style="border-bottom: 0; padding: 0">
                 <a class="d-block text-center text-decoration-none p-1"
-                   {% if task_status == '+' %}style="background-color:#e3ffee"{% endif %}
-                   {% if task_status == 'x' %}style="background-color:#ffe3ee"{% endif %}
-                   href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}">
-                  {{ task_status }}
+                   style="background-color:{{ status.cell_background }}"
+                   href="{{ status.submission_url }}">
+                  {{ status.code }}
                 </a>
               </td>
             {% endfor %}

@@ -5,8 +5,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from webapp.models import (
-    Group, Message, Task, TaskStatus, TaskStatusEnum, Variant,
-    create_session_maker,
+    Group,
+    Message,
+    Task,
+    TaskStatus,
+    TaskStatusEnum,
+    Variant,
+    create_session_maker
 )
 
 
