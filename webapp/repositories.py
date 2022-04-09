@@ -1,9 +1,9 @@
 import datetime
+import uuid
 from typing import Callable, Dict, List, Union
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-import uuid
 
 from webapp.models import (
     FinalSeed,
