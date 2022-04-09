@@ -8,14 +8,7 @@ from webapp.models import Group, Task, TaskStatus, TaskStatusEnum, Variant
 class TaskDto:
     def __init__(self, group: Group, task: Task, base_url: str):
         self.id = int(task.id)
-        self.__group = group
-        self.__base_url = base_url
-
-    @property
-    def formulation_url(self):
-        git = self.__group.title
-        furl = self.__base_url
-        return f'{furl}/{self.id}/{git}.html'
+        self.formulation_url = f'{base_url}/{self.id}/{group.title}.html'
 
 
 class TaskStatusDto:
@@ -30,30 +23,32 @@ class TaskStatusDto:
         self.task = task.id
         self.variant = variant.id
         self.group = int(group.id)
-        self.__group = group
-        self.__variant = variant
-        self.__task = task
-        self.__status = status
-        self.__base_url = base_url
+        self.group_title = group.title
+        self.base_url = base_url
+        ns = TaskStatusEnum.NotSubmitted
+        self.status = ns if status is None else TaskStatusEnum(status.status)
+        self.checked = self.status == TaskStatusEnum.Checked
+        self.error_message = None if status is None or \
+            status.output is None else status.output
 
     @property
     def submission_url(self) -> str:
-        gid = self.__group.id
-        vid = self.__variant.id
-        tid = self.__task.id
+        gid = self.group
+        vid = self.variant
+        tid = self.task
         return f'/group/{gid}/variant/{vid}/task/{tid}'
 
     @property
     def formulation_url(self) -> str:
-        git = self.__group.title
-        vid = self.__variant.id
-        tid = self.__task.id
-        furl = self.__base_url
+        git = self.group_title
+        vid = self.variant
+        tid = self.task
+        furl = self.base_url
         return f'{furl}/{tid}/{git}.html#вариант-{vid + 1}'
 
     @property
     def cell_background(self) -> str:
-        return self.__map_status({
+        return self.map_status({
             TaskStatusEnum.Submitted: "inherit",
             TaskStatusEnum.Checking: "inherit",
             TaskStatusEnum.Checked: "#e3ffee",
@@ -63,7 +58,7 @@ class TaskStatusDto:
 
     @property
     def name(self) -> str:
-        return self.__map_status({
+        return self.map_status({
             TaskStatusEnum.Submitted: "Отправлено",
             TaskStatusEnum.Checking: "Проверяется",
             TaskStatusEnum.Checked: "Принято",
@@ -73,7 +68,7 @@ class TaskStatusDto:
 
     @property
     def code(self) -> str:
-        return self.__map_status({
+        return self.map_status({
             TaskStatusEnum.Submitted: "?",
             TaskStatusEnum.Checking: "...",
             TaskStatusEnum.Checked: "+",
@@ -83,7 +78,7 @@ class TaskStatusDto:
 
     @property
     def color(self) -> str:
-        return self.__map_status({
+        return self.map_status({
             TaskStatusEnum.Submitted: "primary",
             TaskStatusEnum.Checking: "warning",
             TaskStatusEnum.Checked: "success",
@@ -91,25 +86,7 @@ class TaskStatusDto:
             TaskStatusEnum.NotSubmitted: "secondary",
         })
 
-    @property
-    def error_message(self) -> str:
-        if self.__status is None or self.__status.output is None:
-            return None
-        return str(self.__status.output)
-
-    @property
-    def checked(self) -> bool:
-        if self.__status is None:
-            return False
-        return self.__status.status == TaskStatusEnum.Checked
-
-    @property
-    def status(self) -> TaskStatusEnum:
-        if self.__status is None:
-            return TaskStatusEnum.NotSubmitted
-        return self.__status.status
-
-    def __map_status(self, map: Dict[TaskStatusEnum, str]):
+    def map_status(self, map: Dict[TaskStatusEnum, str]):
         return map[self.status]
 
 

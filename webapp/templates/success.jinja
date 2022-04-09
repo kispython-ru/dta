@@ -11,8 +11,8 @@
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/group/{{ group.id }}">
-          {{ group.title }}
+        <a class="text-decoration-none" href="/group/{{ status.group }}">
+          {{ status.group_title }}
         </a>
       </li>
       <li class="breadcrumb-item">
@@ -30,7 +30,7 @@
   <h5 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
-    группа <span class="badge alert-secondary" style="font-size: inherit">{{ group.title }}</span>
+    группа <span class="badge alert-secondary" style="font-size: inherit">{{ status.group_title }}</span>
   </h5>
   <h6 class="card-subtitle mb-2 mt-2 text-muted">
     Ответ на задание успешно отправлен. Результат проверки вскоре отобразится на странице задания.

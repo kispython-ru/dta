@@ -11,8 +11,8 @@
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/group/{{ group.id }}">
-          {{ group.title }}
+        <a class="text-decoration-none" href="/group/{{ status.group }}">
+          {{ status.group_title }}
         </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
@@ -25,7 +25,7 @@
   <h6 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
-    группа <a href="/group/{{ group.id }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ group.title }}</a>
+    группа <a href="/group/{{ status.group }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
   </h6>
   <h6 class="card-subtitle mb-2 text-muted">
     Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для варианта №{{ status.variant + 1 }}.
@@ -34,7 +34,7 @@
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
        href="{{ status.formulation_url }}">
-      Перейти к задаче №{{ status.task + 1 }} варианта №{{ status.variant + 1 }} группы {{ group.title }}
+      Перейти к задаче №{{ status.task + 1 }} варианта №{{ status.variant + 1 }} группы {{ status.group_title }}
     </a>
   </div>
   <div>
