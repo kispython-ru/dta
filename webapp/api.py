@@ -94,7 +94,7 @@ def submit_task(gid: int, vid: int, tid: int):
     error_message = ts.output if ts is not None else ""
     status = ts.status if ts is not None else TaskStatusEnum.NotSubmitted
     base_url = app.config["TASK_BASE_URL"]
-    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id}"
+    source = f"{base_url}/{task.id}/{group.title}.html#вариант-{variant.id + 1}"
     return jsonify(dict(
         id=task.id,
         source=source,
