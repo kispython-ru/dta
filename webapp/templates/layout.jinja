@@ -10,6 +10,20 @@
   {% if request.endpoint == 'views.task' and highlight_syntax %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/codemirror.min.css') }}">
   {% endif %}
+  <style>
+  .logo {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: -20px;
+  }
+  .logo-container {
+    width: 24px;
+    position: relative;
+    margin-right: 16px;
+    display: inline-block;
+  }
+  </style>
 </head>
 <body>
 {% block content %}{% endblock %}
