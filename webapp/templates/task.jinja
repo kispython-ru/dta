@@ -58,7 +58,7 @@
       {% endif %}
     {% endif %}
   </div>
-  <div class="card m-auto mt-3">
+  <div class="card m-auto mt-3 mb-5">
     <form class="card-body" action="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}" method="POST">
       <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
       <div class="text-muted mb-2">
@@ -75,7 +75,8 @@
           style="min-height: 250px;font-family: monospace, monospace;"></textarea>
         <small class="form-text text-muted">
           <div>Введите текст программы на языке программирования Python в поле выше.</div>
-          <div>В отправляемом коде должна присутствовать функция main и не должно быть какого-либо ввода/вывода.</div>
+          <div>В отправляемом коде должна присутствовать функция <code>main</code> и не должно быть какого-либо ввода/вывода.</div>
+          <div>Поддерживается использование модулей только из стандартной библиотеки Python.</div>
         </small>
       </div>
       {% if form.code.errors %}
