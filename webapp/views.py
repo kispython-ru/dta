@@ -15,7 +15,7 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("views", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-manager = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
 exports = ExportManager(db.groups, db.messages)
 
 
@@ -27,19 +27,19 @@ def dashboard():
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
 def group(group_id: int):
-    group = manager.get_group_statuses(group_id)
+    group = statuses.get_group_statuses(group_id)
     return render_template("group.jinja", group=group)
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
-    status = manager.get_task_status(gid, vid, tid)
+    status = statuses.get_task_status(gid, vid, tid)
     return render_template("task.jinja", status=status, form=MessageForm())
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
 def submit_task(gid: int, vid: int, tid: int):
-    status = manager.get_task_status(gid, vid, tid)
+    status = statuses.get_task_status(gid, vid, tid)
     form = MessageForm()
     if form.validate_on_submit() and not status.checked:
         code = form.code.data

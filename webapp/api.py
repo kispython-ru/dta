@@ -13,7 +13,7 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-manager = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])
@@ -39,7 +39,7 @@ def variant_list():
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/list", methods=["GET"])
 def task_list(gid: int, vid: int):
-    variant = manager.get_variant_statuses(gid, vid)
+    variant = statuses.get_variant_statuses(gid, vid)
     response = [dict(
         id=status.task,
         source=status.formulation_url,
@@ -51,7 +51,7 @@ def task_list(gid: int, vid: int):
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
-    status = manager.get_task_status(gid, vid, tid)
+    status = statuses.get_task_status(gid, vid, tid)
     return jsonify(dict(
         id=status.task,
         source=status.formulation_url,
@@ -72,7 +72,7 @@ def submit_task(gid: int, vid: int, tid: int):
 
     db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
     db.statuses.submit_task(tid, vid, gid, code)
-    status = manager.get_task_status(gid, vid, tid)
+    status = statuses.get_task_status(gid, vid, tid)
     return jsonify(dict(
         id=status.task,
         source=status.formulation_url,
