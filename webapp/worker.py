@@ -11,7 +11,6 @@ from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("worker", __name__)
-db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
 
 
 def check_solution(
@@ -39,7 +38,7 @@ def load_tests(core_path: str):
     return GROUPS, TASKS
 
 
-def process_pending_messages(core_path: str):
+def process_pending_messages(core_path: str, db):
     pending_messages = db.messages.get_pending_messages_unique()
     message_count = len(pending_messages)
     if message_count > 0:
@@ -78,9 +77,10 @@ def process_pending_messages(core_path: str):
 
 def background_worker(connection_string: str, core_path: str):
     print(f"Starting background worker for database: {connection_string}")
+    db = AppDatabase(lambda: connection_string)
     while True:
         try:
-            process_pending_messages(core_path)
+            process_pending_messages(core_path, db)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
@@ -91,6 +91,7 @@ def background_worker(connection_string: str, core_path: str):
 def start_background_worker():
     if app.config.get("DISABLE_BACKGROUND_WORKER") is True:
         return
+
     connection_string = app.config["CONNECTION_STRING"]
     core_path = app.config["CORE_PATH"]
     process = Process(
