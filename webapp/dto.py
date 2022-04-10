@@ -43,8 +43,7 @@ class TaskStatusDto:
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status == Status.Checked
-        self.error_message = None if status is None or \
-            status.output is None else status.output
+        self.error_message = status.output if status is not None else None
 
     @property
     def submission_url(self) -> str:
