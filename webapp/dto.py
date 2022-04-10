@@ -20,9 +20,10 @@ class ExternalTaskDto:
 
 
 class TaskDto:
-    def __init__(self, group: Group, task: Task, base_url: str):
+    def __init__(self, group: Group, task: Task, base_url: str, random: bool):
         self.id = int(task.id)
-        self.formulation_url = f'{base_url}/{self.id}/{group.title}.html'
+        url = f'{base_url}/{self.id}/{group.title}.html'
+        self.formulation_url = url if not random else "#"
 
 
 class TaskStatusDto:

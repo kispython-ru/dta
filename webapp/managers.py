@@ -50,6 +50,10 @@ class ExternalTaskManager:
         self.variants = variants
         self.fetch_lists()
 
+    @property
+    def random_active(self) -> bool:
+        return self.seed is not None and self.seed.active
+
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
         if self.seed is None:
             return ExternalTaskDto(
@@ -97,8 +101,8 @@ class StatusManager:
         group = self.groups.get_by_id(group_id)
         variants = self.variants.get_all()
         statuses = self.__get_statuses(group.id)
-        tasks = self.__get_tasks(group, config)
         e = self.__get_external_task_manager(group)
+        tasks = self.__get_tasks(group, config, e.random_active)
         dtos: List[VariantDto] = []
         for var in variants:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
@@ -110,8 +114,8 @@ class StatusManager:
         group = self.groups.get_by_id(gid)
         variant = self.variants.get_by_id(vid)
         statuses = self.__get_statuses(group.id)
-        tasks = self.__get_tasks(group, config)
         e = self.__get_external_task_manager(group)
+        tasks = self.__get_tasks(group, config, e.random_active)
         dto = self.__get_variant(group, variant, tasks, statuses, config, e)
         return dto
 
@@ -121,10 +125,10 @@ class StatusManager:
         variant = self.variants.get_by_id(vid)
         task = self.tasks.get_by_id(tid)
         status = self.statuses.get_task_status(tid, vid, gid)
-        task_dto = TaskDto(group, task, base_url)
-        external = self.__get_external_task_manager(group)
-        e = external.get_external_task(task.id, variant.id)
-        return TaskStatusDto(group, variant, task_dto, status, e, base_url)
+        e = self.__get_external_task_manager(group)
+        ext = e.get_external_task(task.id, variant.id)
+        task_dto = TaskDto(group, task, base_url, e.random_active)
+        return TaskStatusDto(group, variant, task_dto, status, ext, base_url)
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)
@@ -155,12 +159,17 @@ class StatusManager:
             dtos.append(dto)
         return VariantDto(variant, dtos)
 
-    def __get_tasks(self, group: Group, config: AppConfig) -> List[TaskDto]:
+    def __get_tasks(
+        self,
+        group: Group,
+        config: AppConfig,
+        active: bool
+    ) -> List[TaskDto]:
         base_url = config.task_base_url
         tasks = self.tasks.get_all()
         dtos: List[TaskDto] = []
         for task in tasks:
-            dto = TaskDto(group, task, base_url)
+            dto = TaskDto(group, task, base_url, active)
             dtos.append(dto)
         return dtos
 
