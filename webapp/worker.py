@@ -101,6 +101,10 @@ def start_background_worker():
     if config.config.no_background_worker is True:
         return
     path = config.config.core_path
-    process = Process(target=background_worker, args=(path,))
-    process.start()
-    app.config["WORKER_PID"] = process.pid
+    try:
+        process = Process(target=background_worker, args=(path,))
+        process.start()
+        app.config["WORKER_PID"] = process.pid
+    except BaseException:
+        exception = get_exception_info()
+        print(f"Error occured while starting process: {exception}")
