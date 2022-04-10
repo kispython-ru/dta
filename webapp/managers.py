@@ -1,7 +1,7 @@
 import csv
 import io
 import random
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from flask import Config
 
@@ -13,7 +13,7 @@ from webapp.dto import (
     TaskStatusDto,
     VariantDto
 )
-from webapp.models import FinalSeed, Group, Message, TaskStatus, Variant
+from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
@@ -62,17 +62,25 @@ class ExternalTaskManager:
                 variant=variant,
                 active=True
             )
-        rand = random.Random(f'{self.seed.seed}{variant}')
-        task_count = len(self.all_tasks)
-        task_index = [task.id for task in self.all_tasks].index(task)
-        task_choice = rand.sample(self.all_tasks, task_count)
-        task_id = task_choice[task_index].id
+        unique = f'{task}{variant}'
+        task: Task = self.sample(str(variant), self.all_tasks, task)
+        variant: Variant = self.sample(unique, self.all_variants, variant)
+        group: Group = self.sample(unique, self.all_groups, self.group.id)
         return ExternalTaskDto(
-            task=task_id,
-            group_title=rand.choice(self.all_groups).title,
-            variant=rand.choice(self.all_variants).id,
+            task=task.id,
+            group_title=group.title,
+            variant=variant.id,
             active=bool(self.seed.active),
         )
+
+    def sample(self, seed: str, list: List[Dict[str, int]], i: int):
+        composite_seed = f'{self.seed.seed}{seed}'
+        rand = random.Random(composite_seed)
+        length = len(list)
+        identifiers = [item.id for item in list]
+        index = identifiers.index(i)
+        random_sample = rand.sample(list, length)
+        return random_sample[index]
 
     def fetch_lists(self):
         if self.seed is None:
