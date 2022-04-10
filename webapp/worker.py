@@ -2,8 +2,6 @@ import sys
 import time
 from multiprocessing import Process
 
-from pyexpat.errors import messages
-
 from flask import Blueprint
 from flask import current_app as app
 
@@ -14,7 +12,6 @@ from webapp.utils import get_exception_info
 
 blueprint = Blueprint("worker", __name__)
 config = AppConfigManager(lambda: app.config)
-db = AppDatabase(lambda: config.config.connection_string)
 
 
 def check_solution(
@@ -43,7 +40,7 @@ def load_tests(core_path: str):
     return GROUPS, TASKS
 
 
-def process_pending_messages(core_path: str):
+def process_pending_messages(core_path: str, db: AppDatabase):
     pending_messages = db.messages.get_pending_messages_unique()
     message_count = len(pending_messages)
     if message_count == 0:
@@ -85,11 +82,12 @@ def process_pending_messages(core_path: str):
             print(f"Error occured while checking for messages: {exception}")
 
 
-def background_worker(core_path: str):
-    print("Starting background worker...")
+def background_worker(connection_string: str, core_path: str):
+    print(f"Starting background worker for database: {connection_string}")
+    db = AppDatabase(lambda: connection_string)
     while True:
         try:
-            process_pending_messages(core_path)
+            process_pending_messages(core_path, db)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
@@ -101,8 +99,9 @@ def start_background_worker():
     if config.config.no_background_worker is True:
         return
     path = config.config.core_path
+    connection = config.config.connection_string
+    process = Process(target=background_worker, args=(connection, path))
     try:
-        process = Process(target=background_worker, args=(path,))
         process.start()
         app.config["WORKER_PID"] = process.pid
     except BaseException:
