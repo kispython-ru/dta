@@ -15,8 +15,16 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("views", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
+
 exports = ExportManager(db.groups, db.messages)
+statuses = StatusManager(
+    tasks=db.tasks,
+    groups=db.groups,
+    variants=db.variants,
+    statuses=db.statuses,
+    config=config,
+    seeds=db.seeds
+)
 
 
 @blueprint.route("/", methods=["GET"])

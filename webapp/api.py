@@ -13,7 +13,15 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config)
+
+statuses = StatusManager(
+    tasks=db.tasks,
+    groups=db.groups,
+    variants=db.variants,
+    statuses=db.statuses,
+    config=config,
+    seeds=db.seeds
+)
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])

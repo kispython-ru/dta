@@ -2,11 +2,12 @@ import sys
 import time
 from multiprocessing import Process
 
+from pyexpat.errors import messages
+
 from flask import Blueprint
 from flask import current_app as app
 
-from webapp.managers import AppConfigManager
-from webapp.models import Group, Message, Task, Variant
+from webapp.managers import AppConfigManager, ExternalTaskManager
 from webapp.repositories import AppDatabase, TaskStatusEnum
 from webapp.utils import get_exception_info
 
@@ -17,19 +18,20 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 
 def check_solution(
-        core_path: str,
-        group: Group,
-        task: Task,
-        variant: Variant,
-        message: Message):
+    core_path: str,
+    group_title: str,
+    task: int,
+    variant: int,
+    code: str
+):
     if core_path not in sys.path:
         sys.path.insert(1, core_path)
     from check_solution import check_solution
     (ok, error) = check_solution(
-        group=group.title,
-        task=task.id,
-        variant=variant.id,
-        code=message.code,
+        group=group_title,
+        task=task,
+        variant=variant,
+        code=code,
     )
     return (ok, error)
 
@@ -44,20 +46,25 @@ def load_tests(core_path: str):
 def process_pending_messages(core_path: str):
     pending_messages = db.messages.get_pending_messages_unique()
     message_count = len(pending_messages)
-    if message_count > 0:
-        print(f"Processing {message_count} incoming messages...")
+    if message_count == 0:
+        return
+    print(f"Processing {message_count} incoming messages...")
     for message in pending_messages:
         group = db.groups.get_by_id(message.group)
         task = db.tasks.get_by_id(message.task)
         variant = db.variants.get_by_id(message.variant)
+        seed = db.seeds.get_final_seed(group.id)
+        e = ExternalTaskManager(group, seed, db.tasks, db.groups, db.variants)
+        ext = e.get_external_task(task.id, variant.id)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
+        print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:
             (ok, error) = check_solution(
-                core_path,
-                group,
-                task,
-                variant,
-                message
+                core_path=core_path,
+                group_title=ext.group_title,
+                task=ext.task,
+                variant=ext.variant,
+                code=message.code,
             )
             print(f"Check result: {ok}, {error}")
             status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed

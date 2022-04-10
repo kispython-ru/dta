@@ -5,6 +5,13 @@ from flask import Config
 from webapp.models import Group, Task, TaskStatus, TaskStatusEnum, Variant
 
 
+class ExternalTaskDto:
+    def __init__(self, group_title: str, task: int, variant: int):
+        self.group_title = group_title
+        self.task = task
+        self.variant = variant
+
+
 class TaskDto:
     def __init__(self, group: Group, task: Task, base_url: str):
         self.id = int(task.id)
@@ -18,6 +25,7 @@ class TaskStatusDto:
         variant: Variant,
         task: TaskDto,
         status: Union[TaskStatus, None],
+        external: ExternalTaskDto,
         base_url: str,
     ) -> None:
         self.task = task.id
@@ -25,6 +33,8 @@ class TaskStatusDto:
         self.group = int(group.id)
         self.group_title = group.title
         self.base_url = base_url
+        self.external = external
+
         ns = TaskStatusEnum.NotSubmitted
         self.status = ns if status is None else TaskStatusEnum(status.status)
         self.checked = self.status == TaskStatusEnum.Checked
@@ -40,9 +50,9 @@ class TaskStatusDto:
 
     @property
     def formulation_url(self) -> str:
-        git = self.group_title
-        vid = self.variant
-        tid = self.task
+        git = self.external.group_title
+        vid = self.external.variant
+        tid = self.external.task
         furl = self.base_url
         return f'{furl}/{tid}/{git}.html#вариант-{vid + 1}'
 
