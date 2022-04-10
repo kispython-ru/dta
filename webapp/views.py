@@ -49,7 +49,8 @@ def task(gid: int, vid: int, tid: int):
 def submit_task(gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     form = MessageForm()
-    if form.validate_on_submit() and not status.checked:
+    valid = form.validate_on_submit()
+    if valid and not status.checked and status.external.active:
         code = form.code.data
         db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
         db.statuses.submit_task(tid, vid, gid, code)

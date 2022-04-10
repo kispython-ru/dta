@@ -6,10 +6,17 @@ from webapp.models import Group, Task, TaskStatus, TaskStatusEnum, Variant
 
 
 class ExternalTaskDto:
-    def __init__(self, group_title: str, task: int, variant: int):
+    def __init__(
+        self,
+        group_title: str,
+        task: int,
+        variant: int,
+        active: bool
+    ) -> None:
         self.group_title = group_title
         self.task = task
         self.variant = variant
+        self.active = active
 
 
 class TaskDto:
@@ -95,6 +102,12 @@ class TaskStatusDto:
             TaskStatusEnum.Failed: "danger",
             TaskStatusEnum.NotSubmitted: "secondary",
         })
+
+    @property
+    def disabled(self) -> bool:
+        checked = self.status == TaskStatusEnum.Checked
+        active = self.external.active
+        return checked or not active
 
     def map_status(self, map: Dict[TaskStatusEnum, str]):
         return map[self.status]
