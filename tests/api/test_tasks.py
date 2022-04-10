@@ -11,21 +11,21 @@ from webapp.repositories import AppDatabase
 def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_task(db)
 
-    responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
+    response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
-    assert responce.is_json
-    assert any([item for item in responce.json if item["id"] == task])
+    assert response.is_json
+    assert any([item for item in response.json if item["id"] == task])
 
 
 def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_task(db)
 
-    responce = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
+    response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
 
-    assert responce.is_json
-    assert responce.json['id'] == task
-    assert responce.json['status'] == TaskStatusEnum.NotSubmitted
-    assert responce.json['status_name'] == "Не отправлено"
+    assert response.is_json
+    assert response.json['id'] == task
+    assert response.json['status'] == TaskStatusEnum.NotSubmitted
+    assert response.json['status_name'] == "Не отправлено"
 
 
 def test_task_solution_submission(db: AppDatabase, client: FlaskClient):

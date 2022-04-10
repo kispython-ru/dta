@@ -57,8 +57,8 @@ class ExternalTaskManager:
         rand = random.Random(composite_seed)
         return ExternalTaskDto(
             group_title=rand.choice(self.all_groups).title,
-            task=rand.choice(self.all_tasks),
-            variant=rand.choice(self.all_variants)
+            task=rand.choice(self.all_tasks).id,
+            variant=rand.choice(self.all_variants).id
         )
 
     def fetch_lists(self):
