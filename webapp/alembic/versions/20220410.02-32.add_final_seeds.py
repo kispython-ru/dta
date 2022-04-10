@@ -21,6 +21,7 @@ def upgrade():
         'final_seeds',
         sa.Column("group", sa.Integer, sa.ForeignKey('groups.id'), primary_key=True, nullable=False),
         sa.Column("seed", sa.String, unique=True, nullable=False),
+        sa.Column("active", sa.Boolean, nullable=False),
     )
 
 

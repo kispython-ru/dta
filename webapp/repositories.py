@@ -299,10 +299,17 @@ class FinalSeedRepository:
                 .filter_by(group=group) \
                 .first()
 
-    def update_final_seed(self, group: int):
+    def begin_final_test(self, group: int):
         seed = str(uuid.uuid4())
         with self.db.create_session() as session:
-            session.add(FinalSeed(group=group, seed=seed))
+            session.add(FinalSeed(group=group, seed=seed, active=True))
+            session.commit()
+
+    def end_final_test(self, group: int):
+        with self.db.create_session() as session:
+            session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .update({"active": False})
             session.commit()
 
 

@@ -154,6 +154,7 @@ class Message(Base):
 class FinalSeed(Base):
     __tablename__ = "final_seeds"
     seed = sa.Column("seed", sa.String, unique=True, nullable=False)
+    active = sa.Column("active", sa.Boolean, nullable=False)
     group = sa.Column(
         "group",
         sa.Integer,
