@@ -138,3 +138,4 @@ class AppConfig:
         self.connection_string: str = config["CONNECTION_STRING"]
         self.task_base_url: str = config["TASK_BASE_URL"]
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
+        self.final_tasks: Dict[str, List[int]] = config["FINAL_TASKS"]

@@ -42,7 +42,9 @@ class ExternalTaskManager:
         tasks: TaskRepository,
         groups: GroupRepository,
         variants: VariantRepository,
+        config: AppConfig,
     ):
+        self.config = config
         self.group = group
         self.seed = seed
         self.tasks = tasks
@@ -63,15 +65,25 @@ class ExternalTaskManager:
                 active=True
             )
         unique = f'{task}{variant}'
-        task: Task = self.sample(str(variant), self.all_tasks, task)
-        variant: Variant = self.sample(unique, self.all_variants, variant)
         group: Group = self.sample(unique, self.all_groups, self.group.id)
+        variant: Variant = self.sample(unique, self.all_variants, variant)
+        task: Task = self.sample_task(str(variant), task)
         return ExternalTaskDto(
             task=task.id,
             group_title=group.title,
             variant=variant.id,
             active=bool(self.seed.active),
         )
+
+    def sample_task(self, seed: str, task: int):
+        final_tasks: Dict[str, List[int]] = self.config.final_tasks
+        if not final_tasks:
+            return self.sample(seed, self.all_tasks, task)
+        possible_options: List[int] = final_tasks[str(task)]
+        composite_seed = f'{self.seed.seed}{seed}'
+        rand = random.Random(composite_seed)
+        id = rand.choice(possible_options)
+        return Task(id=id)
 
     def sample(self, seed: str, list: List[Dict[str, int]], i: int):
         composite_seed = f'{self.seed.seed}{seed}'
@@ -148,7 +160,8 @@ class StatusManager:
             seed=seed,
             tasks=self.tasks,
             groups=self.groups,
-            variants=self.variants
+            variants=self.variants,
+            config=self.config.config,
         )
 
     def __get_variant(
