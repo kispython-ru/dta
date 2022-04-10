@@ -12,7 +12,7 @@ class ExternalTaskDto:
         task: int,
         variant: int,
         active: bool
-    ) -> None:
+    ):
         self.group_title = group_title
         self.task = task
         self.variant = variant
@@ -35,7 +35,7 @@ class TaskStatusDto:
         status: Union[TaskStatus, None],
         external: ExternalTaskDto,
         base_url: str,
-    ) -> None:
+    ):
         self.task = task.id
         self.variant = variant.id
         self.group = int(group.id)

@@ -1,7 +1,7 @@
 import csv
 import io
 import random
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from flask import Config
 
@@ -42,7 +42,7 @@ class ExternalTaskManager:
         tasks: TaskRepository,
         groups: GroupRepository,
         variants: VariantRepository,
-    ) -> None:
+    ):
         self.group = group
         self.seed = seed
         self.tasks = tasks
@@ -62,11 +62,14 @@ class ExternalTaskManager:
                 variant=variant,
                 active=True
             )
-        composite_seed = f'{self.seed.seed}{task}{variant}'
-        rand = random.Random(composite_seed)
+        rand = random.Random(f'{self.seed.seed}{variant}')
+        task_count = len(self.all_tasks)
+        task_index = [task.id for task in self.all_tasks].index(task)
+        task_choice = rand.sample(self.all_tasks, task_count)
+        task_id = task_choice[task_index].id
         return ExternalTaskDto(
+            task=task_id,
             group_title=rand.choice(self.all_groups).title,
-            task=rand.choice(self.all_tasks).id,
             variant=rand.choice(self.all_variants).id,
             active=bool(self.seed.active),
         )
@@ -88,7 +91,7 @@ class StatusManager:
         statuses: TaskStatusRepository,
         config: AppConfigManager,
         seeds: FinalSeedRepository,
-    ) -> None:
+    ):
         self.tasks = tasks
         self.groups = groups
         self.variants = variants
