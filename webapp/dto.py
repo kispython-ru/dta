@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 from flask import Config
 
-from webapp.models import Group, Task, TaskStatus, TaskStatusEnum, Variant
+from webapp.models import Group, Status, Task, TaskStatus, Variant
 
 
 class ExternalTaskDto:
@@ -20,10 +20,9 @@ class ExternalTaskDto:
 
 
 class TaskDto:
-    def __init__(self, group: Group, task: Task, base_url: str, random: bool):
+    def __init__(self, group: Group, task: Task, url: str, random: bool):
         self.id = int(task.id)
-        url = f'{base_url}/{self.id}/{group.title}.html'
-        self.formulation_url = url if not random else "#"
+        self.url = f'{url}/{self.id}/{group.title}.html' if not random else "#"
 
 
 class TaskStatusDto:
@@ -42,10 +41,8 @@ class TaskStatusDto:
         self.group_title = group.title
         self.base_url = base_url
         self.external = external
-
-        ns = TaskStatusEnum.NotSubmitted
-        self.status = ns if status is None else TaskStatusEnum(status.status)
-        self.checked = self.status == TaskStatusEnum.Checked
+        self.status = Status.NotSubmitted if status is None else status.status
+        self.checked = self.status == Status.Checked
         self.error_message = None if status is None or \
             status.output is None else status.output
 
@@ -67,50 +64,50 @@ class TaskStatusDto:
     @property
     def cell_background(self) -> str:
         return self.map_status({
-            TaskStatusEnum.Submitted: "inherit",
-            TaskStatusEnum.Checking: "inherit",
-            TaskStatusEnum.Checked: "#e3ffee",
-            TaskStatusEnum.Failed: "#ffe3ee",
-            TaskStatusEnum.NotSubmitted: "inherit",
+            Status.Submitted: "inherit",
+            Status.Checking: "inherit",
+            Status.Checked: "#e3ffee",
+            Status.Failed: "#ffe3ee",
+            Status.NotSubmitted: "inherit",
         })
 
     @property
     def name(self) -> str:
         return self.map_status({
-            TaskStatusEnum.Submitted: "Отправлено",
-            TaskStatusEnum.Checking: "Проверяется",
-            TaskStatusEnum.Checked: "Принято",
-            TaskStatusEnum.Failed: "Ошибка!",
-            TaskStatusEnum.NotSubmitted: "Не отправлено",
+            Status.Submitted: "Отправлено",
+            Status.Checking: "Проверяется",
+            Status.Checked: "Принято",
+            Status.Failed: "Ошибка!",
+            Status.NotSubmitted: "Не отправлено",
         })
 
     @property
     def code(self) -> str:
         return self.map_status({
-            TaskStatusEnum.Submitted: "?",
-            TaskStatusEnum.Checking: "...",
-            TaskStatusEnum.Checked: "+",
-            TaskStatusEnum.Failed: "x",
-            TaskStatusEnum.NotSubmitted: "-",
+            Status.Submitted: "?",
+            Status.Checking: "...",
+            Status.Checked: "+",
+            Status.Failed: "x",
+            Status.NotSubmitted: "-",
         })
 
     @property
     def color(self) -> str:
         return self.map_status({
-            TaskStatusEnum.Submitted: "primary",
-            TaskStatusEnum.Checking: "warning",
-            TaskStatusEnum.Checked: "success",
-            TaskStatusEnum.Failed: "danger",
-            TaskStatusEnum.NotSubmitted: "secondary",
+            Status.Submitted: "primary",
+            Status.Checking: "warning",
+            Status.Checked: "success",
+            Status.Failed: "danger",
+            Status.NotSubmitted: "secondary",
         })
 
     @property
     def disabled(self) -> bool:
-        checked = self.status == TaskStatusEnum.Checked
+        checked = self.status == Status.Checked
         active = self.external.active
         return checked or not active
 
-    def map_status(self, map: Dict[TaskStatusEnum, str]):
+    def map_status(self, map: Dict[Status, str]):
         return map[self.status]
 
 

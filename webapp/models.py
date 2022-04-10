@@ -49,7 +49,7 @@ class IntEnum(sa.TypeDecorator):
         return self._enumtype(value)
 
 
-class TaskStatusEnum(enum.IntEnum):
+class Status(enum.IntEnum):
     Submitted = 0
     Checking = 1
     Checked = 2
@@ -83,9 +83,9 @@ class TaskStatus(Base):
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
-    status: sa.Column[TaskStatusEnum] = sa.Column(
+    status: sa.Column[Status] = sa.Column(
         "status",
-        IntEnum(TaskStatusEnum),
+        IntEnum(Status),
         nullable=False
     )
 

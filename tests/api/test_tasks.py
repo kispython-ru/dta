@@ -4,7 +4,7 @@ from tests.utils import arrange_task
 
 from flask.testing import FlaskClient
 
-from webapp.models import TaskStatusEnum
+from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
@@ -24,7 +24,7 @@ def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
 
     assert response.is_json
     assert response.json['id'] == task
-    assert response.json['status'] == TaskStatusEnum.NotSubmitted
+    assert response.json['status'] == Status.NotSubmitted
     assert response.json['status_name'] == "Не отправлено"
 
 
@@ -40,7 +40,7 @@ def test_task_solution_submission(db: AppDatabase, client: FlaskClient):
 
     assert response.json is not None
     assert response.json["id"] == task
-    assert response.json["status"] == TaskStatusEnum.Submitted
+    assert response.json["status"] == Status.Submitted
     assert response.json["status_name"] == "Отправлено"
     assert response.json["error_message"] is None
 

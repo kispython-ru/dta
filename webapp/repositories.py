@@ -9,9 +9,9 @@ from webapp.models import (
     FinalSeed,
     Group,
     Message,
+    Status,
     Task,
     TaskStatus,
-    TaskStatusEnum,
     Variant,
     create_session_maker
 )
@@ -181,7 +181,7 @@ class TaskStatusRepository:
             output: str):
         existing = self.get_task_status(task, variant, group)
         if existing is not None:
-            if existing.status == TaskStatusEnum.Checked:
+            if existing.status == Status.Checked:
                 return  # We've already accepted this task!
         with self.db.create_session() as session:
             session.query(TaskStatus) \
@@ -200,12 +200,12 @@ class TaskStatusRepository:
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
             if existing is not None:
-                if existing.status == TaskStatusEnum.Checked:
+                if existing.status == Status.Checked:
                     return  # We've already accepted this task!
                 session.delete(existing)
                 session.commit()
             now = datetime.datetime.now()
-            status = TaskStatusEnum.Submitted
+            status = Status.Submitted
             task_status = TaskStatus(
                 task=task,
                 variant=variant,

@@ -4,7 +4,7 @@ from tests.utils import arrange_task
 
 from flask.testing import FlaskClient
 
-from webapp.models import TaskStatusEnum
+from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
@@ -18,7 +18,7 @@ def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
     assert response.is_json
     assert response.json['id'] == task
     assert default_template in response.json['source']
-    assert response.json['status'] == TaskStatusEnum.NotSubmitted
+    assert response.json['status'] == Status.NotSubmitted
     assert response.json['status_name'] == "Не отправлено"
 
 
@@ -33,7 +33,7 @@ def test_final_seed_is_used(db: AppDatabase, client: FlaskClient):
     assert response.is_json
     assert response.json['id'] == task
     assert default_template not in response.json['source']
-    assert response.json['status'] == TaskStatusEnum.NotSubmitted
+    assert response.json['status'] == Status.NotSubmitted
     assert response.json['status_name'] == "Не отправлено"
 
 
@@ -50,7 +50,7 @@ def test_final_submissions_are_allowed(db: AppDatabase, client: FlaskClient):
 
     assert response.is_json
     assert response.json['id'] == task
-    assert response.json['status'] == TaskStatusEnum.Submitted
+    assert response.json['status'] == Status.Submitted
     assert response.json['status_name'] == "Отправлено"
 
 

@@ -8,7 +8,7 @@ from flask import Blueprint
 from flask import current_app as app
 
 from webapp.managers import AppConfigManager, ExternalTaskManager
-from webapp.repositories import AppDatabase, TaskStatusEnum
+from webapp.repositories import AppDatabase, Status
 from webapp.utils import get_exception_info
 
 
@@ -67,7 +67,7 @@ def process_pending_messages(core_path: str):
                 code=message.code,
             )
             print(f"Check result: {ok}, {error}")
-            status = TaskStatusEnum.Checked if ok else TaskStatusEnum.Failed
+            status = Status.Checked if ok else Status.Failed
             db.messages.mark_as_processed(
                 task=message.task,
                 variant=message.variant,
