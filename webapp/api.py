@@ -73,15 +73,12 @@ def submit_task(gid: int, vid: int, tid: int):
     token = request.headers.get("token")
     if config.config.api_token != token:
         raise ValueError("Access is denied.")
-
     code = request.json["code"]
     if not CodeLength.min < len(code) < CodeLength.max:
         raise ValueError("Code length is invalid.")
-
     status = statuses.get_task_status(gid, vid, tid)
     if status.checked or not status.external.active:
         raise ValueError("Submissions are disallowed.")
-
     db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
     db.statuses.submit_task(tid, vid, gid, code)
     status = statuses.get_task_status(gid, vid, tid)
