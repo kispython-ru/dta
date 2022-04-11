@@ -14,7 +14,7 @@ def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
     response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
     assert response.is_json
-    assert any([item for item in response.json if item["id"] == task])
+    assert any(item for item in response.json if item["id"] == task)
 
 
 def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
