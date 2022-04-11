@@ -1,12 +1,19 @@
 import datetime
+import uuid
 from typing import Callable, Dict, List, Union
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from webapp.models import (
-    Group, Message, Task, TaskStatus, TaskStatusEnum, Variant,
-    create_session_maker,
+    FinalSeed,
+    Group,
+    Message,
+    Status,
+    Task,
+    TaskStatus,
+    Variant,
+    create_session_maker
 )
 
 
@@ -174,7 +181,7 @@ class TaskStatusRepository:
             output: str):
         existing = self.get_task_status(task, variant, group)
         if existing is not None:
-            if existing.status == TaskStatusEnum.Checked:
+            if existing.status == Status.Checked:
                 return  # We've already accepted this task!
         with self.db.create_session() as session:
             session.query(TaskStatus) \
@@ -193,12 +200,12 @@ class TaskStatusRepository:
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
             if existing is not None:
-                if existing.status == TaskStatusEnum.Checked:
+                if existing.status == Status.Checked:
                     return  # We've already accepted this task!
                 session.delete(existing)
                 session.commit()
             now = datetime.datetime.now()
-            status = TaskStatusEnum.Submitted
+            status = Status.Submitted
             task_status = TaskStatus(
                 task=task,
                 variant=variant,
@@ -282,6 +289,30 @@ class MessageRepository:
             session.commit()
 
 
+class FinalSeedRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def get_final_seed(self, group: int) -> Union[FinalSeed, None]:
+        with self.db.create_session() as session:
+            return session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .first()
+
+    def begin_final_test(self, group: int):
+        seed = str(uuid.uuid4())
+        with self.db.create_session() as session:
+            session.add(FinalSeed(group=group, seed=seed, active=True))
+            session.commit()
+
+    def end_final_test(self, group: int):
+        with self.db.create_session() as session:
+            session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .update({"active": False})
+            session.commit()
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -290,3 +321,4 @@ class AppDatabase:
         self.tasks = TaskRepository(db)
         self.statuses = TaskStatusRepository(db)
         self.messages = MessageRepository(db)
+        self.seeds = FinalSeedRepository(db)

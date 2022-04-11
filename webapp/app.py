@@ -9,6 +9,7 @@ import webapp.views as views
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
+from webapp.managers import AppConfigManager
 from webapp.repositories import AppDatabase
 from webapp.utils import load_config_files
 
@@ -32,9 +33,9 @@ def seed_database(app: Flask):
         return
     print("Seeding the database now...")
     with app.app_context():
-        core_path = app.config["CORE_PATH"]
-        groups, tasks = worker.load_tests(core_path)
-        db = AppDatabase(lambda: app.config["CONNECTION_STRING"])
+        config = AppConfigManager(lambda: app.config)
+        groups, tasks = worker.load_tests(config.config.core_path)
+        db = AppDatabase(lambda: config.config.connection_string)
         db.groups.delete_all()
         db.groups.create_by_names(groups)
         db.tasks.delete_all()

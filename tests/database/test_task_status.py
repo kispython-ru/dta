@@ -1,6 +1,6 @@
 from tests.utils import arrange_task, unique_int, unique_str
 
-from webapp.models import TaskStatusEnum
+from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
@@ -36,20 +36,20 @@ def test_task_status_get_task_status(db: AppDatabase):
     assert task_status.variant == variant
     assert task_status.group == group
     assert task_status.code == code
-    assert task_status.status == TaskStatusEnum.Submitted
+    assert task_status.status == Status.Submitted
 
 
 def test_task_status_update_status(db: AppDatabase):
     (group, variant, task) = arrange_task(db)
     db.statuses.submit_task(task, variant, group, unique_str())
 
-    for ts_enum in TaskStatusEnum:
-        if ts_enum != TaskStatusEnum.Checked:
+    for ts_enum in Status:
+        if ts_enum != Status.Checked:
             db.statuses.update_status(task, variant, group, ts_enum.value, unique_str())
             task_status = db.statuses.get_task_status(task, variant, group)
             assert task_status.status == ts_enum.value
 
-    db.statuses.update_status(task, variant, group, TaskStatusEnum.Checked, unique_str())
+    db.statuses.update_status(task, variant, group, Status.Checked, unique_str())
     task_status = db.statuses.get_task_status(task, variant, group)
-    assert task_status.status == TaskStatusEnum.Checked
+    assert task_status.status == Status.Checked
 

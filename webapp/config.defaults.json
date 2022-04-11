@@ -9,5 +9,9 @@
     "JSON_AS_ASCII": false,
     "JSONIFY_PRETTYPRINT_REGULAR": false,
     "DISABLE_BACKGROUND_WORKER": false,
-    "TASK_BASE_URL": "http://sovietov.com/kispython"
+    "TASK_BASE_URL": "http://sovietov.com/kispython",
+    "FINAL_TASKS": {
+        "0": [0, 1, 2, 3, 4],
+        "1": [5, 6, 7, 8]
+    }
 }
