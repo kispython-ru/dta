@@ -13,7 +13,6 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-
 statuses = StatusManager(
     tasks=db.tasks,
     groups=db.groups,
