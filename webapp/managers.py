@@ -65,9 +65,9 @@ class ExternalTaskManager:
                 active=True
             )
         unique = f'{task}{variant}'
+        task: Task = self.sample_task(str(variant), task)
         group: Group = self.sample(unique, self.all_groups, self.group.id)
         variant: Variant = self.sample(unique, self.all_variants, variant)
-        task: Task = self.sample_task(str(variant), task)
         return ExternalTaskDto(
             task=task.id,
             group_title=group.title,
