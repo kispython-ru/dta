@@ -41,7 +41,13 @@ def group(group_id: int):
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    return render_template("task.jinja", status=status, form=MessageForm())
+    highlight = config.config.highlight_syntax
+    return render_template(
+        "task.jinja",
+        status=status,
+        form=MessageForm(),
+        highlight=highlight,
+    )
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
@@ -54,7 +60,13 @@ def submit_task(gid: int, vid: int, tid: int):
         db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
         db.statuses.submit_task(tid, vid, gid, code)
         return render_template("success.jinja", status=status)
-    return render_template("task.jinja", status=status, form=form)
+    highlight = config.config.highlight_syntax
+    return render_template(
+        "task.jinja",
+        status=status,
+        form=form,
+        highlight=highlight,
+    )
 
 
 @blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
