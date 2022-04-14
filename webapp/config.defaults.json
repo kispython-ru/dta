@@ -1,4 +1,5 @@
 {
+    "ALEMBIC_PATH": ".",
     "HIGHLIGHT_SYNTAX": true,
     "TEMPLATES_AUTO_RELOAD": true,
     "CONNECTION_STRING": "sqlite:///web-app.db",

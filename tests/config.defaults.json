@@ -1,4 +1,5 @@
 {
+    "ALEMBIC_PATH": "webapp",
     "FINAL_TASKS": {},
     "HIGHLIGHT_SYNTAX": false,
     "TEMPLATES_AUTO_RELOAD": true,
