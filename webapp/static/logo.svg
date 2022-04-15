@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="logo_256"
+   viewBox="0 0 115.5917 115.5917"
+   version="1.1"
+   sodipodi:docname="logo_256_1.svg"
+   width="115.5917"
+   height="115.5917"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sodipodi:namedview
+     id="namedview21"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="2.1294118"
+     inkscape:cx="77.486188"
+     inkscape:cy="32.638122"
+     inkscape:window-width="2498"
+     inkscape:window-height="1417"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="logo_256" />
+  <defs
+     id="defs4">
+    <style
+       id="style2">
+      .cls-1 {
+        fill: #3571a4;
+      }
+
+      .cls-2 {
+        fill: #fc4141;
+      }
+    </style>
+  </defs>
+  <title
+     id="title6">logo_256</title>
+  <path
+     class="cls-1"
+     d="m 47.072765,71.672948 h -0.659837 a 5.0807443,5.0807443 0 0 1 -5.001564,-5.15992 V 19.196121 C 41.398168,8.7443052 33.189796,0.27199823 23.094291,0.27199823 H 18.336867 C 8.20837,0.27199823 0,8.7443052 0,19.196121 h 13.896165 a 5.0807443,5.0807443 0 0 1 5.001564,5.159925 v 47.316902 c 0,10.45182 8.208371,18.92413 18.336868,18.92413 h 28.168435 c 0,-10.45182 -8.208371,-18.92413 -18.330267,-18.92413 z M 13.335303,14.036197 a 3.3915618,3.3915618 0 0 1 -3.332176,-3.444349 3.3321765,3.3321765 0 1 1 6.664353,0 3.3915618,3.3915618 0 0 1 -3.332177,3.444349 z"
+     id="path8"
+     style="stroke-width:0.659837" />
+  <path
+     class="cls-2"
+     d="m 90.736395,71.672948 v 0 a 2.6393477,2.6393477 0 0 1 -2.63934,-2.63934 V 0.27199823 h -4.189972 c -10.121898,0 -18.330269,6.53898397 -18.330269,14.60878977 v 61.1075 c 0,8.0698 8.208371,14.60879 18.330269,14.60879 v 0 a 2.6393477,2.6393477 0 0 1 2.639352,2.63934 v 3.43116 c 0,10.451812 8.20837,18.924122 18.336875,18.924122 h 4.16357 V 90.597078 c 0.0198,-10.45182 -8.18859,-18.92413 -18.310485,-18.92413 z m 6.66436,33.651692 a 3.4443488,3.4443488 0 1 1 3.299185,-3.44435 3.3915618,3.3915618 0 0 1 -3.299185,3.41136 z"
+     id="path10"
+     style="stroke-width:0.659837" />
+  <metadata
+     id="metadata838">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>logo_256</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

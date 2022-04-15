@@ -29,9 +29,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 line_length = "79"
-multi_line_output = "5"
+multi_line_output = "3"
 lines_after_imports = "2"
-include_trailing_comma = "true"
+include_trailing_comma = "false"
 use_parentheses = "true"
 skip = [
     ".git",
