@@ -17,6 +17,7 @@ def test_variant_html_id(db: AppDatabase, client: FlaskClient):
     response = client.get(f'/group/{group_id}')
     html_group = response.get_data(as_text=True)
 
-    tag_contents = [tag.get_text() for tag in get_tags(html_group, 'span', True)]
+    tag_contents = [tag.get_text() for tag in
+                    get_tags(html_group, 'span', True)]
 
     assert tag_contents.count(f'{variant_id + 1}') == 1

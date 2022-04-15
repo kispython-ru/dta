@@ -17,7 +17,8 @@ def test_task_html_id(db: AppDatabase, client: FlaskClient):
     response = client.get(f'/group/{group_id}')
     html_group = response.get_data(as_text=True)
 
-    tag_contents = [tag for tag in get_tags(html_group, 'a', 'text-decoration-none')
+    tag_contents = [tag for tag in
+                    get_tags(html_group, 'a', 'text-decoration-none')
                     if f'№{task_id + 1}' in tag.get_text()]
 
     assert len(tag_contents) == 1
@@ -35,7 +36,8 @@ def test_task_html_link(db: AppDatabase, client: FlaskClient):
     response = client.get(f'/group/{group_id}')
     html_group = response.get_data(as_text=True)
 
-    tag_contents = next(tag.get('href') for tag in get_tags(html_group, 'a', 'text-decoration-none')
+    tag_contents = next(tag.get('href') for tag in
+                        get_tags(html_group, 'a', 'text-decoration-none')
                         if f'№{task_id + 1}' in tag.get_text())
 
     assert f'{task_id}/{group_title}.html' in tag_contents
