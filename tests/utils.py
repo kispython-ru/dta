@@ -45,6 +45,7 @@ def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
     return (group, variant, task)
 
 
-def get_tags(html: str, name: str, class_: Union[str, bool, None]) -> ResultSet[Tag]:
+def get_tags(html: str, name: str, class_: Union[str, bool, None])\
+             -> ResultSet[Tag]:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all(name, class_=class_)
