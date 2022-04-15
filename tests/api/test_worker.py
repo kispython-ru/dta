@@ -7,7 +7,7 @@ from tests.utils import arrange_task, timeout_assert
 from flask import Flask
 from flask.testing import FlaskClient
 
-from webapp.models import TaskStatusEnum
+from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
@@ -23,5 +23,5 @@ def test_background_task_check(db: AppDatabase, client: FlaskClient, app: Flask)
         content_type='application/json'
     )
 
-    assert response.json["status"] == TaskStatusEnum.Submitted
-    timeout_assert(lambda: client.get(url).json["status"] == TaskStatusEnum.Failed)
+    assert response.json["status"] == Status.Submitted
+    timeout_assert(lambda: client.get(url).json["status"] == Status.Failed)

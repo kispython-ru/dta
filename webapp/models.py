@@ -49,42 +49,12 @@ class IntEnum(sa.TypeDecorator):
         return self._enumtype(value)
 
 
-class TaskStatusEnum(enum.IntEnum):
+class Status(enum.IntEnum):
     Submitted = 0
     Checking = 1
     Checked = 2
     Failed = 3
     NotSubmitted = 4
-
-    @property
-    def name(self):
-        return {
-            self.Submitted: "Отправлено",
-            self.Checking: "Проверяется",
-            self.Checked: "Принято",
-            self.Failed: "Ошибка!",
-            self.NotSubmitted: "Не отправлено",
-        }[self]
-
-    @property
-    def code(self):
-        return {
-            self.Submitted: "?",
-            self.Checking: "...",
-            self.Checked: "+",
-            self.Failed: "x",
-            self.NotSubmitted: "-",
-        }[self]
-
-    @property
-    def color(self):
-        return {
-            self.Submitted: "primary",
-            self.Checking: "warning",
-            self.Checked: "success",
-            self.Failed: "danger",
-            self.NotSubmitted: "secondary",
-        }[self]
 
 
 class TaskStatus(Base):
@@ -113,9 +83,9 @@ class TaskStatus(Base):
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
-    status: sa.Column[TaskStatusEnum] = sa.Column(
+    status: sa.Column[Status] = sa.Column(
         "status",
-        IntEnum(TaskStatusEnum),
+        IntEnum(Status),
         nullable=False
     )
 
@@ -158,15 +128,15 @@ class Message(Base):
     processed = sa.Column("processed", sa.Boolean, nullable=False)
 
     def __str__(self):
-        return str({
-            "id": self.id,
-            "task": self.task,
-            "variant": self.variant,
-            "group": self.group,
-            "time": self.time,
-            "ip": self.ip,
-            "processed": self.processed,
-        })
+        return str(dict(
+            id=self.id,
+            task=self.task,
+            variant=self.variant,
+            group=self.group,
+            time=self.time,
+            ip=self.ip,
+            processed=self.processed,
+        ))
 
     def __eq__(self, other):
         if isinstance(other, Message):
@@ -179,3 +149,15 @@ class Message(Base):
                 self.processed == other.processed and \
                 self.id == other.id
         return super.__eq__(self, other)
+
+
+class FinalSeed(Base):
+    __tablename__ = "final_seeds"
+    seed = sa.Column("seed", sa.String, unique=True, nullable=False)
+    active = sa.Column("active", sa.Boolean, nullable=False)
+    group = sa.Column(
+        "group",
+        sa.Integer,
+        sa.ForeignKey('groups.id'),
+        primary_key=True,
+        nullable=False)
