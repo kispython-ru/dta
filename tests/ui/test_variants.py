@@ -1,7 +1,4 @@
-from bs4 import BeautifulSoup
-from bs4.element import ResultSet, Tag
-from tests.utils import unique_str, unique_int
-from typing import Union
+from tests.utils import get_tags, unique_int, unique_str
 
 from flask.testing import FlaskClient
 
@@ -23,12 +20,3 @@ def test_variant_html_id(db: AppDatabase, client: FlaskClient):
     tag_contents = [tag.get_text() for tag in get_tags(html_group, 'span', True)]
 
     assert tag_contents.count(f'{variant_id + 1}') == 1
-
-
-def test_variant_html_link(db: AppDatabase, client: FlaskClient):
-    pass
-
-
-def get_tags(html: str, name: str, class_: Union[str, bool]) -> ResultSet[Tag]:
-    soup = BeautifulSoup(html, 'html.parser')
-    return soup.find_all(name, class_=class_)

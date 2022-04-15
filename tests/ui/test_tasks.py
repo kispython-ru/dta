@@ -1,6 +1,4 @@
-from bs4 import BeautifulSoup
-from bs4.element import ResultSet, Tag
-from tests.utils import unique_str, unique_int
+from tests.utils import get_tags, unique_int, unique_str
 
 from flask.testing import FlaskClient
 
@@ -40,9 +38,4 @@ def test_task_html_link(db: AppDatabase, client: FlaskClient):
     tag_contents = next(tag.get('href') for tag in get_tags(html_group, 'a', 'text-decoration-none')
                         if f'№{task_id + 1}' in tag.get_text())
 
-    assert tag_contents == f'http://sovietov.com/kispython/{task_id}/{group_title}.html'
-
-
-def get_tags(html: str, name: str, class_: str) -> ResultSet[Tag]:
-    soup = BeautifulSoup(html, 'html.parser')
-    return soup.find_all(name, class_=class_)
+    assert f'{task_id}/{group_title}.html' in tag_contents

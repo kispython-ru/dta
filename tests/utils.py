@@ -1,7 +1,12 @@
 import datetime
 import time
 import uuid
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Union
+
+from bs4 import BeautifulSoup
+from bs4.element import ResultSet, Tag
+
+from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
 
@@ -38,3 +43,8 @@ def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
 
     group = db.groups.get_by_prefix(group_name)[0].id
     return (group, variant, task)
+
+
+def get_tags(html: str, name: str, class_: Union[str, bool, None]) -> ResultSet[Tag]:
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.find_all(name, class_=class_)

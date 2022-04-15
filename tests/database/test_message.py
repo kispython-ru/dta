@@ -1,4 +1,5 @@
 from tests.utils import arrange_task, unique_int, unique_str
+
 from webapp.repositories import AppDatabase
 
 

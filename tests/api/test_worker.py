@@ -1,6 +1,6 @@
 import json
-import time
 import os
+import time
 
 import pytest
 from tests.utils import arrange_task, timeout_assert
