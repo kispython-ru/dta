@@ -2,7 +2,7 @@ from typing import Union
 
 from werkzeug.exceptions import HTTPException
 
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask import current_app as app
 from flask import make_response, render_template, request
 
@@ -30,6 +30,17 @@ statuses = StatusManager(
 def dashboard():
     groupings = db.groups.get_groupings()
     return render_template("dashboard.jinja", groupings=groupings)
+
+
+@blueprint.route("/exam_groop_choosing", methods=["GET"])
+def exam():
+    return render_template("exam.jinja")
+
+
+@blueprint.route("/exam_management", methods=["POST"])
+def enter_exam_group():
+    group = request.form['group']
+    return group
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
