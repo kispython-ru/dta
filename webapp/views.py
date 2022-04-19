@@ -34,57 +34,51 @@ def dashboard():
     return render_template("dashboard.jinja", groupings=groupings)
 
 
-@blueprint.route("/exam", methods=["GET"])
-def exam():
-    return render_template("exam.jinja")
+@blueprint.route("/exams", methods=["GET"])
+def exams():
+    return render_template("exams.jinja")
 
 
-@blueprint.route("/exam", methods=["POST"])
+@blueprint.route("/exams", methods=["POST"])
 def enter_exam_group():
     group = request.form['group'].upper()
     print(group)
     pattern = r"[\u0401\u0451\u0410-\u044f]{4}-[0-9]{2}-[0-9]{2}"
     if re.match(pattern, group) != None:
         group_id = db.groups.get_group_id_by_name(group)
-        if(group_id != None):
+        if group_id != None:
             return redirect(url_for("views.pre_exam", group_id=group_id))
-        else:
-            return render_template(
+        return render_template(
             "error.jinja",
             error_code = 404,
             error_message="Эта группа не сдаёт экзамен",
-            error_redirect="/exam",
-    )
-    else:
-        return render_template(
+            error_redirect="/exams",
+        )
+    return render_template(
         "error.jinja",
         error_code = 404,
         error_message="Неверный формат ввода группы",
-        error_redirect="/exam",
+        error_redirect="/exams",
     )    
 
-#возможно стоит изменить логику работы seed = db.seeds.get_final_seed(group_id)
-@blueprint.route("/exam/<group_id>", methods=["GET"])
+
+@blueprint.route("/exams/<group_id>", methods=["GET"])
 def pre_exam(group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    return render_template("exam_management.jinja", group=group, seed=seed)   
+    return render_template("exam.jinja", group=group, seed=seed)   
 
 
-@blueprint.route("/exam/<group_id>/start", methods=["POST"])
-def exam_start(group_id: int):
-    db.seeds.begin_final_test(int(group_id))
-    seed = db.seeds.get_final_seed(group_id)#здесь ошибка UNIQUE constraint failed: final_seeds.group
-    group = db.groups.get_by_id(group_id)
-    return render_template("exam_management.jinja", group=group, seed=seed)
-
-
-@blueprint.route("/exam/<group_id>/end", methods=["POST"])
-def exam_end(group_id: int):
-    db.seeds.end_final_test(group_id)
+@blueprint.route("/exams/<group_id>", methods=["POST"])
+def exam(group_id: int):
     seed = db.seeds.get_final_seed(group_id)
+    if seed == None:
+        db.seeds.begin_final_test(group_id)
+    elif seed.active == True:
+        db.seeds.end_final_test(group_id)
+    seed = db.seeds.get_final_seed(group_id)    
     group = db.groups.get_by_id(group_id)
-    return render_template("exam_management.jinja", group=group, seed=seed)    
+    return render_template("exam.jinja", group=group, seed=seed)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])

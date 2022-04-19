@@ -1,0 +1,26 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse container">
+    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+      <li>
+        <div class="logo-container">
+          <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+          </div>
+        </div>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Цифровой ассистент преподавателя
+      </li>
+    </ol>
+  </div>
+</nav>
+<div class="ms-5 mt-5 d-flex flex-row">
+    <form action="/exams" method="post" >
+        <label style="display:block;" class="mx-auto mb-2 breadcrumb-item active">Введите номер группы в формате XXXX-XX-XX, например, ИНБО-07-20</label>
+        <input type="text" name="group" style="display:block; width:300px" class="form-control mx-auto mb-2">
+        <button class="btn btn-outline-primary mx-auto mb-2" style="display:block;" type="submit">Далее</button>
+    </form>
+</div>
+{% endblock %}
