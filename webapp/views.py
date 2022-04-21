@@ -44,7 +44,7 @@ def enter_exam_group():
     group = request.form['group'].upper()
     print(group)
     pattern = r"[\u0401\u0451\u0410-\u044f]{4}-[0-9]{2}-[0-9]{2}"
-    if re.match(pattern, group) != None:
+    if re.match(pattern, group):
         group_id = db.groups.get_group_id_by_name(group)
         if group_id != None:
             return redirect(url_for("views.pre_exam", group_id=group_id))

@@ -11,27 +11,32 @@
         </div>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        Цифровой ассистент преподавателя
+        <a class="text-decoration-none" href="/exams/">
+          Зачёт&nbsp;
+        <a>
       </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        / {{ group.title }}
+      </li>  
     </ol>
   </div>
 </nav>
-<div style="margin-left:16%; margin-top:3%;" class="d-flex flex-row">
+<div class="d-flex flex-row container mt-3">
   <div>
         {% if seed == None %}
             <form action="/exams/{{  group.id  }}" method="post" >
-                <label style="display:block;" class="mx-auto mb-2 breadcrumb-item active">Зачёт для группы {{  group.title  }}</label>
-                <button class="btn btn-outline-primary mx-auto mb-2" style="display:block;" type="submit" href="/exam/{{  group.id  }}/start">Начать</button>
+                <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+                <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="/exam/{{  group.id  }}/start">Начать</button>
             </form>
         {% elif seed.active == false %}
                 <form action="#" method="post" >
-                    <label style="display:block;" class="mx-auto mb-2 breadcrumb-item active">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2" style="display:block;" type="submit" href="#">Получить результаты</button>
+                    <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="#">Получить результаты</button>
                 </form>
         {% else %}
                 <form action="/exams/{{ group.id }}" method="post" >
-                    <label style="display:block;" class="mx-auto mb-2 breadcrumb-item active">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2" style="display:block;" type="submit" href="/exam/{{  group.id  }}/end">Завершить</button>
+                    <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="/exam/{{  group.id  }}/end">Завершить</button>
                 </form>          
         {% endif %}    
     </form>

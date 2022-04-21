@@ -11,16 +11,18 @@
         </div>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        Цифровой ассистент преподавателя
+        Зачёт
       </li>
     </ol>
   </div>
 </nav>
-<div class="d-flex flex-row" style="margin-left:7%; margin-top:3%; margin-right:12%">
+<div class="d-flex flex-row container mt-3">
     <form action="/exams" method="post" >
-        <label style="display:block;" class="mx-auto mb-2 breadcrumb-item active">Введите номер группы в формате XXXX-XX-XX, например, ИНБО-07-20</label>
-        <input type="text" name="group" style="display:block;" class="form-control mx-auto mb-2">
-        <button class="btn btn-outline-primary mx-auto mb-2" style="display:block;" type="submit">Далее</button>
+        <label class="mx-auto mb-2 breadcrumb-item active block">
+          Введите номер группы в формате XXXX-XX-XX, например, ИНБО-07-20
+        </label>
+        <input type="text" name="group" class="form-control mx-auto mb-2 block">
+        <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">Далее</button>
     </form>
 </div>
 {% endblock %}
