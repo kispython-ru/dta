@@ -17,12 +17,13 @@
   </div>
 </nav>
 <div class="d-flex flex-row container mt-3">
-    <form action="/exams" method="post" >
-        <label class="mx-auto mb-2 breadcrumb-item active block">
-          Введите номер группы в формате XXXX-XX-XX, например, ИНБО-07-20
-        </label>
-        <input type="text" name="group" class="form-control mx-auto mb-2 block">
-        <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">Далее</button>
-    </form>
+  <form action="/exams/{{token}}" method="post" >
+    <select class="form-select mb-2" aria-label="Default select example" name="group">
+      {% for group in groups %}
+          <option value="{{group.id}}">{{group.title}}</option>
+      {% endfor %} 
+    </select>
+    <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">Далее</button>
+  </form>
 </div>
 {% endblock %}

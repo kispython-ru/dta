@@ -24,19 +24,19 @@
 <div class="d-flex flex-row container mt-3">
   <div>
         {% if seed == None %}
-            <form action="/exams/{{  group.id  }}" method="post" >
+            <form action="/exams/{{token}}/{{  group.id  }}" method="post" >
                 <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="/exam/{{  group.id  }}/start">Начать</button>
+                <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Начать</button>
             </form>
         {% elif seed.active == false %}
                 <form action="#" method="post" >
                     <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="#">Получить результаты</button>
+                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Получить результаты</button>
                 </form>
         {% else %}
-                <form action="/exams/{{ group.id }}" method="post" >
+                <form action="/exams/{{token}}/{{ group.id }}" method="post" >
                     <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit" href="/exam/{{  group.id  }}/end">Завершить</button>
+                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Завершить</button>
                 </form>          
         {% endif %}    
     </form>

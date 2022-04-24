@@ -73,13 +73,6 @@ class GroupRepository:
         with self.db.create_session() as session:
             group = session.query(Group).get(group_id)
             return group
-
-
-    def get_group_id_by_name(self, group_name: str) -> int:
-        groups = self.get_all()
-        for group in groups:
-            if group_name == group.title:
-                return group.id
         
 
     def create_by_names(self, names: List[str]):

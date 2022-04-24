@@ -1,12 +1,17 @@
 from typing import Union
 
-import re
-
 from werkzeug.exceptions import HTTPException
 
-from flask import Blueprint, jsonify, redirect, url_for
+from flask import Blueprint
 from flask import current_app as app
-from flask import make_response, render_template, request
+from flask import (
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for
+)
 
 from webapp.forms import MessageForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager
@@ -32,53 +37,6 @@ statuses = StatusManager(
 def dashboard():
     groupings = db.groups.get_groupings()
     return render_template("dashboard.jinja", groupings=groupings)
-
-
-@blueprint.route("/exams", methods=["GET"])
-def exams():
-    return render_template("exams.jinja")
-
-
-@blueprint.route("/exams", methods=["POST"])
-def enter_exam_group():
-    group = request.form['group'].upper()
-    print(group)
-    pattern = r"[\u0401\u0451\u0410-\u044f]{4}-[0-9]{2}-[0-9]{2}"
-    if re.match(pattern, group):
-        group_id = db.groups.get_group_id_by_name(group)
-        if group_id != None:
-            return redirect(url_for("views.pre_exam", group_id=group_id))
-        return render_template(
-            "error.jinja",
-            error_code = 404,
-            error_message="Эта группа не сдаёт экзамен",
-            error_redirect="/exams",
-        )
-    return render_template(
-        "error.jinja",
-        error_code = 404,
-        error_message="Неверный формат ввода группы",
-        error_redirect="/exams",
-    )    
-
-
-@blueprint.route("/exams/<group_id>", methods=["GET"])
-def pre_exam(group_id: int):
-    group = db.groups.get_by_id(group_id)
-    seed = db.seeds.get_final_seed(group_id)
-    return render_template("exam.jinja", group=group, seed=seed)   
-
-
-@blueprint.route("/exams/<group_id>", methods=["POST"])
-def exam(group_id: int):
-    seed = db.seeds.get_final_seed(group_id)
-    if seed == None:
-        db.seeds.begin_final_test(group_id)
-    elif seed.active == True:
-        db.seeds.end_final_test(group_id)
-    seed = db.seeds.get_final_seed(group_id)    
-    group = db.groups.get_by_id(group_id)
-    return render_template("exam.jinja", group=group, seed=seed)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
@@ -130,6 +88,65 @@ def export(s: str, token: str, count: Union[int, None]):
     return output
 
 
+@blueprint.route("/exams/<token>", methods=["GET"])
+def exams(token: str):
+    if config.config.final_token != token:
+        return render_template(
+        "error.jinja",
+        error_code=401,
+        error_message="Unauthorized",
+        error_redirect="/",
+    )
+    groups = db.groups.get_all()
+    return render_template("exams.jinja", groups=groups, token=token)    
+
+
+@blueprint.route("/exams/<token>", methods=["POST"])
+def enter_exam_group(token: str):
+    if config.config.final_token != token:
+        return render_template(
+        "error.jinja",
+        error_code=401,
+        error_message="Unauthorized",
+        error_redirect="/",
+    )
+    group_id = request.form.get('group')
+    return redirect(url_for("views.pre_exam", group_id=group_id, token=token))
+
+
+@blueprint.route("/exams/<token>/<group_id>", methods=["GET"])
+def pre_exam(group_id: int, token: str):
+    if config.config.final_token != token:
+        return render_template(
+        "error.jinja",
+        error_code=401,
+        error_message="Unauthorized",
+        error_redirect="/",
+    )
+    group = db.groups.get_by_id(group_id)
+    seed = db.seeds.get_final_seed(group_id)
+    return render_template("exam.jinja", group=group, seed=seed, token=token)   
+
+
+@blueprint.route("/exams/<token>/<group_id>", methods=["POST"])
+def exam(group_id: int, token: str):
+    if config.config.final_token != token:
+        return render_template(
+        "error.jinja",
+        error_code=401,
+        error_message="Unauthorized",
+        error_redirect="/",
+    )
+    seed = db.seeds.get_final_seed(group_id)
+    if seed == None:
+        db.seeds.begin_final_test(group_id)
+    elif seed.active == True:
+        db.seeds.end_final_test(group_id)
+    seed = db.seeds.get_final_seed(group_id)    
+    group = db.groups.get_by_id(group_id)
+    return render_template("exam.jinja", group=group, seed=seed, token=token)
+
+
 @blueprint.errorhandler(Exception)
 def handle_views_errors(error):
     error_code = error.code if isinstance(error, HTTPException) else 500
@@ -140,3 +157,7 @@ def handle_views_errors(error):
         error_message="Error has occured.",
         error_redirect="/",
     )
+
+
+
+ 
