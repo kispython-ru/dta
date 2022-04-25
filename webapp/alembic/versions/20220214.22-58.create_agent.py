@@ -19,7 +19,12 @@ depends_on = None
 def upgrade():
     op.create_table(
         'messages',
-        sa.Column('id', sa.Integer, primary_key=True, nullable=False),
+        sa.Column(
+                    'id',
+                    sa.Integer,
+                    primary_key=True,
+                    nullable=False
+        ),
         sa.Column('task', sa.Integer, sa.ForeignKey('tasks.id'), nullable=False),
         sa.Column('variant', sa.Integer, sa.ForeignKey('variants.id'), nullable=False),
         sa.Column('group', sa.Integer, sa.ForeignKey('groups.id'), nullable=False),
