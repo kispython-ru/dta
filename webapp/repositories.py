@@ -73,7 +73,6 @@ class GroupRepository:
         with self.db.create_session() as session:
             group = session.query(Group).get(group_id)
             return group
-        
 
     def create_by_names(self, names: List[str]):
         for name in names:
