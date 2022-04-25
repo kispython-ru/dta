@@ -1,4 +1,4 @@
-[![Main workflow](https://github.com/worldbeater/dta/actions/workflows/workflow.yml/badge.svg?branch=main)](https://github.com/worldbeater/dta/actions/workflows/workflow.yml) [![codecov](https://codecov.io/gh/worldbeater/dta/branch/main/graph/badge.svg)](https://codecov.io/gh/worldbeater/dta)
+[![Main workflow](https://github.com/kispython-ru/dta/actions/workflows/workflow.yml/badge.svg?branch=main)](https://github.com/kispython-ru/dta/actions/workflows/workflow.yml) [![codecov](https://codecov.io/gh/kispython-ru/dta/branch/main/graph/badge.svg)](https://codecov.io/gh/kispython-ru/dta)
 
 <br>
 <a href="https://github.com/worldbeater/dta">

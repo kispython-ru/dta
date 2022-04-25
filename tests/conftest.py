@@ -14,7 +14,7 @@ from webapp.repositories import AppDatabase
 def app(request) -> Flask:
     src = os.getcwd()
     tests = os.path.join(src, "tests")
-    app = configure_app(tests, "webapp/alembic.ini", "webapp/alembic")
+    app = configure_app(tests)
     enable_worker = hasattr(request, 'param') and request.param is True
     if enable_worker:
         app.config["DISABLE_BACKGROUND_WORKER"] = False

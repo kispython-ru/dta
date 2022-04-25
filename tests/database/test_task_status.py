@@ -52,4 +52,3 @@ def test_task_status_update_status(db: AppDatabase):
     db.statuses.update_status(task, variant, group, Status.Checked, unique_str())
     task_status = db.statuses.get_task_status(task, variant, group)
     assert task_status.status == Status.Checked
-
