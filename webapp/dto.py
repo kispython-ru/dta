@@ -134,6 +134,7 @@ class AppConfig:
         self.highlight_syntax: bool = config["HIGHLIGHT_SYNTAX"]
         self.core_path: str = config["CORE_PATH"]
         self.csv_token: str = config["CSV_TOKEN"]
+        self.final_token: str = config["FINAL_TOKEN"]
         self.api_token: str = config["API_TOKEN"]
         self.connection_string: str = config["CONNECTION_STRING"]
         self.task_base_url: str = config["TASK_BASE_URL"]

@@ -82,4 +82,3 @@ def test_message_pending_unique(db: AppDatabase):
     messages = db.messages.get_pending_messages_unique()
     message_count = len(list(filter(lambda m: m.task == task, messages)))
     assert message_count == 1
-
