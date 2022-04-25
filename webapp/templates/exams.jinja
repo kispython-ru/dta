@@ -17,7 +17,7 @@
   </div>
 </nav>
 <div class="d-flex flex-row container mt-3">
-  <form action="/exams/{{token}}" method="post" >
+  <form action="/exams/{{token}}" method="post" class="w-100">
     <select class="form-select mb-2" aria-label="Default select example" name="group">
       {% for group in groups %}
           <option value="{{group.id}}">{{group.title}}</option>

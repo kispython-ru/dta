@@ -22,24 +22,21 @@
   </div>
 </nav>
 <div class="d-flex flex-row container mt-3">
-  <div>
-        {% if seed == None %}
-            <form action="/exams/{{token}}/{{  group.id  }}" method="post" >
-                <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Начать</button>
-            </form>
-        {% elif seed.active == false %}
-                <form action="#" method="post" >
-                    <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Получить результаты</button>
-                </form>
-        {% else %}
-                <form action="/exams/{{token}}/{{ group.id }}" method="post" >
-                    <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
-                    <button class="btn btn-outline-primary mx-auto mb-2 d-block" type="submit">Завершить</button>
-                </form>          
-        {% endif %}    
+  {% if seed == None %}
+    <form action="/exams/{{token}}/{{  group.id  }}" method="post" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
     </form>
-  <div>  
+  {% elif seed.active == false %}
+    <form action="#" method="post" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
+    </form>
+  {% else %}
+    <form action="/exams/{{token}}/{{ group.id }}" method="post" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
+    </form>
+  {% endif %}
 </div>
 {% endblock %}
