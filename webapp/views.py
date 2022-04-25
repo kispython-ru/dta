@@ -100,7 +100,6 @@ def export(s: str, token: str, count: Union[int, None]):
 
 
 @blueprint.route("/exams/<token>", methods=["GET"])
-@blueprint.route("/exams", methods=["GET"])
 @require_final_token()
 def exams(token: str):
     groups = db.groups.get_all()
