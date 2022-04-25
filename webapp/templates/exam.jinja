@@ -11,7 +11,7 @@
         </div>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        <a class="text-decoration-none" href="/exams/">
+        <a class="text-decoration-none" href="/exams/{{ token }}">
           Зачёт&nbsp;
         <a>
       </li>
@@ -23,7 +23,7 @@
 </nav>
 <div class="d-flex flex-row container mt-3">
   {% if seed == None %}
-    <form action="/exams/{{token}}/{{  group.id  }}" method="post" class="w-100">
+    <form action="/exams/{{ token }}/{{ group.id }}" method="post" class="w-100">
       <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
     </form>
@@ -33,7 +33,7 @@
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
     </form>
   {% else %}
-    <form action="/exams/{{token}}/{{ group.id }}" method="post" class="w-100">
+    <form action="/exams/{{ token }}/{{ group.id }}" method="post" class="w-100">
       <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
     </form>
