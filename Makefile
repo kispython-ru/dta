@@ -9,7 +9,7 @@ lint:
 
 .PHONY: lint-win
 lint-win:
-	cd webapp && FOR /R %%i in (*.py) DO pycodestyle %%i
+	cd webapp && FOR %%i in (*.py) DO pycodestyle %%i
 	isort -qc .	
 
 .PHONY: test
