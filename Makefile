@@ -7,6 +7,11 @@ lint:
 	pycodestyle ./**/*.py
 	isort -qc .
 
+.PHONY: lint-win
+lint-win:
+	FOR /R %%i in (*.py) DO pycodestyle %%i
+	isort -qc .	
+
 .PHONY: test
 test:
 	pytest
