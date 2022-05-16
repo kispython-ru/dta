@@ -142,6 +142,7 @@ class StatusManager:
         dto = self.__get_variant(group, variant, tasks, statuses, config, e)
         return dto
 
+
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
         base_url = self.config.config.task_base_url
         group = self.groups.get_by_id(gid)
@@ -152,6 +153,7 @@ class StatusManager:
         ext = e.get_external_task(task.id, variant.id)
         task_dto = TaskDto(group, task, base_url, e.random_active)
         return TaskStatusDto(group, variant, task_dto, status, ext, base_url)
+
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)

@@ -1,3 +1,5 @@
+from asyncio import tasks
+import csv
 import functools
 from typing import Union
 
@@ -131,6 +133,56 @@ def exam(group_id: int, token: str):
         db.seeds.end_final_test(group_id)
     seed = db.seeds.get_final_seed(group_id)
     group = db.groups.get_by_id(group_id)
+    return render_template("exam.jinja", group=group, seed=seed, token=token)
+
+
+@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["POST"])
+@require_final_token()
+def score_csv(group_id: int, token: str):
+    seed = db.seeds.get_final_seed(group_id)
+    group = db.groups.get_by_id(group_id)
+    variants = db.variants.get_all()
+    result_table = []
+    headings = ['Сдающая_группа', 'Вариант', '№1_Группа', '№1_Вариант', '№1_Задача', '№1_Статус',
+                '№2_Группа', '№2_Вариант', '№2_Задача', '№2_Статус', 'Сумма_баллов']
+    result_table.append(headings)
+    for variant in variants:
+        group_title = db.groups.get_by_id(group_id).title
+        #variant
+        #tasks 1-2 for every variant
+        external_task1_current_variant = statuses.get_task_status(group_id, variant.id, 1).external
+        external_task2_current_variant = statuses.get_task_status(group_id, variant.id, 2).external
+        #task 1
+        external_task1_group_title = external_task1_current_variant.group_title
+        external_task1_new_variant = external_task1_current_variant.variant
+        external_task1_new_task = external_task1_current_variant.task
+        external_task1_group_id = db.groups.get_group_id_by_name(external_task1_group_title)
+        print(external_task1_group_id)
+        external_task1_new_status = statuses.get_task_status(external_task1_group_id,
+                                                             external_task1_new_variant,
+                                                             external_task1_new_task
+                                                            )
+        #external_task1_new_status = 0
+        #task 2
+        external_task2_group_title = external_task2_current_variant.group_title
+        external_task2_new_variant = external_task2_current_variant.variant
+        external_task2_new_task = external_task2_current_variant.task
+        external_task2_group_id = db.groups.get_group_id_by_name(external_task2_group_title)
+        external_task2_new_status = statuses.get_task_status(external_task2_group_id,
+                                                             external_task1_new_variant,
+                                                             external_task2_new_task
+                                                            )
+        #external_task2_new_status = 0
+        exam_score = external_task1_new_status + external_task2_new_status
+        result_table.append([group_title, variant.id, external_task1_group_title, external_task1_new_variant,
+                        external_task1_new_task, external_task1_new_status, external_task2_group_title,
+                        external_task2_new_variant, external_task2_new_task, external_task2_new_status,
+                        exam_score])
+    print(result_table)
+    with open('Итоги зачёта ' + group_title + '.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',',
+                        quotechar=',', quoting=csv.QUOTE_MINIMAL)
+        writer.writerows(result_table)
     return render_template("exam.jinja", group=group, seed=seed, token=token)
 
 
