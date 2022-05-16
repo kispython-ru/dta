@@ -1,0 +1,22 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse container">
+    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+      <li>
+        <div class="logo-container">
+          <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+          </div>
+        </div>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Зачёт
+      </li>
+    </ol>
+  </div>
+</nav>
+<div class="d-flex flex-row container mt-3 card-subtitle mb-2 text-muted">
+  <h5>Зачёт ещё не начат.</h5> 
+</div>
+{% endblock %}

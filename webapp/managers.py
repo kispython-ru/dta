@@ -142,7 +142,6 @@ class StatusManager:
         dto = self.__get_variant(group, variant, tasks, statuses, config, e)
         return dto
 
-
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
         base_url = self.config.config.task_base_url
         group = self.groups.get_by_id(gid)
@@ -153,7 +152,6 @@ class StatusManager:
         ext = e.get_external_task(task.id, variant.id)
         task_dto = TaskDto(group, task, base_url, e.random_active)
         return TaskStatusDto(group, variant, task_dto, status, ext, base_url)
-
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)
@@ -221,6 +219,18 @@ class ExportManager:
         output = self.create_csv(table, delimiter)
         return output
 
+    def export_exam_results(
+        self,
+        group_id: int,
+        statuses: TaskStatusRepository,
+        variants: VariantRepository,
+        separator: str
+    ) -> str:
+        table = self.create_exam_result_table(group_id, statuses, variants)
+        delimiter = ";" if separator == "semicolon" else ","
+        output = self.create_csv(table, delimiter)
+        return output
+
     def create_csv(self, table: List[List[str]], delimiter: str):
         si = io.StringIO()
         cw = csv.writer(si, delimiter=delimiter)
@@ -245,6 +255,48 @@ class ExportManager:
             id = message.id
             rows.append([id, time, gt, task, variant, ip, code])
         return rows
+
+    def create_exam_result_table(
+        self,
+        group_id: int,
+        statuses: TaskStatusRepository,
+        variants: VariantRepository
+    ) -> List[List[str]]:
+        result_table = []
+        headings = [
+                    'Сдающая_группа', 'Вариант', '№1_Группа',
+                    '№1_Вариант', '№1_Задача', '№1_Статус',
+                    '№2_Группа', '№2_Вариант', '№2_Задача',
+                    '№2_Статус', 'Сумма_баллов'
+                   ]
+        result_table.append(headings)
+        for variant in variants:
+            group_title = self.groups.get_by_id(group_id).title
+
+            task1_current_variant = statuses.get_task_status(
+                group_id, variant.id, 1).external
+            task2_current_variant = statuses.get_task_status(
+                group_id, variant.id, 2).external
+
+            task1_group_title = task1_current_variant.group_title
+            task1_new_variant = task1_current_variant.variant
+            task1_new_task = task1_current_variant.task
+            task1_status = 1 if statuses.get_task_status(
+                group_id, variant.id, 1).status.value == 0 else 0
+
+            task2_group_title = task2_current_variant.group_title
+            task2_new_variant = task2_current_variant.variant
+            task2_new_task = task2_current_variant.task
+            task2_status = 1 if statuses.get_task_status(
+                group_id, variant.id, 2).status.value == 0 else 0
+
+            exam_score = task1_status + task2_status
+            result_table.append([group_title, variant.id, task1_group_title,
+                                 task1_new_variant, task1_new_task,
+                                 task1_status, task2_group_title,
+                                 task2_new_variant,
+                                task2_new_task, task2_status, exam_score])
+        return result_table
 
     def get_group_titles(self) -> Dict[int, str]:
         groups = self.groups.get_all()

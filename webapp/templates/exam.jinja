@@ -28,7 +28,7 @@
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
     </form>
   {% elif seed.active == false %}
-    <form action="/exams/{{ token }}/{{ group.id }}/score_csv" method="post" class="w-100">
+    <form action="/exams/{{ token }}/{{ group.id }}/semicolon/score_csv" method="post" class="w-100">
       <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
     </form>
