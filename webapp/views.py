@@ -1,5 +1,4 @@
 import functools
-from tkinter.ttk import Separator
 from typing import Union
 
 from werkzeug.exceptions import HTTPException
