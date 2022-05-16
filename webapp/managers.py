@@ -207,9 +207,19 @@ class StatusManager:
 
 
 class ExportManager:
-    def __init__(self, groups: GroupRepository, messages: MessageRepository):
+    def __init__(
+                 self,
+                 groups: GroupRepository,
+                 messages: MessageRepository,
+                 statuses: TaskStatusRepository,
+                 variants: VariantRepository,
+                 tasks: TaskRepository
+                ):
         self.groups = groups
         self.messages = messages
+        self.statuses = statuses
+        self.variants = variants
+        self.tasks = tasks
 
     def export_messages(self, count: Union[int, None], separator: str) -> str:
         messages = self.get_latest_messages(count)
@@ -222,11 +232,14 @@ class ExportManager:
     def export_exam_results(
         self,
         group_id: int,
-        statuses: TaskStatusRepository,
-        variants: VariantRepository,
         separator: str
     ) -> str:
-        table = self.create_exam_result_table(group_id, statuses, variants)
+        table = self.create_exam_result_table(
+                                              group_id,
+                                              self.statuses,
+                                              self.variants,
+                                              self.tasks
+                                             )
         delimiter = ";" if separator == "semicolon" else ","
         output = self.create_csv(table, delimiter)
         return output
@@ -259,44 +272,32 @@ class ExportManager:
     def create_exam_result_table(
         self,
         group_id: int,
-        statuses: TaskStatusRepository,
-        variants: VariantRepository
     ) -> List[List[str]]:
-        result_table = []
-        headings = [
+        table = [[
                     'Сдающая_группа', 'Вариант', '№1_Группа',
                     '№1_Вариант', '№1_Задача', '№1_Статус',
                     '№2_Группа', '№2_Вариант', '№2_Задача',
                     '№2_Статус', 'Сумма_баллов'
-                   ]
-        result_table.append(headings)
-        for variant in variants:
+                ]]
+        for variant in self.variants:
             group_title = self.groups.get_by_id(group_id).title
-
-            task1_current_variant = statuses.get_task_status(
-                group_id, variant.id, 1).external
-            task2_current_variant = statuses.get_task_status(
-                group_id, variant.id, 2).external
-
-            task1_group_title = task1_current_variant.group_title
-            task1_new_variant = task1_current_variant.variant
-            task1_new_task = task1_current_variant.task
-            task1_status = 1 if statuses.get_task_status(
-                group_id, variant.id, 1).status.value == 0 else 0
-
-            task2_group_title = task2_current_variant.group_title
-            task2_new_variant = task2_current_variant.variant
-            task2_new_task = task2_current_variant.task
-            task2_status = 1 if statuses.get_task_status(
-                group_id, variant.id, 2).status.value == 0 else 0
-
-            exam_score = task1_status + task2_status
-            result_table.append([group_title, variant.id, task1_group_title,
-                                 task1_new_variant, task1_new_task,
-                                 task1_status, task2_group_title,
-                                 task2_new_variant,
-                                task2_new_task, task2_status, exam_score])
-        return result_table
+            row = [group_title, variant.id]
+            score = 0
+            for task in self.tasks.get_all():
+                info = self.statuses.get_task_status(
+                    group_id,
+                    variant.id,
+                    task.id
+                )
+                status = 1 if info.status.value == 0 else 0
+                row.append(info.external.group_title)
+                row.append(info.external.variant)
+                row.append(info.external.task)
+                row.append(status)
+                score += status
+            row.append(score)
+            table.append(row)
+        return table
 
     def get_group_titles(self) -> Dict[int, str]:
         groups = self.groups.get_all()

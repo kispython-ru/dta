@@ -17,7 +17,12 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("views", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-exports = ExportManager(db.groups, db.messages)
+exports = ExportManager(
+    db.groups,
+    db.messages,
+    db.statuses,
+    db.variants,
+    db.tasks)
 statuses = StatusManager(
     tasks=db.tasks,
     groups=db.groups,
@@ -140,14 +145,8 @@ def exam(group_id: int, token: str):
 @blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["POST"])
 @require_final_token()
 def score_csv(group_id: int, token: str):
-    variants = db.variants.get_all()
     delimiter = request.form.get('delimiter')
-    value = exports.export_exam_results(
-                                        group_id,
-                                        statuses,
-                                        variants,
-                                        delimiter
-                                       )
+    value = exports.export_exam_results(group_id, delimiter)
     output = make_response(value)
     output.headers["Content-Disposition"] = "attachment; filename=results.csv"
     output.headers["Content-type"] = "text/csv"
