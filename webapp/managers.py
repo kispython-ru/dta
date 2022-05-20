@@ -207,27 +207,39 @@ class StatusManager:
 
 
 class ExportManager:
-    def __init__(self, groups: GroupRepository, messages: MessageRepository):
+    def __init__(
+        self,
+        groups: GroupRepository,
+        messages: MessageRepository,
+        statuses: StatusManager,
+        variants: VariantRepository,
+        tasks: TaskRepository
+    ):
         self.groups = groups
         self.messages = messages
+        self.statuses = statuses
+        self.variants = variants
+        self.tasks = tasks
 
     def export_messages(self, count: Union[int, None], separator: str) -> str:
-        messages = self.get_latest_messages(count)
-        group_titles = self.get_group_titles()
-        table = self.create_table(messages, group_titles)
+        messages = self.__get_latest_messages(count)
+        group_titles = self.__get_group_titles()
+        table = self.__create_messages_table(messages, group_titles)
         delimiter = ";" if separator == "semicolon" else ","
-        output = self.create_csv(table, delimiter)
+        output = self.__create_csv(table, delimiter)
         return output
 
-    def create_csv(self, table: List[List[str]], delimiter: str):
-        si = io.StringIO()
-        cw = csv.writer(si, delimiter=delimiter)
-        cw.writerows(table)
-        bom = u"\uFEFF"
-        value = bom + si.getvalue()
-        return value
+    def export_exam_results(
+        self,
+        group_id: int,
+        separator: str
+    ) -> str:
+        table = self.__create_exam_table(group_id)
+        delimiter = ";" if separator == "semicolon" else ","
+        output = self.__create_csv(table, delimiter)
+        return output
 
-    def create_table(
+    def __create_messages_table(
         self,
         messages: List[Message],
         group_titles: Dict[int, str]
@@ -244,14 +256,55 @@ class ExportManager:
             rows.append([id, time, gt, task, variant, ip, code])
         return rows
 
-    def get_group_titles(self) -> Dict[int, str]:
+    def __create_exam_table(self, group_id: int) -> List[List[str]]:
+        header = ['Сдающая группа', 'Вариант']
+        tasks = self.tasks.get_all()
+        for task in tasks:
+            id = task.id + 1
+            header += [
+                f'№{id} Группа',
+                f'№{id} Вариант',
+                f'№{id} Задача',
+                f'№{id} Статус'
+            ]
+        header.append('Сумма баллов')
+        rows = []
+        for variant in self.variants.get_all():
+            group_title = self.groups.get_by_id(group_id).title
+            row = [group_title, variant.id]
+            score = 0
+            for task in tasks:
+                info = self.statuses.get_task_status(
+                    group_id,
+                    variant.id,
+                    task.id
+                )
+                status = 1 if info.status.value == 0 else 0
+                row.append(info.external.group_title)
+                row.append(info.external.variant)
+                row.append(info.external.task)
+                row.append(status)
+                score += status
+            row.append(score)
+            rows.append(row)
+        return [header] + rows
+
+    def __get_group_titles(self) -> Dict[int, str]:
         groups = self.groups.get_all()
         group_titles: Dict[int, str] = {}
         for group in groups:
             group_titles[group.id] = group.title
         return group_titles
 
-    def get_latest_messages(self, count: Union[int, None]) -> List[Message]:
+    def __get_latest_messages(self, count: Union[int, None]) -> List[Message]:
         if count is None:
             return self.messages.get_all()
         return self.messages.get_latest(count)
+
+    def __create_csv(self, table: List[List[str]], delimiter: str):
+        si = io.StringIO()
+        cw = csv.writer(si, delimiter=delimiter)
+        cw.writerows(table)
+        bom = u"\uFEFF"
+        value = bom + si.getvalue()
+        return value
