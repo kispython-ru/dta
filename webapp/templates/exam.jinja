@@ -4,11 +4,11 @@
   <div class="collapse navbar-collapse container">
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
       <li>
-        <div class="logo-container">
+        <a class="logo-container text-decoration-none" href="/exams/{{token}}">
           <div class="logo">
             <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
           </div>
-        </div>
+        </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
         <a class="text-decoration-none" href="/exams/{{ token }}">
