@@ -1,8 +1,8 @@
+import functools
 import json
 import os
 import sys
 import traceback
-import functools
 from typing import Callable
 
 from flask import Request, render_template

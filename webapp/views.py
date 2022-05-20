@@ -15,15 +15,6 @@ from webapp.utils import get_exception_info, get_real_ip, require_token
 blueprint = Blueprint("views", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-
-exports = ExportManager(
-    groups=db.groups,
-    messages=db.messages,
-    statuses=db.statuses,
-    variants=db.variants,
-    tasks=db.tasks
-)
-
 statuses = StatusManager(
     tasks=db.tasks,
     groups=db.groups,
@@ -31,6 +22,14 @@ statuses = StatusManager(
     statuses=db.statuses,
     config=config,
     seeds=db.seeds
+)
+
+exports = ExportManager(
+    statuses=statuses,
+    groups=db.groups,
+    messages=db.messages,
+    variants=db.variants,
+    tasks=db.tasks
 )
 
 
@@ -124,7 +123,7 @@ def exam(group_id: int, token: str):
     return render_template("exam.jinja", group=group, seed=seed, token=token)
 
 
-@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["POST"])
+@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["GET"])
 @require_token(lambda: config.config.final_token)
 def score_csv(group_id: int, token: str):
     delimiter = request.form.get('delimiter')

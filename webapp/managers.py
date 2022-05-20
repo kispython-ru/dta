@@ -211,7 +211,7 @@ class ExportManager:
         self,
         groups: GroupRepository,
         messages: MessageRepository,
-        statuses: TaskStatusRepository,
+        statuses: StatusManager,
         variants: VariantRepository,
         tasks: TaskRepository
     ):
@@ -234,12 +234,7 @@ class ExportManager:
         group_id: int,
         separator: str
     ) -> str:
-        table = self.__create_exam_table(
-            group_id,
-            self.statuses,
-            self.variants,
-            self.tasks
-        )
+        table = self.__create_exam_table(group_id)
         delimiter = ";" if separator == "semicolon" else ","
         output = self.__create_csv(table, delimiter)
         return output
@@ -261,21 +256,24 @@ class ExportManager:
             rows.append([id, time, gt, task, variant, ip, code])
         return rows
 
-    def __create_exam_table(
-        self,
-        group_id: int,
-    ) -> List[List[str]]:
-        table = [[
-            'Сдающая_группа', 'Вариант', '№1_Группа',
-            '№1_Вариант', '№1_Задача', '№1_Статус',
-            '№2_Группа', '№2_Вариант', '№2_Задача',
-            '№2_Статус', 'Сумма_баллов'
-        ]]
-        for variant in self.variants:
+    def __create_exam_table(self, group_id: int) -> List[List[str]]:
+        header = ['Сдающая группа', 'Вариант']
+        tasks = self.tasks.get_all()
+        for task in tasks:
+            id = task.id + 1
+            header += [
+                f'№{id} Группа',
+                f'№{id} Вариант',
+                f'№{id} Задача',
+                f'№{id} Статус'
+            ]
+        header.append('Сумма баллов')
+        rows = []
+        for variant in self.variants.get_all():
             group_title = self.groups.get_by_id(group_id).title
             row = [group_title, variant.id]
             score = 0
-            for task in self.tasks.get_all():
+            for task in tasks:
                 info = self.statuses.get_task_status(
                     group_id,
                     variant.id,
@@ -288,8 +286,8 @@ class ExportManager:
                 row.append(status)
                 score += status
             row.append(score)
-            table.append(row)
-        return table
+            rows.append(row)
+        return [header] + rows
 
     def __get_group_titles(self) -> Dict[int, str]:
         groups = self.groups.get_all()
