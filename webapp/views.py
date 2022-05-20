@@ -42,7 +42,9 @@ def dashboard():
 @blueprint.route("/group/<group_id>", methods=["GET"])
 def group(group_id: int):
     group = statuses.get_group_statuses(group_id)
-    return render_template("group.jinja", group=group)
+    seed = db.seeds.get_final_seed(group_id)
+    blocked = config.config.final_tasks and seed is None
+    return render_template("group.jinja", group=group, blocked=blocked)
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])

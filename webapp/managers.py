@@ -271,7 +271,7 @@ class ExportManager:
         rows = []
         for variant in self.variants.get_all():
             group_title = self.groups.get_by_id(group_id).title
-            row = [group_title, variant.id]
+            row = [group_title, variant.id + 1]
             score = 0
             for task in tasks:
                 info = self.statuses.get_task_status(
@@ -282,8 +282,8 @@ class ExportManager:
                 status = 1 if info.status.value == 2 else 0
                 row.append(status)
                 row.append(info.external.group_title)
-                row.append(info.external.variant)
-                row.append(info.external.task)
+                row.append(info.external.variant + 1)
+                row.append(info.external.task + 1)
                 score += status
             row.append(score)
             rows.append(row)
