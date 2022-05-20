@@ -123,13 +123,13 @@ def exam(group_id: int, token: str):
     return render_template("exam.jinja", group=group, seed=seed, token=token)
 
 
-@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["GET"])
+@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["POST"])
 @require_token(lambda: config.config.final_token)
-def score_csv(group_id: int, token: str):
+def score_csv(gid: int, token: str):
     delimiter = request.form.get('delimiter')
-    value = exports.export_exam_results(group_id, delimiter)
+    value = exports.export_exam_results(gid, delimiter)
     output = make_response(value)
-    output.headers["Content-Disposition"] = "attachment; filename=results.csv"
+    output.headers["Content-Disposition"] = f"attachment; filename={gid}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
 
