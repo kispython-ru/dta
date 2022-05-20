@@ -2,8 +2,10 @@ import json
 import os
 import sys
 import traceback
+import functools
+from typing import Callable
 
-from flask import Request
+from flask import Request, render_template
 
 
 def get_real_ip(request: Request) -> str:
@@ -33,3 +35,20 @@ def load_config_files(directory_name: str):
                 merged = {**merged, **json_content}
     print(json.dumps(merged, indent=2))
     return merged
+
+
+def require_token(get_token: Callable[[], str]):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            token = get_token()
+            if 'token' not in kwargs or token != kwargs['token']:
+                return render_template(
+                    "error.jinja",
+                    error_code=401,
+                    error_message="Unauthorized",
+                    error_redirect="/",
+                )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

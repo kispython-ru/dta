@@ -208,13 +208,13 @@ class StatusManager:
 
 class ExportManager:
     def __init__(
-                 self,
-                 groups: GroupRepository,
-                 messages: MessageRepository,
-                 statuses: TaskStatusRepository,
-                 variants: VariantRepository,
-                 tasks: TaskRepository
-                ):
+        self,
+        groups: GroupRepository,
+        messages: MessageRepository,
+        statuses: TaskStatusRepository,
+        variants: VariantRepository,
+        tasks: TaskRepository
+    ):
         self.groups = groups
         self.messages = messages
         self.statuses = statuses
@@ -222,11 +222,11 @@ class ExportManager:
         self.tasks = tasks
 
     def export_messages(self, count: Union[int, None], separator: str) -> str:
-        messages = self.get_latest_messages(count)
-        group_titles = self.get_group_titles()
-        table = self.create_table(messages, group_titles)
+        messages = self.__get_latest_messages(count)
+        group_titles = self.__get_group_titles()
+        table = self.__create_messages_table(messages, group_titles)
         delimiter = ";" if separator == "semicolon" else ","
-        output = self.create_csv(table, delimiter)
+        output = self.__create_csv(table, delimiter)
         return output
 
     def export_exam_results(
@@ -234,25 +234,17 @@ class ExportManager:
         group_id: int,
         separator: str
     ) -> str:
-        table = self.create_exam_result_table(
-                                              group_id,
-                                              self.statuses,
-                                              self.variants,
-                                              self.tasks
-                                             )
+        table = self.__create_exam_table(
+            group_id,
+            self.statuses,
+            self.variants,
+            self.tasks
+        )
         delimiter = ";" if separator == "semicolon" else ","
-        output = self.create_csv(table, delimiter)
+        output = self.__create_csv(table, delimiter)
         return output
 
-    def create_csv(self, table: List[List[str]], delimiter: str):
-        si = io.StringIO()
-        cw = csv.writer(si, delimiter=delimiter)
-        cw.writerows(table)
-        bom = u"\uFEFF"
-        value = bom + si.getvalue()
-        return value
-
-    def create_table(
+    def __create_messages_table(
         self,
         messages: List[Message],
         group_titles: Dict[int, str]
@@ -269,16 +261,16 @@ class ExportManager:
             rows.append([id, time, gt, task, variant, ip, code])
         return rows
 
-    def create_exam_result_table(
+    def __create_exam_table(
         self,
         group_id: int,
     ) -> List[List[str]]:
         table = [[
-                    'Сдающая_группа', 'Вариант', '№1_Группа',
-                    '№1_Вариант', '№1_Задача', '№1_Статус',
-                    '№2_Группа', '№2_Вариант', '№2_Задача',
-                    '№2_Статус', 'Сумма_баллов'
-                ]]
+            'Сдающая_группа', 'Вариант', '№1_Группа',
+            '№1_Вариант', '№1_Задача', '№1_Статус',
+            '№2_Группа', '№2_Вариант', '№2_Задача',
+            '№2_Статус', 'Сумма_баллов'
+        ]]
         for variant in self.variants:
             group_title = self.groups.get_by_id(group_id).title
             row = [group_title, variant.id]
@@ -299,14 +291,22 @@ class ExportManager:
             table.append(row)
         return table
 
-    def get_group_titles(self) -> Dict[int, str]:
+    def __get_group_titles(self) -> Dict[int, str]:
         groups = self.groups.get_all()
         group_titles: Dict[int, str] = {}
         for group in groups:
             group_titles[group.id] = group.title
         return group_titles
 
-    def get_latest_messages(self, count: Union[int, None]) -> List[Message]:
+    def __get_latest_messages(self, count: Union[int, None]) -> List[Message]:
         if count is None:
             return self.messages.get_all()
         return self.messages.get_latest(count)
+
+    def __create_csv(self, table: List[List[str]], delimiter: str):
+        si = io.StringIO()
+        cw = csv.writer(si, delimiter=delimiter)
+        cw.writerows(table)
+        bom = u"\uFEFF"
+        value = bom + si.getvalue()
+        return value
