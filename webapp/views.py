@@ -123,7 +123,7 @@ def exam(group_id: int, token: str):
     return render_template("exam.jinja", group=group, seed=seed, token=token)
 
 
-@blueprint.route("/exams/<token>/<group_id>/score_csv", methods=["POST"])
+@blueprint.route("/exams/<token>/<gid>/score_csv", methods=["POST"])
 @require_token(lambda: config.config.final_token)
 def score_csv(gid: int, token: str):
     delimiter = request.form.get('delimiter')
