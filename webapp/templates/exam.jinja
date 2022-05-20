@@ -21,13 +21,21 @@
     </ol>
   </div>
 </nav>
-<div class="d-flex flex-row container mt-3">
+<div class="flex-row container mt-3">
   {% if seed == None %}
+    <h6 class="d-block fw-bold">Зачёт ещё не начат</h6>
     <form action="/exams/{{ token }}/{{ group.id }}" method="post" class="w-100">
-      <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">
+        Зачёт для группы {{ group.title }} начат, студенты не могут отправлять решения.
+      </label>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
     </form>
   {% elif seed.active == false %}
+    <h6 class="d-block fw-bold">Зачёт завершён</h6>
+    <div class="mx-auto mb-2 breadcrumb-item active d-block">
+      Студенты группы {{ group.title }} больше не могут отправлять решения.
+    </div>
+    <h6 class="d-block mt-3">Выгрузка результатов</h6>
     <form action="/exams/{{ token }}/{{ group.id }}/score_csv" method="post" class="w-100">
       <label class="mx-auto mb-2 breadcrumb-item active d-block">Разделитель CSV</label>
       <select class="form-select mb-2" aria-label="Default select example" name="delimiter">
@@ -36,12 +44,21 @@
       </select>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
     </form>
-  {% else %}
+    <h6 class="d-block mt-3">Продолжить зачёт</h6>
+    <div class="mx-auto mb-2 breadcrumb-item active d-block">
+      После продолжения зачёта студенты вновь смогут отправлять решения.
+    </div>
     <form action="/exams/{{ token }}/{{ group.id }}" method="post" class="w-100">
-      <label class="mx-auto mb-2 breadcrumb-item active d-block">Зачёт для группы {{  group.title  }}</label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Продолжить зачёт</button>
+    </form>
+  {% else %}
+    <h6 class="d-block fw-bold">Зачёт начат</h6>
+    <form action="/exams/{{ token }}/{{ group.id }}" method="post" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">
+        Зачёт для группы {{ group.title }} начат, студенты могут отправлять решения.
+      </label>
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
     </form>
   {% endif %}
-  <div>{{status}}</div>
 </div>
 {% endblock %}

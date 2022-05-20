@@ -118,6 +118,8 @@ def exam(group_id: int, token: str):
         db.seeds.begin_final_test(group_id)
     elif seed.active:
         db.seeds.end_final_test(group_id)
+    else:
+        db.seeds.continue_final_test(group_id)
     seed = db.seeds.get_final_seed(group_id)
     group = db.groups.get_by_id(group_id)
     return render_template("exam.jinja", group=group, seed=seed, token=token)

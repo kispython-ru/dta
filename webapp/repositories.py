@@ -305,6 +305,13 @@ class FinalSeedRepository:
             session.add(FinalSeed(group=group, seed=seed, active=True))
             session.commit()
 
+    def continue_final_test(self, group: int):
+        with self.db.create_session() as session:
+            session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .update({"active": True})
+            session.commit()
+
     def end_final_test(self, group: int):
         with self.db.create_session() as session:
             session.query(FinalSeed) \
