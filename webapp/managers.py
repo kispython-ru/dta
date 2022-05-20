@@ -262,10 +262,10 @@ class ExportManager:
         for task in tasks:
             id = task.id + 1
             header += [
+                f'№{id} Статус',
                 f'№{id} Группа',
                 f'№{id} Вариант',
                 f'№{id} Задача',
-                f'№{id} Статус'
             ]
         header.append('Сумма баллов')
         rows = []
@@ -279,11 +279,11 @@ class ExportManager:
                     variant.id,
                     task.id
                 )
-                status = 1 if info.status.value == 0 else 0
+                status = 1 if info.status.value == 2 else 0
+                row.append(status)
                 row.append(info.external.group_title)
                 row.append(info.external.variant)
                 row.append(info.external.task)
-                row.append(status)
                 score += status
             row.append(score)
             rows.append(row)

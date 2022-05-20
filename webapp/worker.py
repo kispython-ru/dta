@@ -57,7 +57,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             tasks=db.tasks,
             groups=db.groups,
             variants=db.variants,
-            config=config
+            config=config.config,
         )
         ext = external_manager.get_external_task(task.id, variant.id)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
