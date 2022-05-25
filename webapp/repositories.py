@@ -211,6 +211,13 @@ class TaskStatusRepository:
             session.commit()
             return task_status
 
+    def delete_group_task_statuses(self, group: int):
+        with self.db.create_session() as session:
+            status = session.query(TaskStatus) \
+                .filter_by(group=group) \
+                .delete()
+            return status
+
 
 class MessageRepository:
     def __init__(self, db: DbContextManager):
@@ -309,6 +316,13 @@ class FinalSeedRepository:
             session.query(FinalSeed) \
                 .filter_by(group=group) \
                 .update({"active": False})
+            session.commit()
+
+    def delete_final_seed(self, group: int):
+        with self.db.create_session() as session:
+            session.query(FinalSeed) \
+                .filter_by(group=group) \
+                .delete()
             session.commit()
 
 

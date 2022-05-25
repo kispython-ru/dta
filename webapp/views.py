@@ -150,6 +150,16 @@ def score_csv(gid: int, token: str):
     return output
 
 
+@blueprint.route("/exams/<token>/<gid>/hardreset", methods=["GET"])
+@require_token(lambda: config.config.final_token)
+def hardreset(gid: int, token: str):
+    seed = db.seeds.get_final_seed(gid)
+    if seed is not None and config.config.final_tasks:
+        db.seeds.delete_final_seed(gid)
+        db.statuses.delete_group_task_statuses(gid)
+    return redirect(url_for("views.pre_exam", group_id=gid, token=token))
+
+
 @blueprint.errorhandler(Exception)
 def handle_views_errors(error):
     error_code = error.code if isinstance(error, HTTPException) else 500
