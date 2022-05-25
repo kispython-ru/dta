@@ -54,14 +54,6 @@ class GroupRepository:
             groups = session.query(Group).all()
             return groups
 
-    def get_groupings(self) -> Dict[str, List[Group]]:
-        groups = self.get_all()
-        groupings: Dict[str, List[Group]] = {}
-        for group in groups:
-            key = group.title.split("-")[0]
-            groupings.setdefault(key, []).append(group)
-        return groupings
-
     def get_by_prefix(self, prefix: str) -> List[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group) \

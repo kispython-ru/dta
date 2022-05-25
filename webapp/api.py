@@ -5,7 +5,7 @@ from flask import current_app as app
 from flask import jsonify, request
 
 from webapp.forms import CodeLength
-from webapp.managers import AppConfigManager, StatusManager
+from webapp.managers import AppConfigManager, GroupManager, StatusManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip
 
@@ -13,6 +13,12 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
+groups = GroupManager(
+    config=config,
+    groups=db.groups,
+    seeds=db.seeds,
+)
+
 statuses = StatusManager(
     tasks=db.tasks,
     groups=db.groups,
@@ -25,7 +31,7 @@ statuses = StatusManager(
 
 @blueprint.route("/group/prefixes", methods=["GET"])
 def group_prefixes():
-    groupings = db.groups.get_groupings()
+    groupings = groups.get_groupings()
     keys = list(groupings.keys())
     return jsonify(dict(prefixes=keys))
 

@@ -34,6 +34,32 @@ class AppConfigManager:
         return AppConfig(configuration)
 
 
+class GroupManager:
+    def __init__(
+        self,
+        config: AppConfigManager,
+        groups: GroupRepository,
+        seeds: FinalSeedRepository
+    ):
+        self.seeds = seeds
+        self.groups = groups
+        self.config = config
+
+    def get_groupings(self) -> Dict[str, List[Group]]:
+        config = self.config.config
+        groups = self.groups.get_all()
+        groupings: Dict[str, List[Group]] = {}
+        for group in groups:
+            if config.final_tasks is not None:
+                seed = self.seeds.get_final_seed(group.id)
+                if seed is None:
+                    continue
+            title: str = group.title
+            key = title.split("-")[0]
+            groupings.setdefault(key, []).append(group)
+        return groupings
+
+
 class ExternalTaskManager:
     def __init__(
         self,

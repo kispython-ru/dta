@@ -7,7 +7,12 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.forms import MessageForm
-from webapp.managers import AppConfigManager, ExportManager, StatusManager
+from webapp.managers import (
+    AppConfigManager,
+    ExportManager,
+    GroupManager,
+    StatusManager
+)
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip, require_token
 
@@ -15,6 +20,12 @@ from webapp.utils import get_exception_info, get_real_ip, require_token
 blueprint = Blueprint("views", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
+groups = GroupManager(
+    config=config,
+    groups=db.groups,
+    seeds=db.seeds,
+)
+
 statuses = StatusManager(
     tasks=db.tasks,
     groups=db.groups,
@@ -35,8 +46,9 @@ exports = ExportManager(
 
 @blueprint.route("/", methods=["GET"])
 def dashboard():
-    groupings = db.groups.get_groupings()
-    return render_template("dashboard.jinja", groupings=groupings)
+    groupings = groups.get_groupings()
+    exam = config.config.final_tasks is not None
+    return render_template("dashboard.jinja", groupings=groupings, exam=exam)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
@@ -116,7 +128,7 @@ def pre_exam(group_id: int, token: str):
 @require_token(lambda: config.config.final_token)
 def exam(group_id: int, token: str):
     seed = db.seeds.get_final_seed(group_id)
-    if seed is None:
+    if seed is None and config.config.final_tasks:
         db.seeds.begin_final_test(group_id)
     elif seed.active:
         db.seeds.end_final_test(group_id)
