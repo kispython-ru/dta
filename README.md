@@ -61,10 +61,11 @@ If you are using [code](https://code.visualstudio.com/), press `Ctrl+Shift+P` in
 
 ```sh
 # Use the following if you'd like to seed the database:
-# export SEED=1 && sh start.sh
+# export SEED=1
 # Don't forget to: unset SEED
-export CONFIG_PATH=/home/app/webapp/config
-. /home/app/.cache/pypoetry/virtualenvs/app-_h2eKbNq-py3.10/bin/activate
-cd src/webapp
-waitress-serve --port 8080 --call 'app:create_app'
+export CONFIG_PATH=/home/app/exam/config
+export DTA_RUNTIME=runsc
+. /home/app/.cache/pypoetry/virtualenvs/app-boZTFemB-py3.10/bin/activate
+cd src
+waitress-serve --listen localhost:8000 --threads 2 --call 'webapp.app:create_app'
 ```
