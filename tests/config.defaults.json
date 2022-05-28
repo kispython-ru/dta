@@ -12,5 +12,6 @@
     "JSON_AS_ASCII": false,
     "JSONIFY_PRETTYPRINT_REGULAR": false,
     "DISABLE_BACKGROUND_WORKER": true,
-    "TASK_BASE_URL": "http://sovietov.com/kispython"
+    "TASK_BASE_URL": "http://sovietov.com/kispython",
+    "READONLY": false
 }

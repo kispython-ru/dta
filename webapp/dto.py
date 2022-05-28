@@ -5,6 +5,20 @@ from flask import Config
 from webapp.models import Group, Status, Task, TaskStatus, Variant
 
 
+class AppConfig:
+    def __init__(self, config: Config):
+        self.highlight_syntax: bool = config["HIGHLIGHT_SYNTAX"]
+        self.core_path: str = config["CORE_PATH"]
+        self.csv_token: str = config["CSV_TOKEN"]
+        self.final_token: str = config["FINAL_TOKEN"]
+        self.api_token: str = config["API_TOKEN"]
+        self.connection_string: str = config["CONNECTION_STRING"]
+        self.task_base_url: str = config["TASK_BASE_URL"]
+        self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
+        self.final_tasks: Dict[str, List[int]] = config["FINAL_TASKS"]
+        self.readonly: bool = config["READONLY"]
+
+
 class ExternalTaskDto:
     def __init__(
         self,
@@ -20,9 +34,16 @@ class ExternalTaskDto:
 
 
 class TaskDto:
-    def __init__(self, group: Group, task: Task, url: str, random: bool):
+    def __init__(
+        self,
+        group: Group,
+        task: Task,
+        config: AppConfig,
+        random: bool
+    ):
         self.id = int(task.id)
-        self.url = f'{url}/{self.id}/{group.title}.html' if not random else "#"
+        self.original = f'{config.task_base_url}/{self.id}/{group.title}.html'
+        self.url = self.original if not random else "#"
 
 
 class TaskStatusDto:
@@ -33,17 +54,18 @@ class TaskStatusDto:
         task: TaskDto,
         status: Union[TaskStatus, None],
         external: ExternalTaskDto,
-        base_url: str,
+        config: AppConfig,
     ):
         self.task = task.id
         self.variant = variant.id
         self.group = int(group.id)
         self.group_title = group.title
-        self.base_url = base_url
+        self.base_url = config.task_base_url
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status == Status.Checked
         self.error_message = status.output if status is not None else None
+        self.readonly = config.readonly
 
     @property
     def submission_url(self) -> str:
@@ -104,7 +126,7 @@ class TaskStatusDto:
     def disabled(self) -> bool:
         checked = self.status == Status.Checked
         active = self.external.active
-        return checked or not active
+        return checked or not active or self.readonly
 
     def map_status(self, map: Dict[Status, str]):
         return map[self.status]
@@ -127,16 +149,3 @@ class GroupDto:
         self.id = int(group.id)
         self.tasks = tasks
         self.variants = variants
-
-
-class AppConfig:
-    def __init__(self, config: Config):
-        self.highlight_syntax: bool = config["HIGHLIGHT_SYNTAX"]
-        self.core_path: str = config["CORE_PATH"]
-        self.csv_token: str = config["CSV_TOKEN"]
-        self.final_token: str = config["FINAL_TOKEN"]
-        self.api_token: str = config["API_TOKEN"]
-        self.connection_string: str = config["CONNECTION_STRING"]
-        self.task_base_url: str = config["TASK_BASE_URL"]
-        self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
-        self.final_tasks: Dict[str, List[int]] = config["FINAL_TASKS"]

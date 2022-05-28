@@ -169,15 +169,15 @@ class StatusManager:
         return dto
 
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
-        base_url = self.config.config.task_base_url
+        config = self.config.config
         group = self.groups.get_by_id(gid)
         variant = self.variants.get_by_id(vid)
         task = self.tasks.get_by_id(tid)
         status = self.statuses.get_task_status(tid, vid, gid)
         e = self.__get_external_task_manager(group)
         ext = e.get_external_task(task.id, variant.id)
-        task_dto = TaskDto(group, task, base_url, e.random_active)
-        return TaskStatusDto(group, variant, task_dto, status, ext, base_url)
+        task_dto = TaskDto(group, task, config, e.random_active)
+        return TaskStatusDto(group, variant, task_dto, status, ext, config)
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)
@@ -199,13 +199,12 @@ class StatusManager:
         config: AppConfig,
         external: ExternalTaskManager,
     ) -> VariantDto:
-        base_url = config.task_base_url
         dtos: List[TaskStatusDto] = []
         for task in tasks:
             composite_key: Tuple[int, int] = (variant.id, task.id)
             status = statuses.get(composite_key)
             e = external.get_external_task(task.id, variant.id)
-            dto = TaskStatusDto(group, variant, task, status, e, base_url)
+            dto = TaskStatusDto(group, variant, task, status, e, config)
             dtos.append(dto)
         return VariantDto(variant, dtos)
 
@@ -215,11 +214,10 @@ class StatusManager:
         config: AppConfig,
         active: bool
     ) -> List[TaskDto]:
-        base_url = config.task_base_url
         tasks = self.tasks.get_all()
         dtos: List[TaskDto] = []
         for task in tasks:
-            dto = TaskDto(group, task, base_url, active)
+            dto = TaskDto(group, task, config, active)
             dtos.append(dto)
         return dtos
 
