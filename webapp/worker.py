@@ -82,6 +82,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 variant=message.variant,
                 group=message.group,
                 status=status,
+                ip=message.ip,
                 output=error,
             )
         except BaseException:

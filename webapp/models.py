@@ -82,6 +82,7 @@ class TaskStatus(Base):
     )
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
+    ip = sa.Column("ip", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
     status: sa.Column[Status] = sa.Column(
         "status",

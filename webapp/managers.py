@@ -54,6 +54,8 @@ class GroupManager:
                 seed = self.seeds.get_final_seed(group.id)
                 if seed is None:
                     continue
+                if not seed.active:
+                    continue
             title: str = group.title
             key = title.split("-")[0]
             groupings.setdefault(key, []).append(group)
@@ -281,7 +283,7 @@ class ExportManager:
         return rows
 
     def __create_exam_table(self, group_id: int) -> List[List[str]]:
-        header = ['Сдающая группа', 'Вариант']
+        header = ['Сдающая группа', 'Вариант', 'IP']
         tasks = self.tasks.get_all()
         for task in tasks:
             id = task.id + 1
@@ -290,6 +292,7 @@ class ExportManager:
                 f'№{id} Группа',
                 f'№{id} Вариант',
                 f'№{id} Задача',
+                f'№{id} IP'
             ]
         header.append('Сумма баллов')
         rows = []
@@ -308,6 +311,7 @@ class ExportManager:
                 row.append(info.external.group_title)
                 row.append(info.external.variant + 1)
                 row.append(info.external.task + 1)
+                row.append(info.ip)
                 score += status
             row.append(score)
             rows.append(row)
