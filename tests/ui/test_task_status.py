@@ -50,7 +50,14 @@ def test_task_status_html_status(db: AppDatabase, client: FlaskClient):
                 [Status.Checked, '+', 'background-color:#e3ffee']]
 
     for status, text, color in statuses:
-        db.statuses.update_status(tasks_id, variant_id, group_id, status.value, unique_str())
+        db.statuses.update_status(
+            tasks_id,
+            variant_id,
+            group_id,
+            status.value,
+            unique_str(),
+            unique_str()
+        )
         response = client.get(f'/group/{group_id}')
         html_group = response.get_data(as_text=True)
         tag_contents = next(tag for tag in get_tags(html_group, 'a', class_=tag_class)

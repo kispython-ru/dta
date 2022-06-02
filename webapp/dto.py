@@ -57,6 +57,7 @@ class TaskStatusDto:
         config: AppConfig,
     ):
         self.task = task.id
+        self.ip = status.ip if status is not None else "-"
         self.variant = variant.id
         self.group = int(group.id)
         self.group_title = group.title

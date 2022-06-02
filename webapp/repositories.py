@@ -170,7 +170,8 @@ class TaskStatusRepository:
             variant: int,
             group: int,
             status: int,
-            output: str):
+            output: str,
+            ip: str):
         existing = self.get_task_status(task, variant, group)
         if existing is not None:
             if existing.status == Status.Checked:
@@ -178,7 +179,11 @@ class TaskStatusRepository:
         with self.db.create_session() as session:
             session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
-                .update({"status": status, "output": output})
+                .update({
+                    "status": status,
+                    "output": output,
+                    "ip": ip,
+                })
             session.commit()
 
     def submit_task(

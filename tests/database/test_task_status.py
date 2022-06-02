@@ -45,10 +45,25 @@ def test_task_status_update_status(db: AppDatabase):
 
     for ts_enum in Status:
         if ts_enum != Status.Checked:
-            db.statuses.update_status(task, variant, group, ts_enum.value, unique_str())
+            db.statuses.update_status(
+                task,
+                variant,
+                group,
+                ts_enum.value,
+                unique_str(),
+                unique_str()
+            )
             task_status = db.statuses.get_task_status(task, variant, group)
             assert task_status.status == ts_enum.value
 
-    db.statuses.update_status(task, variant, group, Status.Checked, unique_str())
+    db.statuses.update_status(
+        task,
+        variant,
+        group,
+        Status.Checked,
+        unique_str(),
+        unique_str()
+    )
+
     task_status = db.statuses.get_task_status(task, variant, group)
     assert task_status.status == Status.Checked
