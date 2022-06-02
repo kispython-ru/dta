@@ -283,7 +283,7 @@ class ExportManager:
         return rows
 
     def __create_exam_table(self, group_id: int) -> List[List[str]]:
-        header = ['Сдающая группа', 'Вариант', 'IP']
+        header = ['Сдающая группа', 'Вариант']
         tasks = self.tasks.get_all()
         for task in tasks:
             id = task.id + 1
@@ -292,9 +292,9 @@ class ExportManager:
                 f'№{id} Группа',
                 f'№{id} Вариант',
                 f'№{id} Задача',
-                f'№{id} IP'
+                f'№{id} IP адрес'
             ]
-        header.append('Сумма баллов')
+        header.append('Решено задач')
         rows = []
         for variant in self.variants.get_all():
             group_title = self.groups.get_by_id(group_id).title
