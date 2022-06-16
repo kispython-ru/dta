@@ -4,13 +4,8 @@ fix:
 
 .PHONY: lint
 lint:
-	pycodestyle --max-line-length 119 .
+	pycodestyle --max-line-length 119 --exclude .venv .
 	isort -qc .
-
-.PHONY: lint-win
-lint-win:
-	cd webapp && FOR %%i in (*.py) DO pycodestyle %%i
-	isort -qc .	
 
 .PHONY: test
 test:
