@@ -68,17 +68,6 @@ class TaskStatus(Base):
     output = sa.Column("output", sa.String, nullable=True)
     status: sa.Column[Status] = sa.Column("status", IntEnum(Status), nullable=False)
 
-    def __eq__(self, other):
-        if isinstance(other, TaskStatus):
-            return self.task == other.task and \
-                self.variant == other.variant and \
-                self.group == other.group and \
-                self.time == other.time and \
-                self.code == other.code and \
-                self.output == other.output and \
-                self.status == other.status
-        return super.__eq__(self, other)
-
 
 class Message(Base):
     __tablename__ = "messages"
@@ -101,18 +90,6 @@ class Message(Base):
             ip=self.ip,
             processed=self.processed,
         ))
-
-    def __eq__(self, other):
-        if isinstance(other, Message):
-            return self.task == other.task and \
-                self.variant == other.variant and \
-                self.group == other.group and \
-                self.time == other.time and \
-                self.code == other.code and \
-                self.ip == other.ip and \
-                self.processed == other.processed and \
-                self.id == other.id
-        return super.__eq__(self, other)
 
 
 class FinalSeed(Base):
