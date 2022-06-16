@@ -80,17 +80,6 @@ class Message(Base):
     ip = sa.Column("ip", sa.String, nullable=False)
     processed = sa.Column("processed", sa.Boolean, nullable=False)
 
-    def __str__(self):
-        return str(dict(
-            id=self.id,
-            task=self.task,
-            variant=self.variant,
-            group=self.group,
-            time=self.time,
-            ip=self.ip,
-            processed=self.processed,
-        ))
-
 
 class FinalSeed(Base):
     __tablename__ = "final_seeds"
