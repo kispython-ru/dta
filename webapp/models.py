@@ -81,6 +81,15 @@ class Message(Base):
     processed = sa.Column("processed", sa.Boolean, nullable=False)
 
 
+class MessageCheck(Base):
+    __tablename__ = "message_checks"
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    message = sa.Column("message", sa.Integer, sa.ForeignKey("messages.id"), nullable=False)
+    time = sa.Column('time', sa.DateTime, nullable=False)
+    status = sa.Column('status', sa.Integer, nullable=False)
+    output = sa.Column('output', sa.String, nullable=True)
+
+
 class FinalSeed(Base):
     __tablename__ = "final_seeds"
     seed = sa.Column("seed", sa.String, unique=True, nullable=False)
