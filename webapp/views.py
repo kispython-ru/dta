@@ -7,12 +7,7 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.forms import MessageForm
-from webapp.managers import (
-    AppConfigManager,
-    ExportManager,
-    GroupManager,
-    StatusManager
-)
+from webapp.managers import AppConfigManager, ExportManager, GroupManager, StatusManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip, require_token
 

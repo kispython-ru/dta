@@ -5,14 +5,7 @@ from typing import Callable, Dict, List, Tuple, Union
 
 from flask import Config
 
-from webapp.dto import (
-    AppConfig,
-    ExternalTaskDto,
-    GroupDto,
-    TaskDto,
-    TaskStatusDto,
-    VariantDto
-)
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
 from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Variant
 from webapp.repositories import (
     FinalSeedRepository,

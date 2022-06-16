@@ -24,12 +24,10 @@ def test_group_html_title(db: AppDatabase, client: FlaskClient):
 
     response = client.get('/')
     html = response.get_data(as_text=True)
-
-    tag_contents = [tag.get_text() for tag in get_tags(html, 'a', True)]
-    number = [tag_content for tag_content in tag_contents if title in tag_content]
+    contents = [tag.get_text() for tag in get_tags(html, 'a', True)]
 
     assert response.content_type == 'text/html; charset=utf-8'
-    assert len(number) == 1
+    assert len([text for text in contents if title in text]) == 1
 
 
 def test_group_html_link(db: AppDatabase, client: FlaskClient):
@@ -44,8 +42,8 @@ def test_group_html_link(db: AppDatabase, client: FlaskClient):
     response = client.get(f'/group/{group_id}')
     html_group = response.get_data(as_text=True)
 
-    tag_contents = next(tag.get('href') for tag in get_tags(html_dashboard, 'a', True) if
-                        tag.get('href') == f'/group/{group_id}')
+    tags = [tag.get('href') for tag in get_tags(html_dashboard, 'a', True)]
+    tag_contents = next(tag for tag in tags if tag == f'/group/{group_id}')
 
     response = client.get(tag_contents)
     html_group_href = response.get_data(as_text=True)

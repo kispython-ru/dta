@@ -4,7 +4,7 @@ fix:
 
 .PHONY: lint
 lint:
-	pycodestyle ./**/*.py
+	pycodestyle --max-line-length 119 .
 	isort -qc .
 
 .PHONY: lint-win

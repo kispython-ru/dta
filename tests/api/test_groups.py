@@ -22,17 +22,16 @@ def test_group_prefixes(db: AppDatabase, client: FlaskClient):
 
 
 def test_group_fetching(db: AppDatabase, client: FlaskClient):
-    prefix_one = unique_str()
-    prefix_two = unique_str()
+    prefix = unique_str()
     db.groups.create_by_names([
-        prefix_one + unique_str(),
-        prefix_two + unique_str(),
-        prefix_one + unique_str()
+        prefix + unique_str(),
+        unique_str() + unique_str(),
+        prefix + unique_str()
     ])
 
-    response = client.get(f"/api/v1/group/{prefix_one}")
+    response = client.get(f"/api/v1/group/{prefix}")
 
     assert response.is_json
     assert len(response.json) == 2
-    assert response.json[0]["title"].startswith(prefix_one)
-    assert response.json[1]["title"].startswith(prefix_one)
+    assert response.json[0]["title"].startswith(prefix)
+    assert response.json[1]["title"].startswith(prefix)

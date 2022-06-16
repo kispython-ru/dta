@@ -9,11 +9,11 @@ from webapp.repositories import AppDatabase
 
 
 def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_task(db)
+    (group, var, task) = arrange_task(db)
     group_title = db.groups.get_by_id(group).title
 
-    default_template = f'/{task}/{group_title}.html#вариант-{variant + 1}'
-    response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
+    default_template = f'/{task}/{group_title}.html#вариант-{var + 1}'
+    response = client.get(f"/api/v1/group/{group}/variant/{var}/task/{task}")
 
     assert response.is_json
     assert response.json['id'] == task
@@ -23,12 +23,12 @@ def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
 
 
 def test_final_seed_is_used(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_task(db)
+    (group, var, task) = arrange_task(db)
     group_title = db.groups.get_by_id(group).title
     db.seeds.begin_final_test(group)
 
-    default_template = f'/{task}/{group_title}.html#вариант-{variant + 1}'
-    response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/{task}")
+    default_template = f'/{task}/{group_title}.html#вариант-{var + 1}'
+    response = client.get(f"/api/v1/group/{group}/variant/{var}/task/{task}")
 
     assert response.is_json
     assert response.json['id'] == task
@@ -54,7 +54,7 @@ def test_final_submissions_are_allowed(db: AppDatabase, client: FlaskClient):
     assert response.json['status_name'] == "Отправлено"
 
 
-def test_final_submissions_are_disallowed(db: AppDatabase, client: FlaskClient):
+def test_final_submissions_are_paused(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_task(db)
     db.seeds.begin_final_test(group)
     db.seeds.end_final_test(group)
