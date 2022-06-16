@@ -22,8 +22,8 @@ def test_task_status_fetching_by_group(db: AppDatabase):
     db.statuses.submit_task(task_1, variant, group, code)
     db.statuses.submit_task(task_2, variant, group, code)
 
-    task_status = db.statuses.get_by_group(group)
-    assert all([task.task == task_1 or task.task == task_2 for task in task_status])
+    status = db.statuses.get_by_group(group)
+    assert all(task.task == task_1 or task.task == task_2 for task in status)
 
 
 def test_task_status_get_task_status(db: AppDatabase):

@@ -12,7 +12,7 @@ from webapp.repositories import AppDatabase
 
 
 @pytest.mark.parametrize('app', ([True]), indirect=True)
-def test_background_task_check(db: AppDatabase, client: FlaskClient, app: Flask):
+def test_background_task_check(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_task(db)
     url = f"/api/v1/group/{group}/variant/{variant}/task/{task}"
 

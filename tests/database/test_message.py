@@ -37,14 +37,14 @@ def test_message_mark_at_process(db: AppDatabase):
     messages = db.messages.get_all()
     message = next(mess for mess in messages if mess.task == task)
     assert message is not None
-    assert message.processed == False
+    assert not message.processed
 
     db.messages.mark_as_processed(task, variant, group)
 
     messages = db.messages.get_all()
     message = next(mess for mess in messages if mess.task == task)
     assert message is not None
-    assert message.processed == True
+    assert message.processed
 
 
 def test_message_get_pending(db: AppDatabase):
@@ -63,10 +63,10 @@ def test_message_get_pending(db: AppDatabase):
     db.messages.mark_as_processed(task_2, variant, group)
 
     messages = db.messages.get_all()
-    message_pending = list(filter(lambda m: m.processed == False, messages))
+    message_pending = list(filter(lambda m: not m.processed, messages))
     message = db.messages.get_pending_messages()
 
-    assert not any(mess.processed == True for mess in message)
+    assert not any(mess.processed for mess in message)
     assert len(message) == len(message_pending)
     assert message == message_pending
 

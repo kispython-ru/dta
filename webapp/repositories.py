@@ -5,16 +5,7 @@ from typing import Callable, Dict, List, Union
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from webapp.models import (
-    FinalSeed,
-    Group,
-    Message,
-    Status,
-    Task,
-    TaskStatus,
-    Variant,
-    create_session_maker
-)
+from webapp.models import FinalSeed, Group, Message, Status, Task, TaskStatus, Variant, create_session_maker
 
 
 class DbContext:

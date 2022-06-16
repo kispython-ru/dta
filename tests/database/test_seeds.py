@@ -19,7 +19,7 @@ def test_final_seed_is_not_empty(db: AppDatabase):
 
     assert seed is not None
     assert seed.group == group.id
-    assert seed.active == True
+    assert seed.active
 
 
 def test_final_test_is_finished(db: AppDatabase):
@@ -33,4 +33,4 @@ def test_final_test_is_finished(db: AppDatabase):
 
     assert seed is not None
     assert seed.group == group.id
-    assert seed.active == False
+    assert not seed.active

@@ -6,6 +6,31 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
+class IntEnum(sa.TypeDecorator):
+    impl = sa.Integer
+    cache_ok = True
+
+    def __init__(self, enumtype, *args, **kwargs):
+        super(IntEnum, self).__init__(*args, **kwargs)
+        self._enumtype = enumtype
+
+    def process_bind_param(self, value, dialect):
+        if isinstance(value, int):
+            return value
+        return value.value
+
+    def process_result_value(self, value, dialect):
+        return self._enumtype(value)
+
+
+class Status(enum.IntEnum):
+    Submitted = 0
+    Checking = 1
+    Checked = 2
+    Failed = 3
+    NotSubmitted = 4
+
+
 Base = declarative_base()
 
 
@@ -32,63 +57,16 @@ class Variant(Base):
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
 
 
-class IntEnum(sa.TypeDecorator):
-    impl = sa.Integer
-    cache_ok = True
-
-    def __init__(self, enumtype, *args, **kwargs):
-        super(IntEnum, self).__init__(*args, **kwargs)
-        self._enumtype = enumtype
-
-    def process_bind_param(self, value, dialect):
-        if isinstance(value, int):
-            return value
-        return value.value
-
-    def process_result_value(self, value, dialect):
-        return self._enumtype(value)
-
-
-class Status(enum.IntEnum):
-    Submitted = 0
-    Checking = 1
-    Checked = 2
-    Failed = 3
-    NotSubmitted = 4
-
-
 class TaskStatus(Base):
     __tablename__ = "task_statuses"
-    task = sa.Column(
-        "task",
-        sa.Integer,
-        sa.ForeignKey("tasks.id"),
-        primary_key=True,
-        nullable=False,
-    )
-    variant = sa.Column(
-        "variant",
-        sa.Integer,
-        sa.ForeignKey("variants.id"),
-        primary_key=True,
-        nullable=False,
-    )
-    group = sa.Column(
-        "group",
-        sa.Integer,
-        sa.ForeignKey("groups.id"),
-        primary_key=True,
-        nullable=False,
-    )
+    task = sa.Column("task", sa.Integer, sa.ForeignKey("tasks.id"), primary_key=True, nullable=False)
+    variant = sa.Column("variant", sa.Integer, sa.ForeignKey("variants.id"), primary_key=True, nullable=False)
+    group = sa.Column("group", sa.Integer, sa.ForeignKey("groups.id"), primary_key=True, nullable=False)
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
     ip = sa.Column("ip", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
-    status: sa.Column[Status] = sa.Column(
-        "status",
-        IntEnum(Status),
-        nullable=False
-    )
+    status: sa.Column[Status] = sa.Column("status", IntEnum(Status), nullable=False)
 
     def __eq__(self, other):
         if isinstance(other, TaskStatus):
@@ -105,24 +83,9 @@ class TaskStatus(Base):
 class Message(Base):
     __tablename__ = "messages"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
-    task = sa.Column(
-        "task",
-        sa.Integer,
-        sa.ForeignKey("tasks.id"),
-        nullable=False,
-    )
-    variant = sa.Column(
-        "variant",
-        sa.Integer,
-        sa.ForeignKey("variants.id"),
-        nullable=False,
-    )
-    group = sa.Column(
-        "group",
-        sa.Integer,
-        sa.ForeignKey("groups.id"),
-        nullable=False,
-    )
+    task = sa.Column("task", sa.Integer, sa.ForeignKey("tasks.id"), nullable=False)
+    variant = sa.Column("variant", sa.Integer, sa.ForeignKey("variants.id"), nullable=False)
+    group = sa.Column("group", sa.Integer, sa.ForeignKey("groups.id"), nullable=False)
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
     ip = sa.Column("ip", sa.String, nullable=False)
@@ -156,9 +119,4 @@ class FinalSeed(Base):
     __tablename__ = "final_seeds"
     seed = sa.Column("seed", sa.String, unique=True, nullable=False)
     active = sa.Column("active", sa.Boolean, nullable=False)
-    group = sa.Column(
-        "group",
-        sa.Integer,
-        sa.ForeignKey('groups.id'),
-        primary_key=True,
-        nullable=False)
+    group = sa.Column("group", sa.Integer, sa.ForeignKey('groups.id'), primary_key=True, nullable=False)
