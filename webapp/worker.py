@@ -85,6 +85,11 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 ip=message.ip,
                 output=error,
             )
+            db.checks.record_check(
+                message=message.id,
+                status=status,
+                output=error,
+            )
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured while checking for messages: {exception}")
