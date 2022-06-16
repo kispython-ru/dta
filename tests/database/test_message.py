@@ -59,16 +59,15 @@ def test_message_get_pending(db: AppDatabase):
     db.messages.submit_task(task_1, variant, group, code, ip)
     db.messages.submit_task(task_2, variant, group, code, ip)
     db.messages.submit_task(task_3, variant, group, code, ip)
-
     db.messages.mark_as_processed(task_2, variant, group)
 
     messages = db.messages.get_all()
-    message_pending = list(filter(lambda m: not m.processed, messages))
-    message = db.messages.get_pending_messages()
+    pending = list(filter(lambda m: not m.processed, messages))
+    messages = db.messages.get_pending_messages()
 
-    assert not any(mess.processed for mess in message)
-    assert len(message) == len(message_pending)
-    assert message == message_pending
+    assert not any(mess.processed for mess in messages)
+    assert len(messages) == len(pending)
+    assert messages[0].code == pending[0].code
 
 
 def test_message_pending_unique(db: AppDatabase):

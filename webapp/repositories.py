@@ -5,7 +5,17 @@ from typing import Callable, Dict, List, Union
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from webapp.models import FinalSeed, Group, Message, Status, Task, TaskStatus, Variant, create_session_maker
+from webapp.models import (
+    FinalSeed,
+    Group,
+    Message,
+    MessageCheck,
+    Status,
+    Task,
+    TaskStatus,
+    Variant,
+    create_session_maker
+)
 
 
 class DbContext:
@@ -220,12 +230,13 @@ class MessageRepository:
         self.db = db
 
     def submit_task(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str,
-            ip: str) -> Message:
+        self,
+        task: int,
+        variant: int,
+        group: int,
+        code: str,
+        ip: str
+    ) -> Message:
         with self.db.create_session() as session:
             now = datetime.datetime.now()
             message = Message(
@@ -264,6 +275,12 @@ class MessageRepository:
                 .all()
             return pending
 
+    def get(self, task: int, variant: int, group: int) -> Union[Message, None]:
+        with self.db.create_session() as session:
+            return session.query(Message) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .first()
+
     def get_pending_messages_unique(self) -> List[Message]:
         pending_messages = self.get_pending_messages()
         unique_messages = []
@@ -282,6 +299,35 @@ class MessageRepository:
                 .filter_by(task=task, variant=variant, group=group) \
                 .update({"processed": True})
             session.commit()
+
+
+class MessageCheckRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def get(self, message: int) -> MessageCheck:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck) \
+                .filter_by(message=message) \
+                .first()
+
+    def record_check(
+        self,
+        message: int,
+        status: TaskStatus,
+        output: Union[str, None]
+    ) -> MessageCheck:
+        with self.db.create_session() as session:
+            now = datetime.datetime.now()
+            check = MessageCheck(
+                message=message,
+                status=status,
+                output=output,
+                time=now,
+            )
+            session.add(check)
+            session.commit()
+            return check
 
 
 class FinalSeedRepository:
@@ -330,4 +376,5 @@ class AppDatabase:
         self.tasks = TaskRepository(db)
         self.statuses = TaskStatusRepository(db)
         self.messages = MessageRepository(db)
+        self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
