@@ -230,12 +230,12 @@ class MessageRepository:
         self.db = db
 
     def submit_task(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str,
-            ip: str
+        self,
+        task: int,
+        variant: int,
+        group: int,
+        code: str,
+        ip: str
     ) -> Message:
         with self.db.create_session() as session:
             now = datetime.datetime.now()
@@ -275,6 +275,12 @@ class MessageRepository:
                 .all()
             return pending
 
+    def get(self, task: int, variant: int, group: int) -> Union[Message, None]:
+        with self.db.create_session() as session:
+            return session.query(Message) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .first()
+
     def get_pending_messages_unique(self) -> List[Message]:
         pending_messages = self.get_pending_messages()
         unique_messages = []
@@ -298,6 +304,12 @@ class MessageRepository:
 class MessageCheckRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
+
+    def get(self, message: int) -> MessageCheck:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck) \
+                .filter_by(message=message) \
+                .first()
 
     def record_check(
         self,
