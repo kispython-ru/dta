@@ -81,6 +81,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 task=message.task,
                 variant=message.variant,
                 group=message.group,
+                code=message.code,
                 status=status,
                 ip=message.ip,
                 output=error,

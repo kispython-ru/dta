@@ -7,7 +7,7 @@ from webapp.repositories import AppDatabase
 def test_task_status_creation(db: AppDatabase):
     (group, variant, task) = arrange_task(db)
 
-    db.statuses.submit_task(task, variant, group, unique_str())
+    db.statuses.submit_task(task, variant, group, unique_str(), unique_str())
     task_statuses = db.statuses.get_all()
 
     assert any(task_status.task == task for task_status in task_statuses)
@@ -19,8 +19,8 @@ def test_task_status_fetching_by_group(db: AppDatabase):
 
     task_2 = unique_int()
     db.tasks.create_by_ids([task_2])
-    db.statuses.submit_task(task_1, variant, group, code)
-    db.statuses.submit_task(task_2, variant, group, code)
+    db.statuses.submit_task(task_1, variant, group, code, unique_str())
+    db.statuses.submit_task(task_2, variant, group, code, unique_str())
 
     status = db.statuses.get_by_group(group)
     assert all(task.task == task_1 or task.task == task_2 for task in status)
@@ -29,7 +29,7 @@ def test_task_status_fetching_by_group(db: AppDatabase):
 def test_task_status_get_task_status(db: AppDatabase):
     (group, variant, task) = arrange_task(db)
     code = unique_str()
-    db.statuses.submit_task(task, variant, group, code)
+    db.statuses.submit_task(task, variant, group, code, unique_str())
 
     task_status = db.statuses.get_task_status(task, variant, group)
     assert task_status.task == task
@@ -41,7 +41,7 @@ def test_task_status_get_task_status(db: AppDatabase):
 
 def test_task_status_update_status(db: AppDatabase):
     (group, variant, task) = arrange_task(db)
-    db.statuses.submit_task(task, variant, group, unique_str())
+    db.statuses.submit_task(task, variant, group, unique_str(), unique_str())
 
     for ts_enum in Status:
         if ts_enum != Status.Checked:
@@ -49,6 +49,7 @@ def test_task_status_update_status(db: AppDatabase):
                 task,
                 variant,
                 group,
+                unique_str(),
                 ts_enum.value,
                 unique_str(),
                 unique_str()
@@ -60,6 +61,7 @@ def test_task_status_update_status(db: AppDatabase):
         task,
         variant,
         group,
+        unique_str(),
         Status.Checked,
         unique_str(),
         unique_str()

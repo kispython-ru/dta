@@ -74,8 +74,9 @@ def submit_task(gid: int, vid: int, tid: int):
     available = status.external.active and not config.config.readonly
     if valid and available:
         code = form.code.data
-        db.messages.submit_task(tid, vid, gid, code, get_real_ip(request))
-        db.statuses.submit_task(tid, vid, gid, code)
+        ip = get_real_ip(request)
+        db.messages.submit_task(tid, vid, gid, code, ip)
+        db.statuses.submit_task(tid, vid, gid, code, ip)
         return render_template("success.jinja", status=status)
     highlight = config.config.highlight_syntax
     return render_template(

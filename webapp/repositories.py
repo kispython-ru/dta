@@ -170,21 +170,29 @@ class TaskStatusRepository:
             task: int,
             variant: int,
             group: int,
+            code: str,
             status: int,
             output: str,
             ip: str):
         existing = self.get_task_status(task, variant, group)
-        if existing is not None:
-            if existing.status == Status.Checked:
-                return  # We've already accepted this task!
+        if existing is not None and existing.status == Status.Checked:
+            return  # We've already accepted this task!
         with self.db.create_session() as session:
-            session.query(TaskStatus) \
-                .filter_by(task=task, variant=variant, group=group) \
-                .update({
-                    "status": status,
-                    "output": output,
-                    "ip": ip,
-                })
+            if existing is not None:
+                session.query(TaskStatus) \
+                    .filter_by(task=task, variant=variant, group=group) \
+                    .update(dict(code=code, status=status, output=output, ip=ip))
+            else:
+                session.add(TaskStatus(
+                    time=datetime.datetime.now(),
+                    task=task,
+                    variant=variant,
+                    group=group,
+                    code=code,
+                    status=status,
+                    output=output,
+                    ip=ip,
+                ))
             session.commit()
 
     def submit_task(
@@ -192,7 +200,8 @@ class TaskStatusRepository:
             task: int,
             variant: int,
             group: int,
-            code: str) -> TaskStatus:
+            code: str,
+            ip: str) -> TaskStatus:
         with self.db.create_session() as session:
             existing: TaskStatus = session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
@@ -202,16 +211,15 @@ class TaskStatusRepository:
                     return  # We've already accepted this task!
                 session.delete(existing)
                 session.commit()
-            now = datetime.datetime.now()
-            status = Status.Submitted
             task_status = TaskStatus(
                 task=task,
                 variant=variant,
                 group=group,
-                time=now,
                 code=code,
                 output=None,
-                status=status,
+                time=datetime.datetime.now(),
+                status=Status.Submitted,
+                ip=ip,
             )
             session.add(task_status)
             session.commit()
