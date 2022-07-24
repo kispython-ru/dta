@@ -41,7 +41,7 @@ def load_tests(core_path: str):
 
 
 def process_pending_messages(core_path: str, db: AppDatabase):
-    pending_messages = db.messages.get_pending_messages_unique()
+    pending_messages = db.messages.get_pending_messages()
     message_count = len(pending_messages)
     if message_count == 0:
         return

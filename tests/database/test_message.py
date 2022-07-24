@@ -67,17 +67,4 @@ def test_message_get_pending(db: AppDatabase):
 
     assert not any(mess.processed for mess in messages)
     assert len(messages) == len(pending)
-    assert messages[0].code == pending[0].code
-
-
-def test_message_pending_unique(db: AppDatabase):
-    (group, variant, task) = arrange_task(db)
-    code = unique_str()
-    ip = unique_str()
-
-    db.messages.submit_task(task, variant, group, code, ip)
-    db.messages.submit_task(task, variant, group, code, ip)
-
-    messages = db.messages.get_pending_messages_unique()
-    message_count = len(list(filter(lambda m: m.task == task, messages)))
-    assert message_count == 1
+    assert messages[-1].code == pending[0].code

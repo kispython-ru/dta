@@ -271,7 +271,7 @@ class MessageRepository:
         with self.db.create_session() as session:
             pending = session.query(Message) \
                 .filter_by(processed=False) \
-                .order_by(Message.time.desc()) \
+                .order_by(Message.time.asc()) \
                 .all()
             return pending
 
@@ -280,18 +280,6 @@ class MessageRepository:
             return session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
-
-    def get_pending_messages_unique(self) -> List[Message]:
-        pending_messages = self.get_pending_messages()
-        unique_messages = []
-        seen_keys = []
-        for message in pending_messages:
-            key = (message.group, message.variant, message.task)
-            if key in seen_keys:
-                continue
-            seen_keys.append(key)
-            unique_messages.append(message)
-        return unique_messages
 
     def mark_as_processed(self, task: int, variant: int, group: int):
         with self.db.create_session() as session:
