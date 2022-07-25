@@ -53,6 +53,9 @@
       {% if status.error_message is not none and status.error_message %}
         <div>Подробные сведения об ошибке:</div>
         <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
+      {% elif status.analytics is not none and status.analytics %}
+        <div>Сведения о принятом решении:</div>
+        <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.analytics | e }}</div>
       {% else %}
         <div class="mb-2"></div>
       {% endif %}

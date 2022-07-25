@@ -4,6 +4,7 @@
     "TEMPLATES_AUTO_RELOAD": true,
     "CONNECTION_STRING": "sqlite:///web-app.db",
     "CORE_PATH": "../mocks",
+    "ANALYTICS_PATH": "../mocks",
     "CSV_TOKEN": "CHANGE_ME",
     "API_TOKEN": "CHANGE_ME",
     "SECRET_KEY": "CHANGE_ME",

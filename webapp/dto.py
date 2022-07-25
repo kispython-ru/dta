@@ -9,6 +9,7 @@ class AppConfig:
     def __init__(self, config: Config):
         self.highlight_syntax: bool = config["HIGHLIGHT_SYNTAX"]
         self.core_path: str = config["CORE_PATH"]
+        self.analytics_path: str = config["ANALYTICS_PATH"]
         self.csv_token: str = config["CSV_TOKEN"]
         self.final_token: str = config["FINAL_TOKEN"]
         self.api_token: str = config["API_TOKEN"]
@@ -65,7 +66,8 @@ class TaskStatusDto:
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status == Status.Checked
-        self.error_message = status.output if status is not None else None
+        self.error_message = status.output if self.status == Status.Failed else None
+        self.analytics = status.output if self.status == Status.Checked else None
         self.readonly = config.readonly
 
     @property

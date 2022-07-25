@@ -40,6 +40,14 @@ def load_tests(core_path: str):
     return GROUPS, TASKS
 
 
+def analyze_solution(analytics_path: str, task: int, code: str):
+    if analytics_path not in sys.path:
+        sys.path.insert(1, analytics_path)
+    from analyze_solution import analyze_solution
+    analytics = analyze_solution(task, code)
+    return analytics
+
+
 def process_pending_messages(core_path: str, db: AppDatabase):
     pending_messages = db.messages.get_pending_messages()
     message_count = len(pending_messages)
@@ -72,6 +80,11 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             )
             print(f"Check result: {ok}, {error}")
             status = Status.Checked if ok else Status.Failed
+            output = error if not ok else analyze_solution(
+                analytics_path=config.config.analytics_path,
+                code=message.code,
+                task=ext.task,
+            )
             db.messages.mark_as_processed(
                 task=message.task,
                 variant=message.variant,
@@ -84,12 +97,12 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 code=message.code,
                 status=status,
                 ip=message.ip,
-                output=error,
+                output=output,
             )
             db.checks.record_check(
                 message=message.id,
                 status=status,
-                output=error,
+                output=output,
             )
         except BaseException:
             exception = get_exception_info()
