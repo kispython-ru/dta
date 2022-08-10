@@ -27,8 +27,10 @@ class DbContext:
         return self.session
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val, trace):
-        if exc_type is not None and exc_type is IntegrityError:
+        if exc_type is not None:
             self.session.rollback()
+        else:
+            self.session.commit()
         self.session.close()
 
 
@@ -75,13 +77,11 @@ class GroupRepository:
         with self.db.create_session() as session:
             group = Group(title=name)
             session.add(group)
-            session.commit()
             return group
 
     def delete_all(self):
         with self.db.create_session() as session:
             session.query(Group).delete()
-            session.commit()
 
 
 class TaskRepository:
@@ -103,12 +103,10 @@ class TaskRepository:
             for task_id in ids:
                 group = Task(id=task_id)
                 session.add(group)
-            session.commit()
 
     def delete_all(self):
         with self.db.create_session() as session:
             session.query(Task).delete()
-            session.commit()
 
 
 class VariantRepository:
@@ -130,12 +128,10 @@ class VariantRepository:
             for variant_id in ids:
                 task = Variant(id=variant_id)
                 session.add(task)
-            session.commit()
 
     def delete_all(self):
         with self.db.create_session() as session:
             session.query(Variant).delete()
-            session.commit()
 
 
 class TaskStatusRepository:
@@ -182,18 +178,17 @@ class TaskStatusRepository:
                 session.query(TaskStatus) \
                     .filter_by(task=task, variant=variant, group=group) \
                     .update(dict(code=code, status=status, output=output, ip=ip))
-            else:
-                session.add(TaskStatus(
-                    time=datetime.datetime.now(),
-                    task=task,
-                    variant=variant,
-                    group=group,
-                    code=code,
-                    status=status,
-                    output=output,
-                    ip=ip,
-                ))
-            session.commit()
+                return
+            session.add(TaskStatus(
+                time=datetime.datetime.now(),
+                task=task,
+                variant=variant,
+                group=group,
+                code=code,
+                status=status,
+                output=output,
+                ip=ip,
+            ))
 
     def submit_task(
             self,
@@ -210,7 +205,6 @@ class TaskStatusRepository:
                 if existing.status == Status.Checked:
                     return  # We've already accepted this task!
                 session.delete(existing)
-                session.commit()
             task_status = TaskStatus(
                 task=task,
                 variant=variant,
@@ -222,7 +216,6 @@ class TaskStatusRepository:
                 ip=ip,
             )
             session.add(task_status)
-            session.commit()
             return task_status
 
     def delete_group_task_statuses(self, group: int):
@@ -246,18 +239,16 @@ class MessageRepository:
         ip: str
     ) -> Message:
         with self.db.create_session() as session:
-            now = datetime.datetime.now()
             message = Message(
+                processed=False,
+                time=datetime.datetime.now(),
                 task=task,
                 variant=variant,
                 group=group,
-                time=now,
                 code=code,
                 ip=ip,
-                processed=False,
             )
             session.add(message)
-            session.commit()
             return message
 
     def get_all(self) -> List[Message]:
@@ -293,8 +284,7 @@ class MessageRepository:
         with self.db.create_session() as session:
             session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
-                .update({"processed": True})
-            session.commit()
+                .update(dict(processed=True))
 
 
 class MessageCheckRepository:
@@ -314,15 +304,13 @@ class MessageCheckRepository:
         output: Union[str, None]
     ) -> MessageCheck:
         with self.db.create_session() as session:
-            now = datetime.datetime.now()
             check = MessageCheck(
+                time=datetime.datetime.now(),
                 message=message,
                 status=status,
                 output=output,
-                time=now,
             )
             session.add(check)
-            session.commit()
             return check
 
 
@@ -340,28 +328,24 @@ class FinalSeedRepository:
         seed = str(uuid.uuid4())
         with self.db.create_session() as session:
             session.add(FinalSeed(group=group, seed=seed, active=True))
-            session.commit()
 
     def continue_final_test(self, group: int):
         with self.db.create_session() as session:
             session.query(FinalSeed) \
                 .filter_by(group=group) \
-                .update({"active": True})
-            session.commit()
+                .update(dict(active=True))
 
     def end_final_test(self, group: int):
         with self.db.create_session() as session:
             session.query(FinalSeed) \
                 .filter_by(group=group) \
-                .update({"active": False})
-            session.commit()
+                .update(dict(active=False))
 
     def delete_final_seed(self, group: int):
         with self.db.create_session() as session:
             session.query(FinalSeed) \
                 .filter_by(group=group) \
                 .delete()
-            session.commit()
 
 
 class AppDatabase:
