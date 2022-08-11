@@ -100,11 +100,12 @@ def hardreset(group_id: int):
     return redirect(f'/admin/group/{group_id}')
 
 
-@blueprint.route("/csv/<sep>/<count>", methods=["GET"])
-@blueprint.route("/csv/<sep>", methods=["GET"], defaults={"count": None})
+@blueprint.route("/admin/messages", methods=["GET"])
 @jwt_required()
-def export(sep: str, count: int | None):
-    value = exports.export_messages(count, sep)
+def messages():
+    separator = request.args.get('separator')
+    count = request.args.get('count')
+    value = exports.export_messages(count, separator)
     output = make_response(value)
     output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
     output.headers["Content-type"] = "text/csv"
@@ -120,7 +121,6 @@ def handle_view_errors(e):
 @blueprint.errorhandler(JWTExtendedException)
 @blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
-    print(get_exception_info())
     response = redirect('/admin/login')
     unset_jwt_cookies(response)
     return response

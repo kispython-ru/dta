@@ -10,12 +10,12 @@
           </div>
         </a>
       </li>
-      <li class="breadcrumb-item" aria-current="page">
+      <li class="breadcrumb-item">
         <a class="text-decoration-none" href="/admin">
           Преподавательская
         </a>
       </li>
-      <li class="breadcrumb-item active" aria-current="page">
+      <li class="breadcrumb-item active">
         {{ group.title }}
       </li>  
     </ol>
@@ -41,7 +41,7 @@
     <h6 class="d-block mt-3">Выгрузка результатов</h6>
     <form action="/admin/group/{{ group.id }}/score_csv" method="GET" class="w-100">
       <label class="mx-auto mb-2 breadcrumb-item active d-block">Разделитель CSV</label>
-      <select class="form-select mb-2" aria-label="Default select example" name="delimiter">
+      <select class="form-select mb-2" name="delimiter">
           <option value="semicolon">Точка с запятой</option>
           <option value="comma">Запятая</option>
       </select>

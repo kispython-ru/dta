@@ -19,18 +19,42 @@
     </a>
   </div>
 </nav>
-<div class="d-flex flex-row container mt-3">
-  <form action="/admin/group/select" method="GET" class="w-100">
-    <select class="form-select mb-2" name="group">
-      {% for group in groups %}
-        <option value="{{ group.id }}">
-          {{ group.title }}
-        </option>
-      {% endfor %} 
-    </select>
-    <button type="submit" class="btn btn-outline-primary w-100 d-block">
-      Далее
-    </button>
-  </form>
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-12 col-lg-6">
+      <b class="card-title d-block">Управление группами</b>
+      <form action="/admin/group/select" method="GET" class="w-100">
+        <select class="form-select mb-2" name="group">
+          {% for group in groups %}
+            <option value="{{ group.id }}">
+              {{ group.title }}
+            </option>
+          {% endfor %} 
+        </select>
+        <button type="submit" class="btn btn-outline-primary w-100 d-block">
+          Далее
+        </button>
+      </form>
+    </div>
+    <div class="col-12 col-lg-6">
+      <b class="card-title d-block">Выгрузка присланных сообщений</b>
+      <form action="/admin/messages" method="GET" class="w-100">
+        <select class="form-select mb-2" name="separator">
+            <option value=";">Точка с запятой</option>
+            <option value=",">Запятая</option>
+        </select>
+        <select class="form-select mb-2" name="count">
+            <option value="10">10 сообщений</option>
+            <option value="100">100 сообщений</option>
+            <option value="500">500 сообщений</option>
+            <option value="1000">1000 сообщений</option>
+            <option value="10000">10 000 сообщений</option>
+        </select>
+        <button type="submit" class="btn btn-outline-primary w-100 d-block">
+          Выгрузить статистику
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}
