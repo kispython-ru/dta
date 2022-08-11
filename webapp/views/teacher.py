@@ -132,6 +132,7 @@ def accept(group_id: int, message_id: int):
 
 
 @blueprint.route("/admin/group/<group_id>/queue/<message_id>/reject", methods=["GET"])
+@jwt_required()
 def reject(group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
