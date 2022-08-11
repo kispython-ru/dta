@@ -4,26 +4,31 @@
   <div class="collapse navbar-collapse container">
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
       <li>
-        <a class="logo-container text-decoration-none" href="/exams/{{token}}">
+        <a class="logo-container text-decoration-none" href="/admin">
           <div class="logo">
             <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
           </div>
         </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">
-        Зачёт
+        Преподавательская
       </li>
     </ol>
+    <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
+      Выйти
+    </a>
   </div>
 </nav>
 <div class="d-flex flex-row container mt-3">
-  <form action="/exams/{{token}}" method="post" class="w-100">
+  <form action="/admin/groups" method="post" class="w-100">
     <select class="form-select mb-2" aria-label="Default select example" name="group">
       {% for group in groups %}
-          <option value="{{group.id}}">{{group.title}}</option>
+          <option value="{{ group.id }}">{{ group.title }}</option>
       {% endfor %} 
     </select>
-    <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">Далее</button>
+    <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">
+      Далее
+    </button>
   </form>
 </div>
 {% endblock %}

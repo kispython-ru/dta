@@ -1,14 +1,15 @@
-from flask_jwt_extended import create_access_token, jwt_required, set_access_cookies
+from flask_jwt_extended import create_access_token, jwt_required, set_access_cookies, verify_jwt_in_request, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
+from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import make_response, redirect, render_template, request, url_for
+from flask import make_response, redirect, render_template, request
 
 from webapp.forms import LoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, require_token
+from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("teacher", __name__)
@@ -21,7 +22,9 @@ teachers = TeacherManager(db.teachers)
 
 
 @blueprint.route("/admin/login", methods=['GET', 'POST'])
-def authorize():
+def login():
+    if verify_jwt_in_request(True):
+        return redirect('/admin')
     form = LoginForm()
     if not form.validate_on_submit():
         return render_template("teacher/login.jinja", form=form)
@@ -34,49 +37,37 @@ def authorize():
     return response
 
 
+@blueprint.route("/admin/logout", methods=['GET'])
+def logout():
+    response = redirect("/admin/login")
+    unset_jwt_cookies(response)
+    return response
+
+
 @blueprint.route("/admin", methods=["GET"])
 @jwt_required()
-def dashboard():
-    return "SECRET PAGE"
-
-
-@blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
-@blueprint.route("/csv/<s>/<token>", methods=["GET"], defaults={"count": None})
-def export(s: str, token: str, count: int | None):
-    if config.config.csv_token != token:
-        raise ValueError("Access is denied.")
-    value = exports.export_messages(count, s)
-    output = make_response(value)
-    output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
-    output.headers["Content-type"] = "text/csv"
-    return output
-
-
-@blueprint.route("/exams/<token>", methods=["GET"])
-@require_token(lambda: config.config.final_token)
-def exams(token: str):
+def groups():
     groups = db.groups.get_all()
-    return render_template("teacher/exams.jinja", groups=groups, token=token)
+    return render_template("teacher/groups.jinja", groups=groups)
 
 
-@blueprint.route("/exams/<token>", methods=["POST"])
-@require_token(lambda: config.config.final_token)
-def enter_exam_group(token: str):
-    group_id = request.form.get('group')
-    return redirect(url_for("views.pre_exam", group_id=group_id, token=token))
+@blueprint.route("/admin/groups", methods=["POST"])
+def select_group():
+    group = request.form.get('group')
+    return redirect(f'/admin/group/{group}')
 
 
-@blueprint.route("/exams/<token>/<group_id>", methods=["GET"])
-@require_token(lambda: config.config.final_token)
-def pre_exam(group_id: int, token: str):
+@blueprint.route("/admin/group/<group_id>", methods=["GET"])
+@jwt_required()
+def group(group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    return render_template("teacher/exam.jinja", group=group, seed=seed, token=token)
+    return render_template("teacher/group.jinja", group=group, seed=seed)
 
 
-@blueprint.route("/exams/<token>/<group_id>", methods=["POST"])
-@require_token(lambda: config.config.final_token)
-def exam(group_id: int, token: str):
+@blueprint.route("/admin/group/<group_id>/toggle", methods=["POST"])
+@jwt_required()
+def toggle_exam(group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     if seed is None and config.config.final_tasks:
         db.seeds.begin_final_test(group_id)
@@ -84,30 +75,39 @@ def exam(group_id: int, token: str):
         db.seeds.end_final_test(group_id)
     else:
         db.seeds.continue_final_test(group_id)
-    seed = db.seeds.get_final_seed(group_id)
-    group = db.groups.get_by_id(group_id)
-    return render_template("teacher/exam.jinja", group=group, seed=seed, token=token)
+    return redirect(f'/admin/group/{group_id}')
 
 
-@blueprint.route("/exams/<token>/<gid>/score_csv", methods=["POST"])
-@require_token(lambda: config.config.final_token)
-def score_csv(gid: int, token: str):
+@blueprint.route("/admin/group/<group_id>/score_csv", methods=["POST"])
+@jwt_required()
+def score_csv(group_id: int):
     delimiter = request.form.get('delimiter')
-    value = exports.export_exam_results(gid, delimiter)
+    value = exports.export_exam_results(group_id, delimiter)
     output = make_response(value)
-    output.headers["Content-Disposition"] = f"attachment; filename={gid}.csv"
+    output.headers["Content-Disposition"] = f"attachment; filename={group_id}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
 
 
-@blueprint.route("/exams/<token>/<gid>/hardreset", methods=["GET"])
-@require_token(lambda: config.config.final_token)
-def hardreset(gid: int, token: str):
-    seed = db.seeds.get_final_seed(gid)
+@blueprint.route("/admin/group/<group_id>/hardreset", methods=["GET"])
+@jwt_required()
+def hardreset(group_id: int):
+    seed = db.seeds.get_final_seed(group_id)
     if seed is not None and config.config.final_tasks:
-        db.seeds.delete_final_seed(gid)
-        db.statuses.delete_group_task_statuses(gid)
-    return redirect(url_for("views.pre_exam", group_id=gid, token=token))
+        db.seeds.delete_final_seed(group_id)
+        db.statuses.delete_group_task_statuses(group_id)
+    return redirect(f'/admin/group/{group_id}')
+
+
+@blueprint.route("/csv/<sep>/<count>", methods=["GET"])
+@blueprint.route("/csv/<sep>", methods=["GET"], defaults={"count": None})
+@jwt_required()
+def export(sep: str, count: int | None):
+    value = exports.export_messages(count, sep)
+    output = make_response(value)
+    output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @blueprint.errorhandler(Exception)
@@ -117,5 +117,8 @@ def handle_view_errors(e):
 
 
 @blueprint.errorhandler(JWTExtendedException)
+@blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
-    return redirect('/admin/login')
+    response = redirect('/admin/login')
+    unset_jwt_cookies(response)
+    return response

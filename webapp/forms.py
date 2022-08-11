@@ -9,23 +9,15 @@ class CodeLength:
 
 
 class MessageForm(FlaskForm):
-    code = StringField(
-        "code", [
-            DataRequired(message="Данное поле не может быть пустым!"),
-            Length(
-                min=CodeLength.min,
-                max=CodeLength.max,
-                message="Код должен содержать как минимум 10 символов!",
-            ),
-        ],
-    )
+    code = StringField("code", [
+        DataRequired(message="Данное поле не может быть пустым!"),
+        Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать как минимум 10 символов!"),
+    ])
 
 
 class LoginForm(FlaskForm):
     login = StringField('login', [DataRequired(message="Данное поле не может быть пустым!")])
-    password = PasswordField(
-        'password', [
-            DataRequired(message="Данное поле не может быть пустым!"),
-            Length(min=8, message="Пароль содержит как минимум 8 символов.")
-        ]
-    )
+    password = PasswordField('password', [
+        DataRequired(message="Данное поле не может быть пустым!"),
+        Length(min=8, message="Пароль содержит как минимум 8 символов."),
+    ])
