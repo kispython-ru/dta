@@ -1,8 +1,5 @@
-from typing import Union
-
 from flask_jwt_extended import create_access_token, jwt_required, set_access_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
-from werkzeug.exceptions import HTTPException
 
 from flask import Blueprint
 from flask import current_app as app
@@ -45,7 +42,7 @@ def dashboard():
 
 @blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
 @blueprint.route("/csv/<s>/<token>", methods=["GET"], defaults={"count": None})
-def export(s: str, token: str, count: Union[int, None]):
+def export(s: str, token: str, count: int | None):
     if config.config.csv_token != token:
         raise ValueError("Access is denied.")
     value = exports.export_messages(count, s)
@@ -114,12 +111,11 @@ def hardreset(gid: int, token: str):
 
 
 @blueprint.errorhandler(Exception)
-def handle_view_errors(error):
+def handle_view_errors(e):
     print(get_exception_info())
-    code = error.code if isinstance(error, HTTPException) else 500
-    return render_template("error.jinja", error_code=code, error_redirect="/admin")
+    return render_template("error.jinja", redirect="/admin")
 
 
 @blueprint.errorhandler(JWTExtendedException)
-def handle_authorization_errors(error):
+def handle_authorization_errors(e):
     return redirect('/admin/login')

@@ -1,5 +1,3 @@
-from werkzeug.exceptions import HTTPException
-
 from flask import Blueprint
 from flask import current_app as app
 from flask import render_template, request
@@ -13,6 +11,7 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
+
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
 
@@ -66,12 +65,6 @@ def submit_task(gid: int, vid: int, tid: int):
 
 
 @blueprint.errorhandler(Exception)
-def handle_views_errors(error):
-    error_code = error.code if isinstance(error, HTTPException) else 500
+def handle_view_errors(e):
     print(get_exception_info())
-    return render_template(
-        "error.jinja",
-        error_code=error_code,
-        error_message="Error has occured.",
-        error_redirect="/",
-    )
+    return render_template("error.jinja", redirect="/admin")
