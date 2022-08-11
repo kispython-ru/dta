@@ -55,6 +55,8 @@ def dashboard():
 @jwt_required()
 def select_group():
     group = request.args.get('group')
+    if config.config.final_tasks is not None:
+        return redirect(f'/admin/group/{group}/exam')
     return redirect(f'/admin/group/{group}')
 
 
@@ -62,13 +64,20 @@ def select_group():
 @jwt_required()
 def group(group_id: int):
     group = db.groups.get_by_id(group_id)
-    seed = db.seeds.get_final_seed(group_id)
-    return render_template("teacher/group.jinja", group=group, seed=seed)
+    return render_template("teacher/group.jinja", group=group)
 
 
-@blueprint.route("/admin/group/<group_id>/toggle", methods=["GET"])
+@blueprint.route("/admin/group/<group_id>/exam", methods=["GET"])
 @jwt_required()
-def toggle_exam(group_id: int):
+def exam(group_id: int):
+    group = db.groups.get_by_id(group_id)
+    seed = db.seeds.get_final_seed(group_id)
+    return render_template("teacher/exam.jinja", group=group, seed=seed)
+
+
+@blueprint.route("/admin/group/<group_id>/exam/toggle", methods=["GET"])
+@jwt_required()
+def exam_toggle(group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     if seed is None and config.config.final_tasks:
         db.seeds.begin_final_test(group_id)
@@ -76,28 +85,18 @@ def toggle_exam(group_id: int):
         db.seeds.end_final_test(group_id)
     elif seed is not None:
         db.seeds.continue_final_test(group_id)
-    return redirect(f'/admin/group/{group_id}')
+    return redirect(f'/admin/group/{group_id}/exam')
 
 
-@blueprint.route("/admin/group/<group_id>/score_csv", methods=["GET"])
+@blueprint.route("/admin/group/<group_id>/exam/csv", methods=["GET"])
 @jwt_required()
-def score_csv(group_id: int):
+def exam_csv(group_id: int):
     delimiter = request.args.get('delimiter')
     value = exports.export_exam_results(group_id, delimiter)
     output = make_response(value)
     output.headers["Content-Disposition"] = f"attachment; filename={group_id}.csv"
     output.headers["Content-type"] = "text/csv"
     return output
-
-
-@blueprint.route("/admin/group/<group_id>/hardreset", methods=["GET"])
-@jwt_required()
-def hardreset(group_id: int):
-    seed = db.seeds.get_final_seed(group_id)
-    if seed is not None and config.config.final_tasks:
-        db.seeds.delete_final_seed(group_id)
-        db.statuses.delete_group_task_statuses(group_id)
-    return redirect(f'/admin/group/{group_id}')
 
 
 @blueprint.route("/admin/messages", methods=["GET"])

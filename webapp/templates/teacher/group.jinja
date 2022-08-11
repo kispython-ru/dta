@@ -17,51 +17,14 @@
       </li>
       <li class="breadcrumb-item active">
         {{ group.title }}
-      </li>  
+      </li>
     </ol>
     <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
       Выйти
     </a>
   </div>
 </nav>
-<div class="flex-row container mt-3">
-  {% if seed == None %}
-    <h6 class="d-block fw-bold">Зачёт ещё не начат</h6>
-    <form action="/admin/group/{{ group.id }}/toggle" method="GET" class="w-100">
-      <label class="mx-auto mb-2 breadcrumb-item active d-block">
-        Зачёт для группы {{ group.title }} ещё не начат, студенты не могут отправлять решения.
-      </label>
-      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
-    </form>
-  {% elif seed.active == false %}
-    <h6 class="d-block fw-bold">Зачёт завершён</h6>
-    <div class="mx-auto mb-2 breadcrumb-item active d-block">
-      Студенты группы {{ group.title }} больше не могут отправлять решения.
-    </div>
-    <h6 class="d-block mt-3">Выгрузка результатов</h6>
-    <form action="/admin/group/{{ group.id }}/score_csv" method="GET" class="w-100">
-      <label class="mx-auto mb-2 breadcrumb-item active d-block">Разделитель CSV</label>
-      <select class="form-select mb-2" name="delimiter">
-          <option value="semicolon">Точка с запятой</option>
-          <option value="comma">Запятая</option>
-      </select>
-      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
-    </form>
-    <h6 class="d-block mt-3">Продолжить зачёт</h6>
-    <div class="mx-auto mb-2 breadcrumb-item active d-block">
-      После продолжения зачёта студенты вновь смогут отправлять решения.
-    </div>
-    <form action="/admin/group/{{ group.id }}/toggle" method="GET" class="w-100">
-      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Продолжить зачёт</button>
-    </form>
-  {% else %}
-    <h6 class="d-block fw-bold">Зачёт начат</h6>
-    <form action="/admin/group/{{ group.id }}/toggle" method="GET" class="w-100">
-      <label class="mx-auto mb-2 breadcrumb-item active d-block">
-        Зачёт для группы {{ group.title }} начат, студенты могут отправлять решения.
-      </label>
-      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
-    </form>
-  {% endif %}
+<div class="container mt-3">
+  Семестровое управление группой.
 </div>
 {% endblock %}

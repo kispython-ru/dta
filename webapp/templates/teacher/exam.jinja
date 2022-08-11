@@ -1,0 +1,72 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse container">
+    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+      <li>
+        <a class="logo-container text-decoration-none" href="/admin">
+          <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+          </div>
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/admin">
+          Преподавательская
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/admin/group/{{ group.id }}/exam">
+          {{ group.title }}
+        </a>
+      </li>
+      <li class="breadcrumb-item active">
+        Зачёт
+      </li>
+    </ol>
+    <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
+      Выйти
+    </a>
+  </div>
+</nav>
+<div class="flex-row container mt-3">
+  {% if seed == None %}
+    <h6 class="d-block fw-bold">Зачёт ещё не начат</h6>
+    <form action="/admin/group/{{ group.id }}/exam/toggle" method="GET" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">
+        Зачёт для группы {{ group.title }} ещё не начат, студенты не могут отправлять решения.
+      </label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
+    </form>
+  {% elif seed.active == false %}
+    <h6 class="d-block fw-bold">Зачёт завершён</h6>
+    <div class="mx-auto mb-2 breadcrumb-item active d-block">
+      Студенты группы {{ group.title }} больше не могут отправлять решения.
+    </div>
+    <h6 class="d-block mt-3">Выгрузка результатов</h6>
+    <form action="/admin/group/{{ group.id }}/exam/csv" method="GET" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">Разделитель CSV</label>
+      <select class="form-select mb-2" name="delimiter">
+          <option value="semicolon">Точка с запятой</option>
+          <option value="comma">Запятая</option>
+      </select>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
+    </form>
+    <h6 class="d-block mt-3">Продолжить зачёт</h6>
+    <div class="mx-auto mb-2 breadcrumb-item active d-block">
+      После продолжения зачёта студенты вновь смогут отправлять решения.
+    </div>
+    <form action="/admin/group/{{ group.id }}/exam/toggle" method="GET" class="w-100">
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Продолжить зачёт</button>
+    </form>
+  {% else %}
+    <h6 class="d-block fw-bold">Зачёт начат</h6>
+    <form action="/admin/group/{{ group.id }}/exam/toggle" method="GET" class="w-100">
+      <label class="mx-auto mb-2 breadcrumb-item active d-block">
+        Зачёт для группы {{ group.title }} начат, студенты могут отправлять решения.
+      </label>
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}
