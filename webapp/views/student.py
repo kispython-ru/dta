@@ -53,9 +53,7 @@ def submit_task(gid: int, vid: int, tid: int):
         code = form.code.data
         ip = get_real_ip(request)
         db.messages.submit_task(tid, vid, gid, code, ip)
-        print('saved message, saving task status')
         db.statuses.submit_task(tid, vid, gid, code, ip)
-        print('saved task status')
         return render_template("student/success.jinja", status=status)
     highlight = config.config.highlight_syntax
     return render_template(
