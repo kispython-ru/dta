@@ -1,4 +1,10 @@
-from flask_jwt_extended import create_access_token, jwt_required, set_access_cookies, verify_jwt_in_request, unset_jwt_cookies
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    set_access_cookies,
+    unset_jwt_cookies,
+    verify_jwt_in_request
+)
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
