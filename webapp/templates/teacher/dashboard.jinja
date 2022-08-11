@@ -20,13 +20,15 @@
   </div>
 </nav>
 <div class="d-flex flex-row container mt-3">
-  <form action="/admin/groups" method="post" class="w-100">
-    <select class="form-select mb-2" aria-label="Default select example" name="group">
+  <form action="/admin/group/select" method="GET" class="w-100">
+    <select class="form-select mb-2" name="group">
       {% for group in groups %}
-          <option value="{{ group.id }}">{{ group.title }}</option>
+        <option value="{{ group.id }}">
+          {{ group.title }}
+        </option>
       {% endfor %} 
     </select>
-    <button class="btn btn-outline-primary w-100" style="display:block;" type="submit">
+    <button type="submit" class="btn btn-outline-primary w-100 d-block">
       Далее
     </button>
   </form>

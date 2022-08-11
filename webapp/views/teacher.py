@@ -46,14 +46,15 @@ def logout():
 
 @blueprint.route("/admin", methods=["GET"])
 @jwt_required()
-def groups():
+def dashboard():
     groups = db.groups.get_all()
-    return render_template("teacher/groups.jinja", groups=groups)
+    return render_template("teacher/dashboard.jinja", groups=groups)
 
 
-@blueprint.route("/admin/groups", methods=["POST"])
+@blueprint.route("/admin/group/select", methods=["GET"])
+@jwt_required()
 def select_group():
-    group = request.form.get('group')
+    group = request.args.get('group')
     return redirect(f'/admin/group/{group}')
 
 
@@ -65,23 +66,23 @@ def group(group_id: int):
     return render_template("teacher/group.jinja", group=group, seed=seed)
 
 
-@blueprint.route("/admin/group/<group_id>/toggle", methods=["POST"])
+@blueprint.route("/admin/group/<group_id>/toggle", methods=["GET"])
 @jwt_required()
 def toggle_exam(group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     if seed is None and config.config.final_tasks:
         db.seeds.begin_final_test(group_id)
-    elif seed.active:
+    elif seed is not None and seed.active:
         db.seeds.end_final_test(group_id)
-    else:
+    elif seed is not None:
         db.seeds.continue_final_test(group_id)
     return redirect(f'/admin/group/{group_id}')
 
 
-@blueprint.route("/admin/group/<group_id>/score_csv", methods=["POST"])
+@blueprint.route("/admin/group/<group_id>/score_csv", methods=["GET"])
 @jwt_required()
 def score_csv(group_id: int):
-    delimiter = request.form.get('delimiter')
+    delimiter = request.args.get('delimiter')
     value = exports.export_exam_results(group_id, delimiter)
     output = make_response(value)
     output.headers["Content-Disposition"] = f"attachment; filename={group_id}.csv"
@@ -119,6 +120,7 @@ def handle_view_errors(e):
 @blueprint.errorhandler(JWTExtendedException)
 @blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
+    print(get_exception_info())
     response = redirect('/admin/login')
     unset_jwt_cookies(response)
     return response
