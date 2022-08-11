@@ -25,8 +25,8 @@
           <div class="form-group mb-2">
             <label>Имя пользователя</label>
             <input name="login" type="text" class="form-control"
-                  placeholder="Имя пользователя"
-                  value="{{ form.login.data if form.login.data }}">
+                   placeholder="Имя пользователя"
+                   value="{{ form.login.data if form.login.data }}">
             <small class="form-text text-muted">Введите имя пользователя.</small>
           </div>
           {% if form.login.errors %}

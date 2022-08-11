@@ -85,11 +85,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 code=message.code,
                 task=ext.task,
             )
-            db.messages.mark_as_processed(
-                task=message.task,
-                variant=message.variant,
-                group=message.group,
-            )
+            db.messages.mark_as_processed(message.id)
             db.statuses.update_status(
                 task=message.task,
                 variant=message.variant,

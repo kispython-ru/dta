@@ -8,6 +8,7 @@ from flask import make_response, redirect, render_template, request
 
 from webapp.forms import LoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
+from webapp.models import Group, Message, Status
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
 
@@ -60,13 +61,6 @@ def select_group():
     return redirect(f'/admin/group/{group}')
 
 
-@blueprint.route("/admin/group/<group_id>", methods=["GET"])
-@jwt_required()
-def group(group_id: int):
-    group = db.groups.get_by_id(group_id)
-    return render_template("teacher/group.jinja", group=group)
-
-
 @blueprint.route("/admin/group/<group_id>/exam", methods=["GET"])
 @jwt_required()
 def exam(group_id: int):
@@ -109,6 +103,54 @@ def messages():
     output.headers["Content-Disposition"] = "attachment; filename=messages.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+
+
+@blueprint.route("/admin/group/<group_id>", methods=["GET"])
+@jwt_required()
+def queue(group_id: int):
+    group = db.groups.get_by_id(group_id)
+    message = db.messages.get_next_pending_message()
+    if message is None or group.id == message.group:
+        return render_template("teacher/queue.jinja", group=group, message=message)
+    return redirect(f'/admin')
+
+
+@blueprint.route("/admin/group/<group_id>/queue/<message_id>/accept", methods=["GET"])
+@jwt_required()
+def accept(group_id: int, message_id: int):
+    group = db.groups.get_by_id(group_id)
+    message = db.messages.get_by_id(message_id)
+    if group.id == message.group:
+        process_message(message, Status.Checked, None)
+    return redirect(f"/admin/group/{group_id}")
+
+
+@blueprint.route("/admin/group/<group_id>/queue/<message_id>/reject", methods=["GET"])
+def reject(group_id: int, message_id: int):
+    group = db.groups.get_by_id(group_id)
+    message = db.messages.get_by_id(message_id)
+    if group.id == message.group:
+        comment = request.args.get("comment")
+        process_message(message, Status.Failed, comment)
+    return redirect(f"/admin/group/{group_id}")
+
+
+def process_message(message: Message, status: Status, comment: str | None):
+    db.messages.mark_as_processed(message.id)
+    db.statuses.update_status(
+        task=message.task,
+        variant=message.variant,
+        group=message.group,
+        code=message.code,
+        status=status,
+        ip=message.ip,
+        output=comment,
+    )
+    db.checks.record_check(
+        message=message.id,
+        status=status,
+        output=comment,
+    )
 
 
 @blueprint.errorhandler(Exception)

@@ -197,14 +197,14 @@ class TaskStatusRepository:
             group: int,
             code: str,
             ip: str) -> TaskStatus:
+        existing = self.get_task_status(task, variant, group)
         with self.db.create_session() as session:
-            existing: TaskStatus = session.query(TaskStatus) \
-                .filter_by(task=task, variant=variant, group=group) \
-                .first()
             if existing is not None:
                 if existing.status == Status.Checked:
                     return  # We've already accepted this task!
-                session.delete(existing)
+                session.query(TaskStatus) \
+                    .filter_by(task=task, variant=variant, group=group) \
+                    .delete()
             task_status = TaskStatus(
                 task=task,
                 variant=variant,
@@ -274,16 +274,31 @@ class MessageRepository:
                 .all()
             return pending
 
+    def get_next_pending_message(self) -> Message | None:
+        with self.db.create_session() as session:
+            message = session.query(Message) \
+                .filter_by(processed=False) \
+                .order_by(Message.time.asc()) \
+                .first()
+            return message
+
+    def get_by_id(self, id: int) -> Message:
+        with self.db.create_session() as session:
+            message = session.query(Message) \
+                .filter_by(id=id) \
+                .one()
+            return message
+
     def get(self, task: int, variant: int, group: int) -> Message | None:
         with self.db.create_session() as session:
             return session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
 
-    def mark_as_processed(self, task: int, variant: int, group: int):
+    def mark_as_processed(self, message: int):
         with self.db.create_session() as session:
             session.query(Message) \
-                .filter_by(task=task, variant=variant, group=group) \
+                .filter_by(id=message) \
                 .update(dict(processed=True))
 
 

@@ -39,7 +39,7 @@ def test_message_mark_at_process(db: AppDatabase):
     assert message is not None
     assert not message.processed
 
-    db.messages.mark_as_processed(task, variant, group)
+    db.messages.mark_as_processed(message.id)
 
     messages = db.messages.get_all()
     message = next(mess for mess in messages if mess.task == task)
@@ -56,10 +56,8 @@ def test_message_get_pending(db: AppDatabase):
     task_3 = unique_int()
     db.tasks.create_by_ids([task_2, task_3])
 
-    db.messages.submit_task(task_1, variant, group, code, ip)
-    db.messages.submit_task(task_2, variant, group, code, ip)
-    db.messages.submit_task(task_3, variant, group, code, ip)
-    db.messages.mark_as_processed(task_2, variant, group)
+    message = db.messages.submit_task(task_1, variant, group, code, ip)
+    db.messages.mark_as_processed(message.id)
 
     messages = db.messages.get_all()
     pending = list(filter(lambda m: not m.processed, messages))
