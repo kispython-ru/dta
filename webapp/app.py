@@ -1,11 +1,11 @@
 import logging
 import os
-from typing import Union
 
 from flask import Flask
 
-import webapp.api as api
-import webapp.views as views
+import webapp.views.api as api
+import webapp.views.student as student
+import webapp.views.teacher as teacher
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
@@ -48,9 +48,10 @@ def configure_app(config_path: str) -> Flask:
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     app.config.update(config)
-    app.register_blueprint(views.blueprint)
-    app.register_blueprint(worker.blueprint)
+    app.register_blueprint(student.blueprint)
+    app.register_blueprint(teacher.blueprint)
     app.register_blueprint(api.blueprint)
+    app.register_blueprint(worker.blueprint)
     logging.basicConfig(level=logging.DEBUG)
     migrate_database(config["CONNECTION_STRING"], config["ALEMBIC_PATH"])
     seed_database(app)

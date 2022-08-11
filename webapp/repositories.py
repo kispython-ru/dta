@@ -1,8 +1,7 @@
 import datetime
 import uuid
-from typing import Callable, Dict, List, Union
+from typing import Callable, List, Union
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from webapp.models import (

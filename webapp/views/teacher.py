@@ -6,85 +6,16 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
-from webapp.forms import MessageForm
-from webapp.managers import AppConfigManager, ExportManager, GroupManager, StatusManager
+from webapp.managers import AppConfigManager, ExportManager, StatusManager
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip, require_token
+from webapp.utils import get_exception_info, require_token
 
 
-blueprint = Blueprint("views", __name__)
+blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-groups = GroupManager(
-    config=config,
-    groups=db.groups,
-    seeds=db.seeds,
-)
-
-statuses = StatusManager(
-    tasks=db.tasks,
-    groups=db.groups,
-    variants=db.variants,
-    statuses=db.statuses,
-    config=config,
-    seeds=db.seeds
-)
-
-exports = ExportManager(
-    statuses=statuses,
-    groups=db.groups,
-    messages=db.messages,
-    variants=db.variants,
-    tasks=db.tasks
-)
-
-
-@blueprint.route("/", methods=["GET"])
-def dashboard():
-    groupings = groups.get_groupings()
-    exam = config.config.final_tasks is not None
-    return render_template("dashboard.jinja", groupings=groupings, exam=exam)
-
-
-@blueprint.route("/group/<group_id>", methods=["GET"])
-def group(group_id: int):
-    group = statuses.get_group_statuses(group_id)
-    seed = db.seeds.get_final_seed(group_id)
-    blocked = config.config.final_tasks and seed is None
-    return render_template("group.jinja", group=group, blocked=blocked)
-
-
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-def task(gid: int, vid: int, tid: int):
-    status = statuses.get_task_status(gid, vid, tid)
-    highlight = config.config.highlight_syntax
-    return render_template(
-        "task.jinja",
-        status=status,
-        form=MessageForm(),
-        highlight=highlight,
-    )
-
-
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-def submit_task(gid: int, vid: int, tid: int):
-    status = statuses.get_task_status(gid, vid, tid)
-    form = MessageForm()
-    valid = form.validate_on_submit() and not status.checked
-    available = status.external.active and not config.config.readonly
-    if valid and available:
-        code = form.code.data
-        ip = get_real_ip(request)
-        db.messages.submit_task(tid, vid, gid, code, ip)
-        db.statuses.submit_task(tid, vid, gid, code, ip)
-        return render_template("success.jinja", status=status)
-    highlight = config.config.highlight_syntax
-    return render_template(
-        "task.jinja",
-        status=status,
-        form=form,
-        highlight=highlight,
-    )
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks)
 
 
 @blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
@@ -103,7 +34,7 @@ def export(s: str, token: str, count: Union[int, None]):
 @require_token(lambda: config.config.final_token)
 def exams(token: str):
     groups = db.groups.get_all()
-    return render_template("exams.jinja", groups=groups, token=token)
+    return render_template("teacher/exams.jinja", groups=groups, token=token)
 
 
 @blueprint.route("/exams/<token>", methods=["POST"])
@@ -118,7 +49,7 @@ def enter_exam_group(token: str):
 def pre_exam(group_id: int, token: str):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    return render_template("exam.jinja", group=group, seed=seed, token=token)
+    return render_template("teacher/exam.jinja", group=group, seed=seed, token=token)
 
 
 @blueprint.route("/exams/<token>/<group_id>", methods=["POST"])
@@ -133,7 +64,7 @@ def exam(group_id: int, token: str):
         db.seeds.continue_final_test(group_id)
     seed = db.seeds.get_final_seed(group_id)
     group = db.groups.get_by_id(group_id)
-    return render_template("exam.jinja", group=group, seed=seed, token=token)
+    return render_template("teacher/exam.jinja", group=group, seed=seed, token=token)
 
 
 @blueprint.route("/exams/<token>/<gid>/score_csv", methods=["POST"])
