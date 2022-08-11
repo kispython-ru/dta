@@ -1,12 +1,15 @@
 from typing import Union
 
+from flask_jwt_extended import create_access_token, jwt_required, set_access_cookies
+from flask_jwt_extended.exceptions import JWTExtendedException
 from werkzeug.exceptions import HTTPException
 
 from flask import Blueprint
 from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
-from webapp.managers import AppConfigManager, ExportManager, StatusManager
+from webapp.forms import LoginForm
+from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, require_token
 
@@ -14,8 +17,30 @@ from webapp.utils import get_exception_info, require_token
 blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
+
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks)
+teachers = TeacherManager(db.teachers)
+
+
+@blueprint.route("/admin/login", methods=['GET', 'POST'])
+def authorize():
+    form = LoginForm()
+    if not form.validate_on_submit():
+        return render_template("teacher/login.jinja", form=form)
+    teacher = teachers.check_password(form.login.data, form.password.data)
+    if teacher is None:
+        return render_template("teacher/login.jinja", form=form)
+    access = create_access_token(identity=teacher.id)
+    response = redirect("/admin")
+    set_access_cookies(response, access)
+    return response
+
+
+@blueprint.route("/admin", methods=["GET"])
+@jwt_required()
+def dashboard():
+    return "SECRET PAGE"
 
 
 @blueprint.route("/csv/<s>/<token>/<count>", methods=["GET"])
@@ -89,12 +114,12 @@ def hardreset(gid: int, token: str):
 
 
 @blueprint.errorhandler(Exception)
-def handle_views_errors(error):
-    error_code = error.code if isinstance(error, HTTPException) else 500
+def handle_view_errors(error):
     print(get_exception_info())
-    return render_template(
-        "error.jinja",
-        error_code=error_code,
-        error_message="Error has occured.",
-        error_redirect="/",
-    )
+    code = error.code if isinstance(error, HTTPException) else 500
+    return render_template("error.jinja", error_code=code, error_redirect="/admin")
+
+
+@blueprint.errorhandler(JWTExtendedException)
+def handle_authorization_errors(error):
+    return redirect('/admin/login')

@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import Callable, List, Union
+from typing import Callable, List
 
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from webapp.models import (
     Status,
     Task,
     TaskStatus,
+    Teacher,
     Variant,
     create_session_maker
 )
@@ -153,7 +154,7 @@ class TaskStatusRepository:
             self,
             task: int,
             variant: int,
-            group: int) -> Union[TaskStatus, None]:
+            group: int) -> TaskStatus | None:
         with self.db.create_session() as session:
             status = session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
@@ -273,7 +274,7 @@ class MessageRepository:
                 .all()
             return pending
 
-    def get(self, task: int, variant: int, group: int) -> Union[Message, None]:
+    def get(self, task: int, variant: int, group: int) -> Message | None:
         with self.db.create_session() as session:
             return session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
@@ -300,7 +301,7 @@ class MessageCheckRepository:
         self,
         message: int,
         status: TaskStatus,
-        output: Union[str, None]
+        output: str | None,
     ) -> MessageCheck:
         with self.db.create_session() as session:
             check = MessageCheck(
@@ -317,7 +318,7 @@ class FinalSeedRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_final_seed(self, group: int) -> Union[FinalSeed, None]:
+    def get_final_seed(self, group: int) -> FinalSeed | None:
         with self.db.create_session() as session:
             return session.query(FinalSeed) \
                 .filter_by(group=group) \
@@ -347,6 +348,18 @@ class FinalSeedRepository:
                 .delete()
 
 
+class TeacherRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def find_by_login(self, login: str) -> Teacher | None:
+        with self.db.create_session() as session:
+            teacher = session.query(Teacher) \
+                .filter_by(login=login) \
+                .first()
+            return teacher
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -357,3 +370,4 @@ class AppDatabase:
         self.messages = MessageRepository(db)
         self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
+        self.teachers = TeacherRepository(db)

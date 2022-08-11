@@ -95,3 +95,10 @@ class FinalSeed(Base):
     seed = sa.Column("seed", sa.String, unique=True, nullable=False)
     active = sa.Column("active", sa.Boolean, nullable=False)
     group = sa.Column("group", sa.Integer, sa.ForeignKey('groups.id'), primary_key=True, nullable=False)
+
+
+class Teacher(Base):
+    __tablename__ = "teachers"
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    login = sa.Column("login", sa.String, nullable=False)
+    password_hash = sa.Column("password_hash", sa.String, nullable=False)

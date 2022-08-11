@@ -15,6 +15,8 @@ radon = "5.1.0"
 waitress = "2.0.0"
 pycodestyle = "2.8.0"
 scikit-learn = "1.1.1"
+Flask-JWT-Extended = "4.3.1"
+bcrypt = "3.2.2"
 
 [tool.poetry.dev-dependencies]
 beautifulsoup4 = "4.10.0"
@@ -22,7 +24,6 @@ isort = "5.9.3"
 pytest = "7.0.1"
 pytest-cov = "3.0.0"
 pytest-alembic = "0.7.0"
-Pillow = "9.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,6 +1,8 @@
 import logging
 import os
 
+from flask_jwt_extended import JWTManager
+
 from flask import Flask
 
 import webapp.views.api as api
@@ -52,6 +54,7 @@ def configure_app(config_path: str) -> Flask:
     app.register_blueprint(teacher.blueprint)
     app.register_blueprint(api.blueprint)
     app.register_blueprint(worker.blueprint)
+    JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
     migrate_database(config["CONNECTION_STRING"], config["ALEMBIC_PATH"])
     seed_database(app)

@@ -3,16 +3,19 @@ import io
 import random
 from typing import Callable, Dict, List, Tuple, Union
 
+import bcrypt
+
 from flask import Config
 
 from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
-from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Variant
+from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
     MessageRepository,
     TaskRepository,
     TaskStatusRepository,
+    TeacherRepository,
     VariantRepository
 )
 
@@ -329,3 +332,16 @@ class ExportManager:
         bom = u"\uFEFF"
         value = bom + si.getvalue()
         return value
+
+
+class TeacherManager:
+    def __init__(self, teachers: TeacherRepository):
+        self.teachers = teachers
+
+    def check_password(self, login: str, password: str) -> Teacher | None:
+        teacher = self.teachers.find_by_login(login)
+        if teacher is not None:
+            safe_given = password.encode('utf8')
+            safe_actual = teacher.password_hash.encode('utf8')
+            if bcrypt.checkpw(safe_given, safe_actual):
+                return teacher

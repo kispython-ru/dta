@@ -1,5 +1,8 @@
 {
     "ALEMBIC_PATH": ".",
+    "JWT_SECRET_KEY": "CHANGE_ME",
+    "JWT_TOKEN_LOCATION": ["cookies"],
+    "JWT_COOKIE_SECURE": false,
     "HIGHLIGHT_SYNTAX": true,
     "TEMPLATES_AUTO_RELOAD": true,
     "CONNECTION_STRING": "sqlite:///web-app.db",
