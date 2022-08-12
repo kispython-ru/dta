@@ -21,21 +21,23 @@
 </nav>
 <div class="container">
   <div class="row">
-    <div class="col-12 mt-3">
-      <b class="card-title d-block">Управление группами</b>
-      <form action="/admin/group/select" method="GET" class="w-100">
-        <select class="form-select mb-2" name="group">
-          {% for group in groups %}
-            <option value="{{ group.id }}">
-              {{ group.title }}
-            </option>
-          {% endfor %} 
-        </select>
-        <button type="submit" class="btn btn-outline-primary w-100 d-block">
-          Далее
-        </button>
-      </form>
-    </div>
+    {% if groups is not none %}
+      <div class="col-12 mt-3">
+        <b class="card-title d-block">Управление группами</b>
+        <form action="/admin/group/select" method="GET" class="w-100">
+          <select class="form-select mb-2" name="group">
+            {% for group in groups %}
+              <option value="{{ group.id }}">
+                {{ group.title }}
+              </option>
+            {% endfor %} 
+          </select>
+          <button type="submit" class="btn btn-outline-primary w-100 d-block">
+            Далее
+          </button>
+        </form>
+      </div>
+    {% endif %}
     <div class="col-12 mt-3">
       <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
       <form action="/admin/messages" method="GET" class="w-100">

@@ -54,7 +54,7 @@ def logout():
 @blueprint.route("/admin", methods=["GET"])
 @jwt_required()
 def dashboard():
-    groups = db.groups.get_all()
+    groups = db.groups.get_all() if config.config.no_background_worker else None
     return render_template("teacher/dashboard.jinja", groups=groups)
 
 
@@ -116,7 +116,8 @@ def messages():
 def queue(group_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_next_pending_message()
-    if message is None or group.id == message.group:
+    matches = message is None or group.id == message.group
+    if matches and config.config.no_background_worker:
         return render_template("teacher/queue.jinja", group=group, message=message)
     return redirect(f'/admin')
 
@@ -126,7 +127,7 @@ def queue(group_id: int):
 def accept(group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
-    if group.id == message.group:
+    if group.id == message.group and config.config.no_background_worker:
         process_message(message, Status.Checked, None)
     return redirect(f"/admin/group/{group_id}")
 
@@ -136,7 +137,7 @@ def accept(group_id: int, message_id: int):
 def reject(group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
-    if group.id == message.group:
+    if group.id == message.group and config.config.no_background_worker:
         comment = request.args.get("comment")
         process_message(message, Status.Failed, comment)
     return redirect(f"/admin/group/{group_id}")

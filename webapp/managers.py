@@ -341,7 +341,7 @@ class TeacherManager:
     def check_password(self, login: str, password: str) -> Teacher | None:
         teacher = self.teachers.find_by_login(login)
         if teacher is not None:
-            safe_given = password.encode('utf8')
-            safe_actual = teacher.password_hash.encode('utf8')
-            if bcrypt.checkpw(safe_given, safe_actual):
+            given = password.encode('utf8')
+            actual = teacher.password_hash.encode('utf8')
+            if bcrypt.checkpw(given, actual):
                 return teacher
