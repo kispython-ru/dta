@@ -1,6 +1,5 @@
 import datetime
 import uuid
-from typing import Callable, List
 
 from sqlalchemy.orm import Session
 
@@ -35,7 +34,7 @@ class DbContext:
 
 
 class DbContextManager:
-    def __init__(self, get_connection: Callable[[], str]):
+    def __init__(self, get_connection: callable[[], str]):
         self.get_connection = get_connection
         self.session_maker = None
 
@@ -52,12 +51,12 @@ class GroupRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Group]:
+    def get_all(self) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group).all()
             return groups
 
-    def get_by_prefix(self, prefix: str) -> List[Group]:
+    def get_by_prefix(self, prefix: str) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group) \
                 .filter(Group.title.startswith(prefix)) \
@@ -69,7 +68,7 @@ class GroupRepository:
             group = session.query(Group).get(group_id)
             return group
 
-    def create_by_names(self, names: List[str]):
+    def create_by_names(self, names: list[str]):
         for name in names:
             self.create(name)
 
@@ -88,7 +87,7 @@ class TaskRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Task]:
+    def get_all(self) -> list[Task]:
         with self.db.create_session() as session:
             tasks = session.query(Task).all()
             return tasks
@@ -98,7 +97,7 @@ class TaskRepository:
             task = session.query(Task).get(task_id)
             return task
 
-    def create_by_ids(self, ids: List[int]):
+    def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
             for task_id in ids:
                 group = Task(id=task_id)
@@ -113,7 +112,7 @@ class VariantRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Variant]:
+    def get_all(self) -> list[Variant]:
         with self.db.create_session() as session:
             variants = session.query(Variant).all()
             return variants
@@ -123,7 +122,7 @@ class VariantRepository:
             variant = session.query(Variant).get(variant_id)
             return variant
 
-    def create_by_ids(self, ids: List[int]):
+    def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
             for variant_id in ids:
                 task = Variant(id=variant_id)
@@ -138,12 +137,12 @@ class TaskStatusRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[TaskStatus]:
+    def get_all(self) -> list[TaskStatus]:
         with self.db.create_session() as session:
             statuses = session.query(TaskStatus).all()
             return statuses
 
-    def get_by_group(self, group: int) -> List[TaskStatus]:
+    def get_by_group(self, group: int) -> list[TaskStatus]:
         with self.db.create_session() as session:
             statuses = session.query(TaskStatus) \
                 .filter_by(group=group) \
@@ -251,14 +250,14 @@ class MessageRepository:
             session.add(message)
             return message
 
-    def get_all(self) -> List[Message]:
+    def get_all(self) -> list[Message]:
         with self.db.create_session() as session:
             messages = session.query(Message) \
                 .order_by(Message.time.desc()) \
                 .all()
             return messages
 
-    def get_latest(self, count: int) -> List[Message]:
+    def get_latest(self, count: int) -> list[Message]:
         with self.db.create_session() as session:
             latest_messages = session.query(Message) \
                 .order_by(Message.time.desc()) \
@@ -266,7 +265,7 @@ class MessageRepository:
                 .all()
             return latest_messages
 
-    def get_pending_messages(self) -> List[Message]:
+    def get_pending_messages(self) -> list[Message]:
         with self.db.create_session() as session:
             pending = session.query(Message) \
                 .filter_by(processed=False) \
@@ -376,7 +375,7 @@ class TeacherRepository:
 
 
 class AppDatabase:
-    def __init__(self, get_connection: Callable[[], str]):
+    def __init__(self, get_connection: callable[[], str]):
         db = DbContextManager(get_connection)
         self.groups = GroupRepository(db)
         self.variants = VariantRepository(db)

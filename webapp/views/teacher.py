@@ -14,7 +14,7 @@ from flask import make_response, redirect, render_template, request
 
 from webapp.forms import LoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
-from webapp.models import Group, Message, Status
+from webapp.models import Message, Status
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
 

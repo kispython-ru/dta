@@ -1,12 +1,9 @@
 import datetime
 import time
 import uuid
-from typing import Callable, Tuple, Union
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
-
-from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
 
@@ -21,7 +18,7 @@ def unique_int() -> int:
     return int(unique_id)
 
 
-def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
+def timeout_assert(condition: callable[[], bool], timeout: int = 20):
     delta = datetime.timedelta(seconds=timeout)
     started = datetime.datetime.now()
     while True:
@@ -32,7 +29,7 @@ def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
             break
 
 
-def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
+def arrange_task(db: AppDatabase) -> tuple[int, int, int]:
     variant = unique_int()
     group_name = unique_str()
     task = unique_int()
@@ -48,7 +45,7 @@ def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
 def get_tags(
     html: str,
     name: str,
-    class_: Union[str, bool, None]
+    class_: str | bool | None,
 ) -> ResultSet[Tag]:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all(name, class_=class_)

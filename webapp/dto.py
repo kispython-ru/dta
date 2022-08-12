@@ -1,5 +1,3 @@
-from typing import Dict, List, Union
-
 from flask import Config
 
 from webapp.models import Group, Status, Task, TaskStatus, Variant
@@ -14,7 +12,7 @@ class AppConfig:
         self.connection_string: str = config["CONNECTION_STRING"]
         self.task_base_url: str = config["TASK_BASE_URL"]
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
-        self.final_tasks: Dict[str, List[int]] = config["FINAL_TASKS"]
+        self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
         self.readonly: bool = config["READONLY"]
 
 
@@ -51,7 +49,7 @@ class TaskStatusDto:
         group: Group,
         variant: Variant,
         task: TaskDto,
-        status: Union[TaskStatus, None],
+        status: TaskStatus | None,
         external: ExternalTaskDto,
         config: AppConfig,
     ):
@@ -129,12 +127,12 @@ class TaskStatusDto:
         active = self.external.active
         return checked or not active or self.readonly
 
-    def map_status(self, map: Dict[Status, str]):
+    def map_status(self, map: dict[Status, str]):
         return map[self.status]
 
 
 class VariantDto:
-    def __init__(self, variant: Variant, statuses: List[TaskStatusDto]):
+    def __init__(self, variant: Variant, statuses: list[TaskStatusDto]):
         self.id = int(variant.id)
         self.statuses = statuses
 
@@ -143,8 +141,8 @@ class GroupDto:
     def __init__(
         self,
         group: Group,
-        tasks: List[TaskDto],
-        variants: List[VariantDto]
+        tasks: list[TaskDto],
+        variants: list[VariantDto]
     ):
         self.title = str(group.title)
         self.id = int(group.id)
