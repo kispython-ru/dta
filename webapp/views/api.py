@@ -1,5 +1,3 @@
-from werkzeug.exceptions import HTTPException
-
 from flask import Blueprint
 from flask import current_app as app
 from flask import jsonify, request
@@ -13,20 +11,9 @@ from webapp.utils import get_exception_info, get_real_ip
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
-groups = GroupManager(
-    config=config,
-    groups=db.groups,
-    seeds=db.seeds,
-)
 
-statuses = StatusManager(
-    tasks=db.tasks,
-    groups=db.groups,
-    variants=db.variants,
-    statuses=db.statuses,
-    config=config,
-    seeds=db.seeds
-)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+groups = GroupManager(config, db.groups, db.seeds)
 
 
 @blueprint.route("/group/prefixes", methods=["GET"])
@@ -99,7 +86,6 @@ def submit_task(gid: int, vid: int, tid: int):
 
 
 @blueprint.errorhandler(Exception)
-def handle_api_errors(error):
-    error_code = error.code if isinstance(error, HTTPException) else 500
+def handle_view_errors(e):
     print(get_exception_info())
-    return jsonify(dict(error=error_code))
+    return jsonify(dict(error=500))

@@ -1,8 +1,7 @@
 import datetime
 import uuid
-from typing import Callable, Dict, List, Union
+from typing import Callable
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -13,6 +12,7 @@ from webapp.models import (
     Status,
     Task,
     TaskStatus,
+    Teacher,
     Variant,
     create_session_maker
 )
@@ -52,12 +52,12 @@ class GroupRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Group]:
+    def get_all(self) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group).all()
             return groups
 
-    def get_by_prefix(self, prefix: str) -> List[Group]:
+    def get_by_prefix(self, prefix: str) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group) \
                 .filter(Group.title.startswith(prefix)) \
@@ -69,7 +69,7 @@ class GroupRepository:
             group = session.query(Group).get(group_id)
             return group
 
-    def create_by_names(self, names: List[str]):
+    def create_by_names(self, names: list[str]):
         for name in names:
             self.create(name)
 
@@ -88,7 +88,7 @@ class TaskRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Task]:
+    def get_all(self) -> list[Task]:
         with self.db.create_session() as session:
             tasks = session.query(Task).all()
             return tasks
@@ -98,7 +98,7 @@ class TaskRepository:
             task = session.query(Task).get(task_id)
             return task
 
-    def create_by_ids(self, ids: List[int]):
+    def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
             for task_id in ids:
                 group = Task(id=task_id)
@@ -113,7 +113,7 @@ class VariantRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[Variant]:
+    def get_all(self) -> list[Variant]:
         with self.db.create_session() as session:
             variants = session.query(Variant).all()
             return variants
@@ -123,7 +123,7 @@ class VariantRepository:
             variant = session.query(Variant).get(variant_id)
             return variant
 
-    def create_by_ids(self, ids: List[int]):
+    def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
             for variant_id in ids:
                 task = Variant(id=variant_id)
@@ -138,12 +138,12 @@ class TaskStatusRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_all(self) -> List[TaskStatus]:
+    def get_all(self) -> list[TaskStatus]:
         with self.db.create_session() as session:
             statuses = session.query(TaskStatus).all()
             return statuses
 
-    def get_by_group(self, group: int) -> List[TaskStatus]:
+    def get_by_group(self, group: int) -> list[TaskStatus]:
         with self.db.create_session() as session:
             statuses = session.query(TaskStatus) \
                 .filter_by(group=group) \
@@ -154,7 +154,7 @@ class TaskStatusRepository:
             self,
             task: int,
             variant: int,
-            group: int) -> Union[TaskStatus, None]:
+            group: int) -> TaskStatus | None:
         with self.db.create_session() as session:
             status = session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
@@ -197,14 +197,14 @@ class TaskStatusRepository:
             group: int,
             code: str,
             ip: str) -> TaskStatus:
+        existing = self.get_task_status(task, variant, group)
         with self.db.create_session() as session:
-            existing: TaskStatus = session.query(TaskStatus) \
-                .filter_by(task=task, variant=variant, group=group) \
-                .first()
             if existing is not None:
                 if existing.status == Status.Checked:
                     return  # We've already accepted this task!
-                session.delete(existing)
+                session.query(TaskStatus) \
+                    .filter_by(task=task, variant=variant, group=group) \
+                    .delete()
             task_status = TaskStatus(
                 task=task,
                 variant=variant,
@@ -251,14 +251,14 @@ class MessageRepository:
             session.add(message)
             return message
 
-    def get_all(self) -> List[Message]:
+    def get_all(self) -> list[Message]:
         with self.db.create_session() as session:
             messages = session.query(Message) \
                 .order_by(Message.time.desc()) \
                 .all()
             return messages
 
-    def get_latest(self, count: int) -> List[Message]:
+    def get_latest(self, count: int) -> list[Message]:
         with self.db.create_session() as session:
             latest_messages = session.query(Message) \
                 .order_by(Message.time.desc()) \
@@ -266,7 +266,7 @@ class MessageRepository:
                 .all()
             return latest_messages
 
-    def get_pending_messages(self) -> List[Message]:
+    def get_pending_messages(self) -> list[Message]:
         with self.db.create_session() as session:
             pending = session.query(Message) \
                 .filter_by(processed=False) \
@@ -274,16 +274,31 @@ class MessageRepository:
                 .all()
             return pending
 
-    def get(self, task: int, variant: int, group: int) -> Union[Message, None]:
+    def get_next_pending_message(self) -> Message | None:
+        with self.db.create_session() as session:
+            message = session.query(Message) \
+                .filter_by(processed=False) \
+                .order_by(Message.time.asc()) \
+                .first()
+            return message
+
+    def get_by_id(self, id: int) -> Message:
+        with self.db.create_session() as session:
+            message = session.query(Message) \
+                .filter_by(id=id) \
+                .one()
+            return message
+
+    def get(self, task: int, variant: int, group: int) -> Message | None:
         with self.db.create_session() as session:
             return session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
 
-    def mark_as_processed(self, task: int, variant: int, group: int):
+    def mark_as_processed(self, message: int):
         with self.db.create_session() as session:
             session.query(Message) \
-                .filter_by(task=task, variant=variant, group=group) \
+                .filter_by(id=message) \
                 .update(dict(processed=True))
 
 
@@ -301,7 +316,7 @@ class MessageCheckRepository:
         self,
         message: int,
         status: TaskStatus,
-        output: Union[str, None]
+        output: str | None,
     ) -> MessageCheck:
         with self.db.create_session() as session:
             check = MessageCheck(
@@ -318,7 +333,7 @@ class FinalSeedRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_final_seed(self, group: int) -> Union[FinalSeed, None]:
+    def get_final_seed(self, group: int) -> FinalSeed | None:
         with self.db.create_session() as session:
             return session.query(FinalSeed) \
                 .filter_by(group=group) \
@@ -348,6 +363,18 @@ class FinalSeedRepository:
                 .delete()
 
 
+class TeacherRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def find_by_login(self, login: str) -> Teacher | None:
+        with self.db.create_session() as session:
+            teacher = session.query(Teacher) \
+                .filter_by(login=login) \
+                .first()
+            return teacher
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -358,3 +385,4 @@ class AppDatabase:
         self.messages = MessageRepository(db)
         self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
+        self.teachers = TeacherRepository(db)

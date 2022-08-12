@@ -1,12 +1,10 @@
 import datetime
 import time
 import uuid
-from typing import Callable, Tuple, Union
+from typing import Callable
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
-
-from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
 
@@ -32,7 +30,7 @@ def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
             break
 
 
-def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
+def arrange_task(db: AppDatabase) -> tuple[int, int, int]:
     variant = unique_int()
     group_name = unique_str()
     task = unique_int()
@@ -48,7 +46,7 @@ def arrange_task(db: AppDatabase) -> Tuple[int, int, int]:
 def get_tags(
     html: str,
     name: str,
-    class_: Union[str, bool, None]
+    class_: str | bool | None,
 ) -> ResultSet[Tag]:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all(name, class_=class_)

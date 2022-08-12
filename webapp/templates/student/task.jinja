@@ -74,12 +74,15 @@
           type="text"
           class="form-control"
           {% if status.disabled %}disabled{%endif%}
-          placeholder="Текст программы на Python"
+          placeholder="Ответ на задание"
           style="min-height: 250px;font-family: monospace, monospace;"></textarea>
         <small class="form-text text-muted">
-          <div>Введите текст программы на языке программирования Python в поле выше.</div>
-          <div>В отправляемом коде должна присутствовать функция <code>main</code> и не должно быть какого-либо ввода/вывода.</div>
-          <div>Поддерживается использование модулей только из стандартной библиотеки Python.</div>
+          <div>Введите ответ на задание в поле выше.</div>
+          <div>
+            В отправляемом коде на языке программирования Python должна присутствовать функция 
+            <code>main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
+            использование модулей только из стандартной библиотеки Python.
+          </div>
         </small>
       </div>
       {% if form.code.errors %}

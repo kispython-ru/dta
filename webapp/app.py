@@ -1,11 +1,13 @@
 import logging
 import os
-from typing import Union
+
+from flask_jwt_extended import JWTManager
 
 from flask import Flask
 
-import webapp.api as api
-import webapp.views as views
+import webapp.views.api as api
+import webapp.views.student as student
+import webapp.views.teacher as teacher
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
@@ -14,14 +16,15 @@ from webapp.repositories import AppDatabase
 from webapp.utils import load_config_files
 
 
-def migrate_database(connection_string: str, alembic_path: str):
-    alembic_ini_path = os.path.join(alembic_path, "alembic.ini")
-    alembic_script_path = os.path.join(alembic_path, "alembic")
-    alembic_config = Config(alembic_ini_path)
-    alembic_config.set_main_option("sqlalchemy.url", connection_string)
-    if alembic_script_path is not None:
-        alembic_config.set_main_option("script_location", alembic_script_path)
-    command.upgrade(alembic_config, "head")
+def migrate_database(connection_string: str):
+    base = os.path.dirname(os.path.abspath(__file__))
+    ini = os.path.join(base, "alembic.ini")
+    script = os.path.join(base, "alembic")
+    config = Config(ini)
+    config.set_main_option("sqlalchemy.url", connection_string)
+    if script is not None:
+        config.set_main_option("script_location", script)
+    command.upgrade(config, "head")
 
 
 def seed_database(app: Flask):
@@ -47,12 +50,19 @@ def configure_app(config_path: str) -> Flask:
     config = load_config_files(config_path)
     app = Flask(__name__)
     app.url_map.strict_slashes = False
+    app.config["JWT_SECRET_KEY"] = config["SECRET_KEY"]
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+    app.config["JWT_COOKIE_SECURE"] = True
+    app.config["JSON_AS_ASCII"] = False
+    app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
     app.config.update(config)
-    app.register_blueprint(views.blueprint)
-    app.register_blueprint(worker.blueprint)
+    app.register_blueprint(student.blueprint)
+    app.register_blueprint(teacher.blueprint)
     app.register_blueprint(api.blueprint)
+    app.register_blueprint(worker.blueprint)
+    JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
-    migrate_database(config["CONNECTION_STRING"], config["ALEMBIC_PATH"])
+    migrate_database(config["CONNECTION_STRING"])
     seed_database(app)
     return app
 

@@ -1,18 +1,12 @@
 {
-    "ALEMBIC_PATH": "webapp",
-    "FINAL_TASKS": null,
-    "HIGHLIGHT_SYNTAX": false,
-    "TEMPLATES_AUTO_RELOAD": true,
     "CONNECTION_STRING": "sqlite:///web-app.db",
     "CORE_PATH": "./mocks",
     "ANALYTICS_PATH": "./mocks",
-    "CSV_TOKEN": "CHANGE_ME",
-    "API_TOKEN": "CHANGE_ME",
-    "FINAL_TOKEN": "CHANGE_ME",
     "SECRET_KEY": "CHANGE_ME",
-    "JSON_AS_ASCII": false,
-    "JSONIFY_PRETTYPRINT_REGULAR": false,
+    "API_TOKEN": "CHANGE_ME",
     "DISABLE_BACKGROUND_WORKER": true,
+    "HIGHLIGHT_SYNTAX": false,
+    "READONLY": false,
     "TASK_BASE_URL": "http://sovietov.com/kispython",
-    "READONLY": false
+    "FINAL_TASKS": null
 }

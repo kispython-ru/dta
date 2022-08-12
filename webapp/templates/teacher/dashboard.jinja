@@ -1,0 +1,62 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="collapse navbar-collapse container">
+    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+      <li>
+        <a class="logo-container text-decoration-none" href="/admin">
+          <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+          </div>
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Преподавательская
+      </li>
+    </ol>
+    <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
+      Выйти
+    </a>
+  </div>
+</nav>
+<div class="container">
+  <div class="row">
+    {% if groups is not none %}
+      <div class="col-12 mt-3">
+        <b class="card-title d-block">Управление группами</b>
+        <form action="/admin/group/select" method="GET" class="w-100">
+          <select class="form-select mb-2" name="group">
+            {% for group in groups %}
+              <option value="{{ group.id }}">
+                {{ group.title }}
+              </option>
+            {% endfor %} 
+          </select>
+          <button type="submit" class="btn btn-outline-primary w-100 d-block">
+            Далее
+          </button>
+        </form>
+      </div>
+    {% endif %}
+    <div class="col-12 mt-3">
+      <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
+      <form action="/admin/messages" method="GET" class="w-100">
+        <select class="form-select mb-2" name="separator">
+            <option value=";">Точка с запятой</option>
+            <option value=",">Запятая</option>
+        </select>
+        <select class="form-select mb-2" name="count">
+            <option value="10">10 сообщений</option>
+            <option value="100">100 сообщений</option>
+            <option value="500">500 сообщений</option>
+            <option value="1000">1000 сообщений</option>
+            <option value="10000">10 000 сообщений</option>
+        </select>
+        <button type="submit" class="btn btn-outline-primary w-100 d-block">
+          Выгрузить статистику
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

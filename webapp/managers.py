@@ -1,18 +1,21 @@
 import csv
 import io
 import random
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable
+
+import bcrypt
 
 from flask import Config
 
 from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
-from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Variant
+from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
     MessageRepository,
     TaskRepository,
     TaskStatusRepository,
+    TeacherRepository,
     VariantRepository
 )
 
@@ -38,10 +41,10 @@ class GroupManager:
         self.groups = groups
         self.config = config
 
-    def get_groupings(self) -> Dict[str, List[Group]]:
+    def get_groupings(self) -> dict[str, list[Group]]:
         config = self.config.config
         groups = self.groups.get_all()
-        groupings: Dict[str, List[Group]] = {}
+        groupings: dict[str, list[Group]] = {}
         for group in groups:
             if config.final_tasks is not None:
                 seed = self.seeds.get_final_seed(group.id)
@@ -59,7 +62,7 @@ class ExternalTaskManager:
     def __init__(
         self,
         group: Group,
-        seed: Union[FinalSeed, None],
+        seed: FinalSeed | None,
         tasks: TaskRepository,
         groups: GroupRepository,
         variants: VariantRepository,
@@ -97,16 +100,16 @@ class ExternalTaskManager:
         )
 
     def sample_task(self, seed: str, task: int):
-        final_tasks: Dict[str, List[int]] = self.config.final_tasks
+        final_tasks: dict[str, list[int]] = self.config.final_tasks
         if not final_tasks:
             return self.sample(seed, self.all_tasks, task)
-        possible_options: List[int] = final_tasks[str(task)]
+        possible_options: list[int] = final_tasks[str(task)]
         composite_seed = f'{self.seed.seed}{seed}'
         rand = random.Random(composite_seed)
         id = rand.choice(possible_options)
         return Task(id=id)
 
-    def sample(self, seed: str, list: List[Dict[str, int]], i: int):
+    def sample(self, seed: str, list: list[dict[str, int]], i: int):
         composite_seed = f'{self.seed.seed}{seed}'
         rand = random.Random(composite_seed)
         length = len(list)
@@ -147,7 +150,7 @@ class StatusManager:
         statuses = self.__get_statuses(group.id)
         e = self.__get_external_task_manager(group)
         tasks = self.__get_tasks(group, config, e.random_active)
-        dtos: List[VariantDto] = []
+        dtos: list[VariantDto] = []
         for var in variants:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
             dtos.append(dto)
@@ -189,14 +192,14 @@ class StatusManager:
         self,
         group: Group,
         variant: Variant,
-        tasks: List[TaskDto],
-        statuses: Dict[Tuple[int, int], TaskStatus],
+        tasks: list[TaskDto],
+        statuses: dict[tuple[int, int], TaskStatus],
         config: AppConfig,
         external: ExternalTaskManager,
     ) -> VariantDto:
-        dtos: List[TaskStatusDto] = []
+        dtos: list[TaskStatusDto] = []
         for task in tasks:
-            composite_key: Tuple[int, int] = (variant.id, task.id)
+            composite_key: tuple[int, int] = (variant.id, task.id)
             status = statuses.get(composite_key)
             e = external.get_external_task(task.id, variant.id)
             dto = TaskStatusDto(group, variant, task, status, e, config)
@@ -208,19 +211,19 @@ class StatusManager:
         group: Group,
         config: AppConfig,
         active: bool
-    ) -> List[TaskDto]:
+    ) -> list[TaskDto]:
         tasks = self.tasks.get_all()
-        dtos: List[TaskDto] = []
+        dtos: list[TaskDto] = []
         for task in tasks:
             dto = TaskDto(group, task, config, active)
             dtos.append(dto)
         return dtos
 
-    def __get_statuses(self, group: int) -> Dict[Tuple[int, int], TaskStatus]:
+    def __get_statuses(self, group: int) -> dict[tuple[int, int], TaskStatus]:
         statuses = self.statuses.get_by_group(group=group)
         dictionary = dict()
         for status in statuses:
-            composite_key: Tuple[int, int] = (status.variant, status.task)
+            composite_key: tuple[int, int] = (status.variant, status.task)
             dictionary[composite_key] = status
         return dictionary
 
@@ -240,7 +243,7 @@ class ExportManager:
         self.variants = variants
         self.tasks = tasks
 
-    def export_messages(self, count: Union[int, None], separator: str) -> str:
+    def export_messages(self, count: int | None, separator: str) -> str:
         messages = self.__get_latest_messages(count)
         group_titles = self.__get_group_titles()
         table = self.__create_messages_table(messages, group_titles)
@@ -260,9 +263,9 @@ class ExportManager:
 
     def __create_messages_table(
         self,
-        messages: List[Message],
-        group_titles: Dict[int, str]
-    ) -> List[List[str]]:
+        messages: list[Message],
+        group_titles: dict[int, str]
+    ) -> list[list[str]]:
         rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Код"]]
         for message in messages:
             gt = group_titles[message.group]
@@ -275,7 +278,7 @@ class ExportManager:
             rows.append([id, time, gt, task, variant, ip, code])
         return rows
 
-    def __create_exam_table(self, group_id: int) -> List[List[str]]:
+    def __create_exam_table(self, group_id: int) -> list[list[str]]:
         header = ['Сдающая группа', 'Вариант']
         tasks = self.tasks.get_all()
         for task in tasks:
@@ -310,22 +313,35 @@ class ExportManager:
             rows.append(row)
         return [header] + rows
 
-    def __get_group_titles(self) -> Dict[int, str]:
+    def __get_group_titles(self) -> dict[int, str]:
         groups = self.groups.get_all()
-        group_titles: Dict[int, str] = {}
+        group_titles: dict[int, str] = {}
         for group in groups:
             group_titles[group.id] = group.title
         return group_titles
 
-    def __get_latest_messages(self, count: Union[int, None]) -> List[Message]:
+    def __get_latest_messages(self, count: int | None) -> list[Message]:
         if count is None:
             return self.messages.get_all()
         return self.messages.get_latest(count)
 
-    def __create_csv(self, table: List[List[str]], delimiter: str):
+    def __create_csv(self, table: list[list[str]], delimiter: str):
         si = io.StringIO()
         cw = csv.writer(si, delimiter=delimiter)
         cw.writerows(table)
         bom = u"\uFEFF"
         value = bom + si.getvalue()
         return value
+
+
+class TeacherManager:
+    def __init__(self, teachers: TeacherRepository):
+        self.teachers = teachers
+
+    def check_password(self, login: str, password: str) -> Teacher | None:
+        teacher = self.teachers.find_by_login(login)
+        if teacher is not None:
+            given = password.encode('utf8')
+            actual = teacher.password_hash.encode('utf8')
+            if bcrypt.checkpw(given, actual):
+                return teacher
