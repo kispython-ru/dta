@@ -1,6 +1,7 @@
 import csv
 import io
 import random
+from typing import Callable
 
 import bcrypt
 
@@ -20,7 +21,7 @@ from webapp.repositories import (
 
 
 class AppConfigManager:
-    def __init__(self, get_config: callable[[], Config]):
+    def __init__(self, get_config: Callable[[], Config]):
         self.get_config = get_config
 
     @property

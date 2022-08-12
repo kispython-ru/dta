@@ -1,6 +1,7 @@
 import datetime
 import time
 import uuid
+from typing import Callable
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
@@ -18,7 +19,7 @@ def unique_int() -> int:
     return int(unique_id)
 
 
-def timeout_assert(condition: callable[[], bool], timeout: int = 20):
+def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
     delta = datetime.timedelta(seconds=timeout)
     started = datetime.datetime.now()
     while True:

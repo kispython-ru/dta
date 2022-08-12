@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from typing import Callable
 
 from sqlalchemy.orm import Session
 
@@ -34,7 +35,7 @@ class DbContext:
 
 
 class DbContextManager:
-    def __init__(self, get_connection: callable[[], str]):
+    def __init__(self, get_connection: Callable[[], str]):
         self.get_connection = get_connection
         self.session_maker = None
 
@@ -375,7 +376,7 @@ class TeacherRepository:
 
 
 class AppDatabase:
-    def __init__(self, get_connection: callable[[], str]):
+    def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
         self.groups = GroupRepository(db)
         self.variants = VariantRepository(db)
