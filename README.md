@@ -53,19 +53,18 @@ make flask-win
 
 ### Acknoledgements
 
-Thanks to [@Plintus-bit](https://github.com/Plintus-bit) for making the awesome logo!
+We appreciate all people who contributed to the project. Thanks to [@Plintus-bit](https://github.com/Plintus-bit) for designing the [logo](https://github.com/kispython-ru/dta#readme)!
 
-### Fruther Steps
+<a href="https://github.com/kispython-ru/dta/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kispython-ru/dta" />
+</a>
 
-If you are using [code](https://code.visualstudio.com/), press `Ctrl+Shift+P` in order to activate poetry virtual environment after installation, or just type `poetry shell` in the terminal. Run unit tests via `make test`, run the app via `make flask`, run the linter as `make lint`, run linter fixes via `make fix`. If you prefer to use containers, there are `make image` and `make container` scripts that will build a Docker image and run the app inside that image. A sample run script for production might look like as follows:
+### Architecture
 
-```sh
-# Use the following if you'd like to seed the database:
-# export SEED=1
-# Don't forget to: unset SEED
-export CONFIG_PATH=/home/app/exam/config
-export DTA_RUNTIME=runsc
-. /home/app/.cache/pypoetry/virtualenvs/app-boZTFemB-py3.10/bin/activate
-cd src
-waitress-serve --listen localhost:8000 --threads 2 --call 'webapp.app:create_app'
-```
+The architecture of the system and its components are described in the following papers:
+
+1. Sovietov P.N., Gorchakov A.V. [**Digital Teaching Assistant for the Python Programming Course**](https://ieeexplore.ieee.org/document/9801060) // 2022 2nd International Conference on Technology Enhanced Learning in Higher Education (TELE). – IEEE, 2022. – pp. 272-276.
+
+2. Sovietov P.N. [**Automatic Generation of Programming Exercises**](https://arxiv.org/abs/2205.11304) // 2021 1st International Conference on Technology Enhanced Learning in Higher Education (TELE). – IEEE, 2021. – pp. 111-114.
+
+3. Andrianova E.G., Demidova L.A., Sovetov P.N. [**Pedagogical design of a digital teaching assistant in massive professional training for the digital economy**](https://www.rtj-mirea.ru/jour/article/view/518/355) // Russian Technological Journal. – 2022. – Vol. 10. – No. 3. – pp. 7-23.
