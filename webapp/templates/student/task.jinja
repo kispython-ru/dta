@@ -31,11 +31,17 @@
     Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для варианта №{{ status.variant + 1 }}.
   </h6>
   <div class="card-subtitle mb-4 mt-2">
+  {% if status.formulation is none %}
     <a class="text-decoration-none btn btn-primary"
        target="__blank"
        href="{{ status.formulation_url }}">
       Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{ status.external.group_title }}
     </a>
+  {% else %}
+    <div class="mt-3">
+      {{ status.formulation }}
+    </div>
+  {% endif %}
   </div>
   <div>
     <h6 class="card-title fw-bold">

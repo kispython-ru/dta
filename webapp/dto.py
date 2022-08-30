@@ -41,6 +41,7 @@ class TaskDto:
         self.id = int(task.id)
         self.original = f'{config.task_base_url}/{self.id}/{group.title}.html'
         self.url = self.original if not random else "#"
+        self.formulation = task.formulation
 
 
 class TaskStatusDto:
@@ -54,6 +55,7 @@ class TaskStatusDto:
         config: AppConfig,
     ):
         self.task = task.id
+        self.formulation = task.formulation
         self.ip = status.ip if status is not None else "-"
         self.variant = variant.id
         self.group = int(group.id)
