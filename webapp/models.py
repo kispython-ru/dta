@@ -50,6 +50,7 @@ class Group(Base):
 class Task(Base):
     __tablename__ = "tasks"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    formulation = sa.Column("formulation", sa.String, nullable=True)
 
 
 class Variant(Base):
