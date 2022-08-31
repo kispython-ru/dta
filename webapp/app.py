@@ -52,7 +52,7 @@ def configure_app(config_path: str) -> Flask:
     app.url_map.strict_slashes = False
     app.config["JWT_SECRET_KEY"] = config["SECRET_KEY"]
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-    app.config["JWT_COOKIE_SECURE"] = True
+    app.config["JWT_COOKIE_SECURE"] = False
     app.config["JSON_AS_ASCII"] = False
     app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
     app.config.update(config)
