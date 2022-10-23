@@ -54,12 +54,14 @@ def task(gid: int, vid: int, tid: int):
     student = get_jwt_student()
     status = statuses.get_task_status(gid, vid, tid)
     highlight = config.config.highlight_syntax
+    registration = config.config.enable_registration
     return render_template(
         "student/task.jinja",
         status=status,
         form=MessageForm(),
         highlight=highlight,
         student=student,
+        registration=registration
     )
 
 
@@ -71,7 +73,8 @@ def submit_task(gid: int, vid: int, tid: int):
     form = MessageForm()
     valid = form.validate_on_submit() and not status.checked
     available = status.external.active and not config.config.readonly
-    if valid and available:
+    allowed = student is not None or not config.config.enable_registration
+    if valid and available and allowed:
         code = form.code.data
         ip = get_real_ip(request)
         db.messages.submit_task(tid, vid, gid, code, ip)
@@ -89,6 +92,8 @@ def submit_task(gid: int, vid: int, tid: int):
 
 @blueprint.route("/login", methods=['GET', 'POST'])
 def login():
+    if not config.config.enable_registration:
+        return redirect('/')
     if verify_jwt_in_request(True):
         return redirect('/')
     form = LoginForm()

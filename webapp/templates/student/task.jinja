@@ -91,14 +91,14 @@
           name="code"
           type="text"
           class="form-control"
-          {% if status.disabled %}disabled{%endif%}
+          {% if status.disabled or registration and not student %}disabled{%endif%}
           placeholder="Ответ на задание"
           style="min-height: 250px;font-family: monospace, monospace;"></textarea>
         <small class="form-text text-muted">
           <div>Введите ответ на задание в поле выше.</div>
           <div>
             В отправляемом коде на языке программирования Python должна присутствовать функция 
-            <code>main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
+            <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
             использование модулей только из стандартной библиотеки Python.
           </div>
         </small>
@@ -115,7 +115,7 @@
         <div class="col-md-8">
           <button
             type="submit"
-            {% if status.disabled %}disabled{%endif%}
+            {% if status.disabled or registration and not student %}disabled{%endif%}
             class="btn btn-primary w-100 d-block">
             Отправить задание на проверку
           </button>
@@ -125,7 +125,7 @@
   </div>
 </div>
 
-{% if highlight and not status.disabled %}
+{% if highlight and not (status.disabled or registration and not student) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <script type="text/javascript"> 

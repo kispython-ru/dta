@@ -14,6 +14,7 @@ class AppConfig:
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
         self.readonly: bool = config["READONLY"]
+        self.enable_registration: bool = config["ENABLE_REGISTRATION"]
 
 
 class ExternalTaskDto:
