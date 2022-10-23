@@ -380,6 +380,11 @@ class StudentRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_by_id(self, id: int) -> Student:
+        with self.db.create_session() as session:
+            student = session.query(Student).get(id)
+            return student
+
     def find_by_email(self, email: str) -> Student | None:
         with self.db.create_session() as session:
             student = session.query(Student) \

@@ -24,6 +24,18 @@
         Уведомление
       </li>
     </ol>
+    {% if student is not none %}
+      <span class="breadcrumb-item text-decoration-none">
+        <span class="text-muted">{{ student.email }}</span>
+        <a class="breadcrumb-item text-decoration-none" href="/logout">
+          Выйти
+        </a>
+      </span>
+    {% elif not exam %}
+      <a class="breadcrumb-item text-decoration-none" href="/login">
+        Войти
+      </a>
+    {% endif %}
   </div>
 </nav>
 <div class="container mt-3">
