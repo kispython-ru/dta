@@ -16,8 +16,8 @@ from flask import redirect, render_template, request
 from webapp.forms import LoginForm, MessageForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
-from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip
+from webapp.repositories import AppDatabase, StudentRepository
+from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional
 
 
 blueprint = Blueprint("student", __name__)
@@ -30,18 +30,16 @@ students = StudentManager(db.students)
 
 
 @blueprint.route("/", methods=["GET"])
-@jwt_required(optional=True)
-def dashboard():
-    student = get_jwt_student()
+@student_jwt_optional(db.students)
+def dashboard(student: Student | None):
     groupings = groups.get_groupings()
     exam = config.config.final_tasks is not None
     return render_template("student/dashboard.jinja", groupings=groupings, exam=exam, student=student)
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
-@jwt_required(optional=True)
-def group(group_id: int):
-    student = get_jwt_student()
+@student_jwt_optional(db.students)
+def group(student: Student | None, group_id: int):
     group = statuses.get_group_statuses(group_id)
     seed = db.seeds.get_final_seed(group_id)
     blocked = config.config.final_tasks and seed is None
@@ -49,9 +47,8 @@ def group(group_id: int):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-@jwt_required(optional=True)
-def task(gid: int, vid: int, tid: int):
-    student = get_jwt_student()
+@student_jwt_optional(db.students)
+def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     highlight = config.config.highlight_syntax
     registration = config.config.enable_registration
@@ -66,9 +63,8 @@ def task(gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-@jwt_required(optional=True)
-def submit_task(gid: int, vid: int, tid: int):
-    student = get_jwt_student()
+@student_jwt_optional(db.students)
+def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     form = MessageForm()
     valid = form.validate_on_submit() and not status.checked
@@ -113,14 +109,6 @@ def logout():
     response = redirect("/")
     unset_jwt_cookies(response)
     return response
-
-
-def get_jwt_student() -> Student | None:
-    identity = get_jwt_identity()
-    if identity is None:
-        return None
-    student = db.students.get_by_id(identity)
-    return student
 
 
 @blueprint.errorhandler(Exception)

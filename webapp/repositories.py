@@ -368,6 +368,11 @@ class TeacherRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_by_id(self, id: int) -> Teacher | None:
+        with self.db.create_session() as session:
+            teacher = session.query(Teacher).get(id)
+            return  teacher
+
     def find_by_login(self, login: str) -> Teacher | None:
         with self.db.create_session() as session:
             teacher = session.query(Teacher) \
@@ -380,7 +385,7 @@ class StudentRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get_by_id(self, id: int) -> Student:
+    def get_by_id(self, id: int) -> Student | None:
         with self.db.create_session() as session:
             student = session.query(Student).get(id)
             return student

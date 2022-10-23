@@ -1,9 +1,48 @@
+from functools import wraps
 import json
 import os
 import sys
 import traceback
+from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
 
 from flask import Request
+from jwt import PyJWTError
+
+from webapp.repositories import StudentRepository, TeacherRepository
+
+
+def student_jwt_optional(students: StudentRepository):
+    def wrapper(function):
+        @wraps(function)
+        def decorator(*args, **kwargs):
+            verify_jwt_in_request(optional=True)
+            identity = get_jwt_identity()
+            if identity is None:
+                return function(None, *args, **kwargs)
+            claims = get_jwt()
+            if "teacher" in claims:
+                return function(None, *args, **kwargs)
+            student = students.get_by_id(identity)
+            return function(student, *args, **kwargs)
+        return decorator
+    return wrapper
+
+
+def teacher_jwt_required(teachers: TeacherRepository):
+    def wrapper(function):
+        @wraps(function)
+        def decorator(*args, **kwargs):
+            verify_jwt_in_request()
+            claims = get_jwt()
+            if "teacher" in claims:
+                identity = get_jwt_identity()
+                teacher = teachers.get_by_id(identity)
+                if teacher:
+                    return function(teacher, *args, **kwargs)
+                raise PyJWTError()
+            raise PyJWTError()
+        return decorator
+    return wrapper
 
 
 def get_real_ip(request: Request) -> str:
