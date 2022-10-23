@@ -13,6 +13,10 @@ class MessageForm(FlaskForm):
         DataRequired(message="Данное поле не может быть пустым!"),
         Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать как минимум 10 символов!"),
     ])
+    password = PasswordField('password', [
+        DataRequired(message="Данное поле не может быть пустым!"),
+        Length(min=8, message="Пароль содержит как минимум 8 символов."),
+    ])
 
 
 class LoginForm(FlaskForm):

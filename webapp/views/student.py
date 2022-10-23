@@ -71,11 +71,12 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     available = status.external.active and not config.config.readonly
     allowed = student is not None or not config.config.enable_registration
     if valid and available and allowed:
-        code = form.code.data
-        ip = get_real_ip(request)
-        db.messages.submit_task(tid, vid, gid, code, ip)
-        db.statuses.submit_task(tid, vid, gid, code, ip)
-        return render_template("student/success.jinja", status=status, student=student)
+        if students.check_password(student.email, form.password.data):
+            ip = get_real_ip(request)
+            db.messages.submit_task(tid, vid, gid, form.code.data, ip)
+            db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
+            return render_template("student/success.jinja", status=status, student=student)
+        form.password.errors.append("Указан неправильный пароль.")
     highlight = config.config.highlight_syntax
     return render_template(
         "student/task.jinja",
