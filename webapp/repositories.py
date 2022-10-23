@@ -371,7 +371,7 @@ class TeacherRepository:
     def get_by_id(self, id: int) -> Teacher | None:
         with self.db.create_session() as session:
             teacher = session.query(Teacher).get(id)
-            return  teacher
+            return teacher
 
     def find_by_login(self, login: str) -> Teacher | None:
         with self.db.create_session() as session:

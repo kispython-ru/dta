@@ -1,12 +1,13 @@
-from functools import wraps
 import json
 import os
 import sys
 import traceback
+from functools import wraps
+
 from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+from jwt import PyJWTError
 
 from flask import Request
-from jwt import PyJWTError
 
 from webapp.repositories import StudentRepository, TeacherRepository
 

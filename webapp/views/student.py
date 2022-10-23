@@ -1,7 +1,7 @@
 from flask_jwt_extended import (
     create_access_token,
-    jwt_required,
     get_jwt_identity,
+    jwt_required,
     set_access_cookies,
     unset_jwt_cookies,
     verify_jwt_in_request
