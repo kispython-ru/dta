@@ -85,42 +85,51 @@
       <div class="text-muted mb-2">
         Во избежание утери данных рекомендуется сохранять отправляемые программы локально.
       </div>
-      <div class="form-group mb-2">
-        <textarea
-          id="code-textarea"
-          name="code"
-          type="text"
-          class="form-control"
-          {% if status.disabled or registration and not student %}disabled{%endif%}
-          placeholder="Ответ на задание"
-          style="min-height: 250px;font-family: monospace, monospace;"></textarea>
-        <small class="form-text text-muted">
-          <div>Введите ответ на задание в поле выше.</div>
-          <div>
-            В отправляемом коде на языке программирования Python должна присутствовать функция 
-            <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
-            использование модулей только из стандартной библиотеки Python.
+      {% if registration and not student %}
+        <div class="row">
+          <div class="col-md-8">
+            <a class="btn btn-outline-danger w-100 d-block" href="/login">
+              Войдите или зарегистрируйтесь, чтобы отправить решение на проверку
+            </a>
           </div>
-        </small>
-      </div>
-      {% if form.code.errors %}
-        <ul class="errors">
-          {% for error in form.code.errors %}
-            <li class="text-danger">{{ error }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-      {{ form.csrf_token }}
-      <div class="row">
-        <div class="col-md-8">
-          <button
-            type="submit"
-            {% if status.disabled or registration and not student %}disabled{%endif%}
-            class="btn btn-primary w-100 d-block">
-            Отправить задание на проверку
-          </button>
         </div>
-      </div>
+      {% else %}
+        <div class="form-group mb-2">
+          <textarea
+            id="code-textarea"
+            name="code"
+            type="text"
+            class="form-control"
+            {% if status.disabled or registration and not student %}disabled{%endif%}
+            placeholder="Ответ на задание"
+            style="min-height: 250px;font-family: monospace, monospace;"></textarea>
+          <small class="form-text text-muted">
+            <div>
+              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция 
+              <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
+              использование модулей только из стандартной библиотеки Python.
+            </div>
+          </small>
+        </div>
+        {% if form.code.errors %}
+          <ul class="errors">
+            {% for error in form.code.errors %}
+              <li class="text-danger">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {{ form.csrf_token }}
+        <div class="row">
+          <div class="col-md-8">
+            <button
+              type="submit"
+              class="btn btn-primary w-100 d-block"
+              {% if status.disabled or registration and not student %}disabled{%endif%}>
+              Отправить решение на проверку
+            </button>
+          </div>
+        </div>
+      {% endif %}
     </form>
   </div>
 </div>
