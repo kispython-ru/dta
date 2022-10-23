@@ -117,7 +117,9 @@ def reject(teacher: Teacher, group_id: int, message_id: int):
 @blueprint.route("/teacher/login", methods=['GET', 'POST'])
 def login():
     if verify_jwt_in_request(True):
-        return redirect('/teacher')
+        response = redirect('/teacher/login')
+        unset_jwt_cookies(response)
+        return response
     form = LoginForm()
     if not form.validate_on_submit():
         return render_template("teacher/login.jinja", form=form)
