@@ -8,11 +8,12 @@ import bcrypt
 from flask import Config
 
 from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
-from webapp.models import FinalSeed, Group, Message, Task, TaskStatus, Teacher, Variant
+from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
     MessageRepository,
+    StudentRepository,
     TaskRepository,
     TaskStatusRepository,
     TeacherRepository,
@@ -345,3 +346,16 @@ class TeacherManager:
             actual = teacher.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
                 return teacher
+
+
+class StudentManager:
+    def __init__(self, students: StudentRepository):
+        self.students = students
+
+    def check_password(self, email: str, password: str) -> Student | None:
+        student = self.students.find_by_email(email)
+        if student is not None:
+            given = password.encode('utf8')
+            actual = student.password_hash.encode('utf8')
+            if bcrypt.checkpw(given, actual):
+                return student

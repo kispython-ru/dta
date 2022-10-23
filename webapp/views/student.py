@@ -1,9 +1,19 @@
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    set_access_cookies,
+    unset_jwt_cookies,
+    verify_jwt_in_request
+)
+from flask_jwt_extended.exceptions import JWTExtendedException
+from jwt.exceptions import PyJWTError
+
 from flask import Blueprint
 from flask import current_app as app
-from flask import render_template, request
+from flask import redirect, render_template, request
 
-from webapp.forms import MessageForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager
+from webapp.forms import LoginForm, MessageForm
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip
 
@@ -14,6 +24,7 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
+students = StudentManager(db.students)
 
 
 @blueprint.route("/", methods=["GET"])
@@ -64,7 +75,31 @@ def submit_task(gid: int, vid: int, tid: int):
     )
 
 
+@blueprint.route("/login", methods=['GET', 'POST'])
+def login():
+    if verify_jwt_in_request(True):
+        return redirect('/')
+    form = LoginForm()
+    if not form.validate_on_submit():
+        return render_template("student/login.jinja", form=form)
+    teacher = students.check_password(form.login.data, form.password.data)
+    if teacher is None:
+        return render_template("student/login.jinja", form=form)
+    access = create_access_token(identity=teacher.id)
+    response = redirect("/")
+    set_access_cookies(response, access)
+    return response
+
+
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
     return render_template("error.jinja", redirect="/teacher")
+
+
+@blueprint.errorhandler(JWTExtendedException)
+@blueprint.errorhandler(PyJWTError)
+def handle_authorization_errors(e):
+    response = redirect('/student/login')
+    unset_jwt_cookies(response)
+    return response

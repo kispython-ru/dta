@@ -10,6 +10,7 @@ from webapp.models import (
     Message,
     MessageCheck,
     Status,
+    Student,
     Task,
     TaskStatus,
     Teacher,
@@ -375,6 +376,18 @@ class TeacherRepository:
             return teacher
 
 
+class StudentRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def find_by_email(self, email: str) -> Student | None:
+        with self.db.create_session() as session:
+            student = session.query(Student) \
+                .filter_by(email=email) \
+                .first()
+            return student
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -386,3 +399,4 @@ class AppDatabase:
         self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
         self.teachers = TeacherRepository(db)
+        self.students = StudentRepository(db)
