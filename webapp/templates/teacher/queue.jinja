@@ -4,19 +4,19 @@
   <div class="collapse navbar-collapse container">
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
       <li>
-        <a class="logo-container text-decoration-none" href="/admin">
+        <a class="logo-container text-decoration-none" href="/teacher">
           <div class="logo">
             <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
           </div>
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/admin">
+        <a class="text-decoration-none" href="/teacher">
           Преподавательская
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/admin/group/{{ group.id }}">
+        <a class="text-decoration-none" href="/teacher/group/{{ group.id }}">
           {{ group.title }}
         </a>
       </li>
@@ -24,7 +24,7 @@
         Очередь сообщений
       </li>
     </ol>
-    <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
+    <a class="breadcrumb-item text-decoration-none" href="/teacher/logout">
       Выйти
     </a>
   </div>
@@ -41,12 +41,12 @@
           style="min-height: 550px;font-family: monospace, monospace;">{{ message.code }}</textarea>
     </div>
     <div class="col-12 col-md-4">
-      <form action="/admin/group/{{ group.id }}/queue/{{ message.id }}/accept" method="GET" class="w-100">
+      <form action="/teacher/group/{{ group.id }}/queue/{{ message.id }}/accept" method="GET" class="w-100">
         <button class="btn btn-outline-success d-block mb-2 w-100" type="submit">
           Принять
         </button>
       </form>
-      <form action="/admin/group/{{ group.id }}/queue/{{ message.id }}/reject" method="GET" class="w-100">
+      <form action="/teacher/group/{{ group.id }}/queue/{{ message.id }}/reject" method="GET" class="w-100">
         <button class="btn btn-outline-danger d-block mb-2 w-100" type="submit">
           Отклонить
         </button>

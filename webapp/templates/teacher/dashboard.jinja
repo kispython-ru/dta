@@ -4,7 +4,7 @@
   <div class="collapse navbar-collapse container">
     <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
       <li>
-        <a class="logo-container text-decoration-none" href="/admin">
+        <a class="logo-container text-decoration-none" href="/teacher">
           <div class="logo">
             <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
           </div>
@@ -14,7 +14,7 @@
         Преподавательская
       </li>
     </ol>
-    <a class="breadcrumb-item text-decoration-none" href="/admin/logout">
+    <a class="breadcrumb-item text-decoration-none" href="/teacher/logout">
       Выйти
     </a>
   </div>
@@ -24,7 +24,7 @@
     {% if groups is not none %}
       <div class="col-12 mt-3">
         <b class="card-title d-block">Управление группами</b>
-        <form action="/admin/group/select" method="GET" class="w-100">
+        <form action="/teacher/group/select" method="GET" class="w-100">
           <select class="form-select mb-2" name="group">
             {% for group in groups %}
               <option value="{{ group.id }}">
@@ -40,7 +40,7 @@
     {% endif %}
     <div class="col-12 mt-3">
       <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
-      <form action="/admin/messages" method="GET" class="w-100">
+      <form action="/teacher/messages" method="GET" class="w-100">
         <select class="form-select mb-2" name="separator">
             <option value=";">Точка с запятой</option>
             <option value=",">Запятая</option>

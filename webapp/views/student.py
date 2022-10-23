@@ -67,4 +67,4 @@ def submit_task(gid: int, vid: int, tid: int):
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/admin")
+    return render_template("error.jinja", redirect="/teacher")
