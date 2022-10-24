@@ -397,6 +397,12 @@ class StudentRepository:
                 .first()
             return student
 
+    def create(self, email: str, password: str) -> Student:
+        with self.db.create_session() as session:
+            student = Student(email=email, password_hash=password)
+            session.add(student)
+            return student
+
 
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):

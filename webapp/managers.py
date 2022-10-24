@@ -359,3 +359,14 @@ class StudentManager:
             actual = student.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
                 return student
+
+    def exists(self, email: str) -> bool:
+        student = self.students.find_by_email(email)
+        return bool(student)
+
+    def create(self, email: str, password: str) -> int:
+        given = password.encode('utf8')
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(given, salt)
+        student = self.students.create(email, hashed)
+        return student.id

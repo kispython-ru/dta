@@ -20,8 +20,8 @@
   <div class="row mt-4">
     <div class="col-12 col-md-9 col-lg-6">
       <div class="card">
-        <form class="card-body" action="/login" method="POST">
-          <b class="card-title d-block">Авторизация</b>
+        <form class="card-body" action="/register" method="POST">
+          <b class="card-title d-block">Регистрация</b>
           <div class="form-group mb-2">
             <label>Электронная почта</label>
             <input name="login" type="text" class="form-control"
@@ -48,16 +48,28 @@
               {% endfor %}
             </small>
           {% endif %}
+          <div class="form-group mb-2">
+            <label>Подтверждение пароля</label>
+            <input name="confirm" type="password" class="form-control" placeholder="Подтверждение пароля">
+            <small class="form-text text-muted">Подтвердите пароль.</small>
+          </div>
+          {% if form.confirm.errors %}
+            <small class="d-block alert alert-danger">
+              {% for error in form.confirm.errors %}
+                <div>{{ error }}</div>
+              {% endfor %}
+            </small>
+          {% endif %}
           {{ form.csrf_token }}
           <div class="row">
             <div class="col-md-6">
               <button type="submit" class="btn btn-primary w-100 d-block">
-                Войти
+                Зарегистрироваться
               </button>
             </div>
             <div class="col-md-6">
-              <a href="/register" class="btn btn-outline-primary w-100 d-block">
-                Регистрация
+              <a href="/login" class="btn btn-outline-primary w-100 d-block">
+                Войти
               </a>
             </div>
           </div>

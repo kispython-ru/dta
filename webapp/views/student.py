@@ -13,7 +13,7 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import StudentLoginForm, MessageForm
+from webapp.forms import StudentLoginForm, MessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -98,10 +98,31 @@ def login():
     form = StudentLoginForm()
     if not form.validate_on_submit():
         return render_template("student/login.jinja", form=form)
-    teacher = students.check_password(form.login.data, form.password.data)
-    if teacher is None:
+    student = students.check_password(form.login.data, form.password.data)
+    if student is None:
         return render_template("student/login.jinja", form=form)
-    access = create_access_token(identity=teacher.id)
+    access = create_access_token(identity=student.id)
+    response = redirect("/")
+    set_access_cookies(response, access)
+    return response
+
+
+@blueprint.route("/register", methods=['GET', 'POST'])
+def register():
+    if not config.config.enable_registration:
+        return redirect('/')
+    if verify_jwt_in_request(True):
+        response = redirect('/register')
+        unset_jwt_cookies(response)
+        return response
+    form = StudentRegisterForm()
+    if not form.validate_on_submit():
+        return render_template("student/register.jinja", form=form)
+    if students.exists(form.login.data):
+        form.login.errors.append("Такой адрес почты уже зарегистрирован!")
+        return render_template("student/register.jinja", form=form)
+    identity = students.create(form.login.data, form.password.data)
+    access = create_access_token(identity=identity)
     response = redirect("/")
     set_access_cookies(response, access)
     return response
