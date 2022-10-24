@@ -21,7 +21,8 @@ def upgrade():
         'students',
         sa.Column("id", sa.Integer, primary_key=True, nullable=False),
         sa.Column("email", sa.String, nullable=False),
-        sa.Column("password_hash", sa.String, nullable=False),
+        sa.Column("password_hash", sa.String, nullable=True),
+        sa.Column("unconfirmed_hash", sa.String, nullable=True),
     )
 
 

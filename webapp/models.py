@@ -109,7 +109,8 @@ class Student(Base):
     __tablename__ = "students"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
     email = sa.Column("email", sa.String, nullable=False)
-    password_hash = sa.Column("password_hash", sa.String, nullable=False)
+    password_hash = sa.Column("password_hash", sa.String, nullable=True)
+    unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
 
 
 class Mailer(Base):

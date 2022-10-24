@@ -98,8 +98,15 @@ def login():
     form = StudentLoginForm()
     if not form.validate_on_submit():
         return render_template("student/login.jinja", form=form)
+    if not students.exists(form.login.data):
+        form.login.errors.append("Такой адрес почты не зарегистрирован!")
+        return render_template("student/login.jinja", form=form)
+    if not students.confirmed(form.login.data):
+        form.login.errors.append(f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+        return render_template("student/login.jinja", form=form)
     student = students.check_password(form.login.data, form.password.data)
     if student is None:
+        form.login.errors.append("Неправильный пароль.")
         return render_template("student/login.jinja", form=form)
     access = create_access_token(identity=student.id)
     response = redirect("/")
