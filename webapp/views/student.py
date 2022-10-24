@@ -13,10 +13,10 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import LoginForm, MessageForm
+from webapp.forms import StudentLoginForm, MessageForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
-from webapp.repositories import AppDatabase, StudentRepository
+from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional
 
 
@@ -95,7 +95,7 @@ def login():
         response = redirect('/login')
         unset_jwt_cookies(response)
         return response
-    form = LoginForm()
+    form = StudentLoginForm()
     if not form.validate_on_submit():
         return render_template("student/login.jinja", form=form)
     teacher = students.check_password(form.login.data, form.password.data)
