@@ -102,7 +102,7 @@
             class="form-control"
             {% if status.disabled or registration and not student %}disabled{%endif%}
             placeholder="Ответ на задание"
-            style="min-height: 250px;font-family: monospace, monospace;"></textarea>
+            style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
           <small class="form-text text-muted">
             <div>
               Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция 
