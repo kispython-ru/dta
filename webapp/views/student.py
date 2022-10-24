@@ -126,13 +126,14 @@ def register():
     if not form.validate_on_submit():
         return render_template("student/register.jinja", form=form)
     if students.exists(form.login.data):
+        if not students.confirmed(form.login.data):
+            form.login.errors.append(f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+            return render_template("student/register.jinja", form=form)
         form.login.errors.append("Такой адрес почты уже зарегистрирован!")
         return render_template("student/register.jinja", form=form)
-    identity = students.create(form.login.data, form.password.data)
-    access = create_access_token(identity=identity)
-    response = redirect("/")
-    set_access_cookies(response, access)
-    return response
+    students.create(form.login.data, form.password.data)
+    form.login.errors.append(f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+    return render_template("student/register.jinja", form=form)
 
 
 @blueprint.route("/logout", methods=['GET'])
