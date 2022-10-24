@@ -366,7 +366,6 @@ class StudentManager:
 
     def create(self, email: str, password: str) -> int:
         given = password.encode('utf8')
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(given, salt)
-        student = self.students.create(email, hashed)
+        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+        student = self.students.create(email, hashed.decode('utf8'))
         return student.id
