@@ -1,4 +1,5 @@
 import logging
+import mailbox
 import os
 
 from flask_jwt_extended import JWTManager
@@ -9,6 +10,7 @@ import webapp.views.api as api
 import webapp.views.student as student
 import webapp.views.teacher as teacher
 import webapp.worker as worker
+import webapp.mailbox as mailbox
 from alembic import command
 from alembic.config import Config
 from webapp.managers import AppConfigManager
@@ -61,6 +63,7 @@ def configure_app(config_path: str) -> Flask:
     app.register_blueprint(teacher.blueprint)
     app.register_blueprint(api.blueprint)
     app.register_blueprint(worker.blueprint)
+    app.register_blueprint(mailbox.blueprint)
     JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
     migrate_database(config["CONNECTION_STRING"])

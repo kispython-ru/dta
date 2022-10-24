@@ -1,11 +1,4 @@
-from flask_jwt_extended import (
-    create_access_token,
-    get_jwt_identity,
-    jwt_required,
-    set_access_cookies,
-    unset_jwt_cookies,
-    verify_jwt_in_request
-)
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
@@ -13,7 +6,7 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import StudentLoginForm, MessageForm, StudentRegisterForm
+from webapp.forms import MessageForm, StudentLoginForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -102,7 +95,10 @@ def login():
         form.login.errors.append("Такой адрес почты не зарегистрирован!")
         return render_template("student/login.jinja", form=form)
     if not students.confirmed(form.login.data):
-        form.login.errors.append(f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+        form.login.errors.append(
+            f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+            f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
+            " подтверждения.")
         return render_template("student/login.jinja", form=form)
     student = students.check_password(form.login.data, form.password.data)
     if student is None:
@@ -127,12 +123,19 @@ def register():
         return render_template("student/register.jinja", form=form)
     if students.exists(form.login.data):
         if not students.confirmed(form.login.data):
-            form.login.errors.append(f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+            form.login.errors.append(
+                f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+                f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
+                " подтверждения.")
             return render_template("student/register.jinja", form=form)
         form.login.errors.append("Такой адрес почты уже зарегистрирован!")
         return render_template("student/register.jinja", form=form)
     students.create(form.login.data, form.password.data)
-    form.login.errors.append(f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на наш адрес kispython@yandex.ru для подтверждения.")
+    form.login.errors.append(
+        f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. "
+        f"Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на "
+        "наш адрес kispython@yandex.ru для подтверждения."
+    )
     return render_template("student/register.jinja", form=form)
 
 

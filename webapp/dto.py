@@ -15,6 +15,8 @@ class AppConfig:
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
         self.readonly: bool = config["READONLY"]
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]
+        self.smtp_login: bool = config["SMTP_LOGIN"]
+        self.smtp_password: bool = config["SMTP_PASSWORD"]
 
 
 class ExternalTaskDto:

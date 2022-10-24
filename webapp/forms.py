@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
-from wtforms.validators import DataRequired, Length, Regexp, EqualTo
+from wtforms.validators import DataRequired, EqualTo, Length, Regexp
 
 
 class CodeLength:
@@ -30,7 +30,10 @@ class TeacherLoginForm(FlaskForm):
 class StudentLoginForm(FlaskForm):
     login = StringField('email', [
         DataRequired(message="Данное поле не может быть пустым!"),
-        Regexp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", message="Должен быть введён корректный адрес электронной почты. Убедитесь, что строка не включает пробелы.")
+        Regexp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", message=(
+            "Должен быть введён корректный адрес электронной почты. "
+            "Убедитесь, что строка не включает пробелы."
+        ))
     ])
     password = PasswordField('password', [
         DataRequired(message="Данное поле не может быть пустым!"),
