@@ -17,37 +17,39 @@ blueprint = Blueprint("mailbox", __name__)
 config = AppConfigManager(lambda: app.config)
 
 
-def get_messages(connection: imaplib.IMAP4_stream):
-    messages = []
+def get_senders(connection: imaplib.IMAP4_stream):
+    senders = []
     _, ids = connection.search(None, '(ALL)')
     for i in ids[0].decode('utf-8').split():
-        _, data = connection.fetch(i, '(BODY[HEADER.FIELDS (FROM BCC)])')
+        _, data = connection.fetch(i, '(BODY[HEADER.FIELDS (FROM)])')
         try:
             string = data[0][1].decode('utf-8')
             message = email.message_from_string(string)
-            sender = email.utils.parseaddr(message["From"])[1]
-            print(f'{sender}')
+            _, sender = email.utils.parseaddr(message["From"])
+            senders.append(sender)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured while procedding message: {exception}")
-    return messages
+    return senders
 
 
-def process_pending_mails(login: str, password: str):
+def get_all_senders(login: str, password: str):
     with imaplib.IMAP4_SSL('imap.yandex.ru') as connection:
         connection.login(login, password)
         messages = []
         connection.select('INBOX')
-        messages += get_messages(connection)
+        messages += get_senders(connection)
         connection.select('Spam')
-        messages += get_messages(connection)
+        messages += get_senders(connection)
+        return messages
 
 
 def background_worker(login: str, password: str):
     print(f"Starting background worker for: {login}")
     while True:
         try:
-            process_pending_mails(login, password)
+            senders = get_all_senders(login, password)
+            print(senders)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
@@ -63,7 +65,6 @@ def start_background_worker():
     process = Process(target=background_worker, args=(login, password))
     try:
         process.start()
-        app.config["WORKER_PID"] = process.pid
     except BaseException:
         exception = get_exception_info()
         print(f"Error occured while starting process: {exception}")

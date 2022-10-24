@@ -6,11 +6,11 @@ from flask_jwt_extended import JWTManager
 
 from flask import Flask
 
+import webapp.mailbox as mailbox
 import webapp.views.api as api
 import webapp.views.student as student
 import webapp.views.teacher as teacher
 import webapp.worker as worker
-import webapp.mailbox as mailbox
 from alembic import command
 from alembic.config import Config
 from webapp.managers import AppConfigManager
