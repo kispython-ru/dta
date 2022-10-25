@@ -63,7 +63,7 @@ def background_worker(login: str, password: str, connection: str):
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
-        time.sleep(10)
+        time.sleep(5 * 60) # 5 minutes.
 
 
 @blueprint.before_app_first_request
