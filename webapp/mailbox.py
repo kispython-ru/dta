@@ -55,7 +55,8 @@ def background_worker(login: str, password: str, connection: str):
             if length:
                 print(f'Received {length} emails! Processing...')
                 for email in senders:
-                    db.students.confirm(email)
+                    if db.students.find_by_email(email):
+                        db.students.confirm(email)
                 print(f'Successfully processed {length} emails.')
         except ConnectionResetError:
             print(f'IMAP connection has been reset, reconnecting...')
