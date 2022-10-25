@@ -355,7 +355,6 @@ class StudentManager:
     def check_password(self, email: str, password: str) -> Student | None:
         student = self.students.find_by_email(email)
         if student is not None and student.password_hash is not None:
-            print(student.password_hash)
             given = password.encode('utf8')
             actual = student.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
