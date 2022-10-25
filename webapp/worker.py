@@ -119,11 +119,12 @@ def background_worker(connection_string: str, core_path: str):
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    if config.config.no_background_worker is True:
+    if config.config.no_background_worker:
         return
-    path = config.config.core_path
-    connection = config.config.connection_string
-    process = Process(target=background_worker, args=(connection, path))
+    process = Process(target=background_worker, args=(
+        config.config.connection_string,
+        config.config.core_path
+    ))
     try:
         process.start()
         app.config["WORKER_PID"] = process.pid

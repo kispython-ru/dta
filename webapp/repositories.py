@@ -397,6 +397,16 @@ class StudentRepository:
                 .first()
             return student
 
+    def confirm(self, email: str):
+        with self.db.create_session() as session:
+            query = session.query(Student).filter_by(email=email)
+            student: Student = query.first()
+            if student.unconfirmed_hash is not None:
+                query.update(dict(
+                    password_hash=student.unconfirmed_hash,
+                    unconfirmed_hash=None,
+                ))
+
     def create(self, email: str, password: str) -> Student:
         with self.db.create_session() as session:
             student = Student(email=email, unconfirmed_hash=password)

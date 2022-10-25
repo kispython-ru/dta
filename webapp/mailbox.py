@@ -10,6 +10,7 @@ from flask import Blueprint
 from flask import current_app as app
 
 from webapp.managers import AppConfigManager
+from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
 
 
@@ -19,7 +20,7 @@ config = AppConfigManager(lambda: app.config)
 
 def get_senders(connection: imaplib.IMAP4_stream):
     senders = []
-    _, ids = connection.search(None, '(ALL)')
+    _, ids = connection.search(None, '(UNSEEN)')
     for i in ids[0].decode('utf-8').split():
         _, data = connection.fetch(i, '(BODY[HEADER.FIELDS (FROM)])')
         try:
@@ -44,12 +45,19 @@ def get_all_senders(login: str, password: str):
         return messages
 
 
-def background_worker(login: str, password: str):
-    print(f"Starting background worker for: {login}")
+def background_worker(login: str, password: str, connection: str):
+    print(f"Starting background worker for IMAP {login} and database: {connection}")
+    db = AppDatabase(lambda: connection)
     while True:
         try:
             senders = get_all_senders(login, password)
-            print(senders)
+            length = len(senders)
+            if not length:
+                continue
+            print(f'Received {length} emails! Processing...')
+            for email in senders:
+                db.students.confirm(email)
+            print(f'Successfully processed {length} emails.')
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
@@ -60,9 +68,11 @@ def background_worker(login: str, password: str):
 def start_background_worker():
     if not config.config.enable_registration:
         return
-    login = config.config.smtp_login
-    password = config.config.smtp_password
-    process = Process(target=background_worker, args=(login, password))
+    process = Process(target=background_worker, args=(
+        config.config.smtp_login,
+        config.config.smtp_password,
+        config.config.connection_string
+    ))
     try:
         process.start()
     except BaseException:
