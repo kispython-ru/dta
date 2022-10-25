@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
-from wtforms.validators import DataRequired, EqualTo, Length, Regexp
+from wtforms.validators import DataRequired, EqualTo, Length, Regexp, NoneOf
 
 
 class CodeLength:
@@ -38,6 +38,7 @@ class StudentLoginForm(FlaskForm):
     password = PasswordField('password', [
         DataRequired(message="Данное поле не может быть пустым!"),
         Length(min=8, message="Пароль содержит как минимум 8 символов."),
+        NoneOf(["12345678", "password"], message="Не используйте такие пароли, как 12345678 и password.")
     ])
 
 

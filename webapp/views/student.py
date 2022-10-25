@@ -128,7 +128,7 @@ def register():
                 f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
                 " подтверждения.")
             return render_template("student/register.jinja", form=form)
-        form.login.errors.append("Такой адрес почты уже зарегистрирован!")
+        form.login.errors.append("Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'.")
         return render_template("student/register.jinja", form=form)
     students.create(form.login.data, form.password.data)
     form.login.errors.append(
