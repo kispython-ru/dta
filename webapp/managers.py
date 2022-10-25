@@ -360,9 +360,18 @@ class StudentManager:
             if bcrypt.checkpw(given, actual):
                 return student
 
+    def change_password(self, email: str, password: str) -> bool:
+        student = self.students.find_by_email(email)
+        if student is not None and student.password_hash is not None:
+            given = password.encode('utf8')
+            hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+            self.students.change_password(email, hashed.decode('utf8'))
+            return True
+        return False
+
     def confirmed(self, email: str) -> bool:
         student = self.students.find_by_email(email)
-        return student.password_hash is not None
+        return student is not None and student.password_hash is not None
 
     def exists(self, email: str) -> bool:
         student = self.students.find_by_email(email)

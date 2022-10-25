@@ -46,3 +46,7 @@ class StudentRegisterForm(StudentLoginForm):
         DataRequired(message="Данное поле не может быть пустым!"),
         EqualTo('password', message="Пароли не совпадают!")
     ])
+
+
+class StudentChangePasswordForm(StudentRegisterForm):
+    pass

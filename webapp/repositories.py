@@ -397,6 +397,14 @@ class StudentRepository:
                 .first()
             return student
 
+    def change_password(self, email: str, password: str) -> bool:
+        with self.db.create_session() as session:
+            query = session.query(Student).filter_by(email=email)
+            student: Student = query.first()
+            if student.unconfirmed_hash is not None:
+                return False
+            query.update(dict(unconfirmed_hash=password))
+
     def confirm(self, email: str):
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)

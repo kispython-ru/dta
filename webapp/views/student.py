@@ -6,7 +6,7 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import MessageForm, StudentLoginForm, StudentRegisterForm
+from webapp.forms import MessageForm, StudentChangePasswordForm, StudentLoginForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -137,6 +137,36 @@ def register():
         "наш адрес kispython@yandex.ru для подтверждения."
     )
     return render_template("student/register.jinja", form=form)
+
+
+@blueprint.route("/change-password", methods=['GET', 'POST'])
+def change_password():
+    if not config.config.enable_registration:
+        return redirect('/')
+    if verify_jwt_in_request(True):
+        response = redirect('/change-password')
+        unset_jwt_cookies(response)
+        return response
+    form = StudentChangePasswordForm()
+    if not form.validate_on_submit():
+        return render_template("student/password.jinja", form=form)
+    if not students.exists(form.login.data):
+        form.login.errors.append("Такой адрес почты не зарегистрирован!")
+        return render_template("student/password.jinja", form=form)
+    if not students.confirmed(form.login.data):
+        form.login.errors.append(
+            f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+            f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
+            " подтверждения.")
+        return render_template("student/password.jinja", form=form)
+    if not students.change_password(form.login.data, form.password.data):
+        form.login.errors.append(f"Изменение пароля невозможно, обратитесь к администратору.")
+        return render_template("student/password.jinja", form=form)
+    form.login.errors.append(
+        f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
+        f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
+        " подтверждения операции изменения пароля.")
+    return render_template("student/password.jinja", form=form)
 
 
 @blueprint.route("/logout", methods=['GET'])

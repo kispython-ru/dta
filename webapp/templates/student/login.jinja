@@ -50,14 +50,19 @@
           {% endif %}
           {{ form.csrf_token }}
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <button type="submit" class="btn btn-primary w-100 d-block">
                 Войти
               </button>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-3">
               <a href="/register" class="btn btn-outline-primary w-100 d-block">
                 Зарегистрироваться
+              </a>
+            </div>
+            <div class="col-md-12">
+              <a href="/change-password" class="btn btn-outline-primary w-100 d-block">
+                Сменить пароль
               </a>
             </div>
           </div>
