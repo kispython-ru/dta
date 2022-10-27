@@ -12,6 +12,7 @@ from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, 
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
+    MailerRepository,
     MessageRepository,
     StudentRepository,
     TaskRepository,
@@ -349,8 +350,9 @@ class TeacherManager:
 
 
 class StudentManager:
-    def __init__(self, students: StudentRepository):
+    def __init__(self, students: StudentRepository, mailers: MailerRepository):
         self.students = students
+        self.mailers = mailers
 
     def check_password(self, email: str, password: str) -> Student | None:
         student = self.students.find_by_email(email)
@@ -376,6 +378,11 @@ class StudentManager:
     def exists(self, email: str) -> bool:
         student = self.students.find_by_email(email)
         return bool(student)
+
+    def email_allowed(self, email: str) -> bool:
+        _, domain = email.split('@')
+        exists = self.mailers.exists(domain)
+        return exists
 
     def create(self, email: str, password: str) -> int:
         given = password.encode('utf8')

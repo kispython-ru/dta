@@ -434,10 +434,10 @@ class MailerRepository:
                 .first()
             return bool(mailer)
 
-    def get_all(self) -> list[Mailer]:
+    def get_domains(self) -> list[str]:
         with self.db.create_session() as session:
-            mailers = session.query(Mailer).all()
-            return mailers
+            mailers: list[Mailer] = session.query(Mailer).all()
+            return [mailer.domain for mailer in mailers]
 
 
 class AppDatabase:

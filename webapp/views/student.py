@@ -19,7 +19,7 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
-students = StudentManager(db.students)
+students = StudentManager(db.students, db.mailers)
 
 
 @blueprint.route("/", methods=["GET"])
@@ -129,6 +129,13 @@ def register():
                 " для подтверждения.")
             return render_template("student/register.jinja", form=form)
         form.login.errors.append("Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'.")
+        return render_template("student/register.jinja", form=form)
+    if not students.email_allowed(form.login.data):
+        domains = db.mailers.get_domains()
+        desc = ", ".join(domains).rstrip().rstrip(',')
+        form.login.errors.append(
+            f'Данный поставщик услуг электронной почты не поддерживается. '
+            f'Поддерживаемые поставщики: {desc}.')
         return render_template("student/register.jinja", form=form)
     students.create(form.login.data, form.password.data)
     form.login.errors.append(
