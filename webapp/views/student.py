@@ -97,8 +97,8 @@ def login():
     if not students.confirmed(form.login.data):
         form.login.errors.append(
             f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-            f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
-            " подтверждения.")
+            f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
+            " для подтверждения Вашего аккаунта.")
         return render_template("student/login.jinja", form=form)
     student = students.check_password(form.login.data, form.password.data)
     if student is None:
@@ -125,8 +125,8 @@ def register():
         if not students.confirmed(form.login.data):
             form.login.errors.append(
                 f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-                f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
-                " подтверждения.")
+                f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
+                " для подтверждения.")
             return render_template("student/register.jinja", form=form)
         form.login.errors.append("Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'.")
         return render_template("student/register.jinja", form=form)
@@ -134,7 +134,7 @@ def register():
     form.login.errors.append(
         f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. "
         f"Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на "
-        "наш адрес kispython@yandex.ru для подтверждения."
+        f"наш адрес {config.config.imap_login} для подтверждения."
     )
     return render_template("student/register.jinja", form=form)
 
@@ -156,16 +156,16 @@ def change_password():
     if not students.confirmed(form.login.data):
         form.login.errors.append(
             f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-            f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
-            " подтверждения.")
+            f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
+            " для подтверждения.")
         return render_template("student/password.jinja", form=form)
     if not students.change_password(form.login.data, form.password.data):
         form.login.errors.append(f"Изменение пароля невозможно, обратитесь к администратору.")
         return render_template("student/password.jinja", form=form)
     form.login.errors.append(
         f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
-        f"электронной почты {form.login.data} на наш адрес kispython@yandex.ru для"
-        " подтверждения операции изменения пароля.")
+        f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
+        " для подтверждения операции изменения пароля.")
     return render_template("student/password.jinja", form=form)
 
 

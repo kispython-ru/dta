@@ -71,8 +71,8 @@ def start_background_worker():
     if not config.config.enable_registration:
         return
     process = Process(target=background_worker, args=(
-        config.config.smtp_login,
-        config.config.smtp_password,
+        config.config.imap_login,
+        config.config.imap_password,
         config.config.connection_string
     ))
     try:

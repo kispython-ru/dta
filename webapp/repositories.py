@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from webapp.models import (
     FinalSeed,
     Group,
+    Mailer,
     Message,
     MessageCheck,
     Status,
@@ -422,6 +423,23 @@ class StudentRepository:
             return student
 
 
+class MailerRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def exists(self, domain: str) -> bool:
+        with self.db.create_session() as session:
+            mailer = session.query(Mailer) \
+                .filter_by(domain=domain) \
+                .first()
+            return bool(mailer)
+
+    def get_all(self) -> list[Mailer]:
+        with self.db.create_session() as session:
+            mailers = session.query(Mailer).all()
+            return mailers
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -434,3 +452,4 @@ class AppDatabase:
         self.seeds = FinalSeedRepository(db)
         self.teachers = TeacherRepository(db)
         self.students = StudentRepository(db)
+        self.mailers = MailerRepository(db)

@@ -10,6 +10,6 @@
     "TASK_BASE_URL": "http://sovietov.com/kispython",
     "FINAL_TASKS": null,
     "ENABLE_REGISTRATION": false,
-    "SMTP_LOGIN": "example@example.com",
-    "SMTP_PASSWORD": "CHANGE_ME"
+    "IMAP_LOGIN": "example@example.com",
+    "IMAP_PASSWORD": "CHANGE_ME"
 }
