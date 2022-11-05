@@ -30,7 +30,7 @@ def get_senders(connection: imaplib.IMAP4_stream):
             senders.append(sender)
         except BaseException:
             exception = get_exception_info()
-            print(f"Error occured while procedding message: {exception}")
+            print(f"Error occured while processing message: {exception}")
     return senders
 
 
