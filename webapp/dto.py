@@ -18,6 +18,14 @@ class AppConfig:
         self.imap_login: bool = config["IMAP_LOGIN"]
         self.imap_password: bool = config["IMAP_PASSWORD"]
 
+    @property
+    def exam(self) -> bool:
+        return self.final_tasks is not None
+
+    @property
+    def registration(self) -> bool:
+        return not self.exam or self.enable_registration
+
 
 class ExternalTaskDto:
     def __init__(

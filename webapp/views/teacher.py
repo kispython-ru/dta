@@ -33,7 +33,7 @@ def dashboard(teacher: Teacher):
 @teacher_jwt_required(db.teachers)
 def select_group(teacher: Teacher):
     group = request.args.get('group')
-    if config.config.final_tasks is not None:
+    if config.config.exam:
         return redirect(f'/teacher/group/{group}/exam')
     return redirect(f'/teacher/group/{group}')
 

@@ -48,7 +48,7 @@ class GroupManager:
         groups = self.groups.get_all()
         groupings: dict[str, list[Group]] = {}
         for group in groups:
-            if config.final_tasks is not None:
+            if config.exam:
                 seed = self.seeds.get_final_seed(group.id)
                 if seed is None:
                     continue

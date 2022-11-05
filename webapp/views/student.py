@@ -26,8 +26,12 @@ students = StudentManager(db.students, db.mailers)
 @student_jwt_optional(db.students)
 def dashboard(student: Student | None):
     groupings = groups.get_groupings()
-    exam = config.config.final_tasks is not None
-    return render_template("student/dashboard.jinja", groupings=groupings, exam=exam, student=student)
+    return render_template(
+        "student/dashboard.jinja",
+        groupings=groupings,
+        exam=config.config.exam,
+        student=student
+    )
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
@@ -35,28 +39,29 @@ def dashboard(student: Student | None):
 def group(student: Student | None, group_id: int):
     group = statuses.get_group_statuses(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    blocked = config.config.final_tasks and seed is None
-    exam = config.config.final_tasks is not None
-    return render_template("student/group.jinja", group=group, blocked=blocked, exam=exam, student=student)
+    blocked = config.config.exam and seed is None
+    return render_template(
+        "student/group.jinja",
+        group=group,
+        blocked=blocked,
+        exam=config.config.exam,
+        student=student
+    )
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
 @student_jwt_optional(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    highlight = config.config.highlight_syntax
-    registration = config.config.enable_registration
-    exam = config.config.final_tasks is not None
-    no_registration = not config.config.enable_registration or exam
-    form = AnonMessageForm() if no_registration else StudentMessageForm()
+    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     return render_template(
         "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
+        exam=config.config.exam,
         status=status,
         form=form,
-        highlight=highlight,
         student=student,
-        registration=registration,
-        exam=exam,
     )
 
 
@@ -64,18 +69,16 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
 @student_jwt_optional(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    exam = config.config.final_tasks is not None
-    no_registration = not config.config.enable_registration or exam
-    form = AnonMessageForm() if no_registration else StudentMessageForm()
+    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     valid = form.validate_on_submit() and not status.checked
     available = status.external.active and not config.config.readonly
-    allowed = student is not None or no_registration
+    allowed = student is not None or not config.config.registration
     if valid and available and allowed:
-        if no_registration or students.check_password(student.email, form.password.data):
+        if not config.config.registration or students.check_password(student.email, form.password.data):
             ip = get_real_ip(request)
             db.messages.submit_task(tid, vid, gid, form.code.data, ip)
             db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-            return render_template("student/success.jinja", status=status, exam=exam, student=student)
+            return render_template("student/success.jinja", status=status, exam=config.config.exam, student=student)
         form.password.errors.append("Указан неправильный пароль.")
     highlight = config.config.highlight_syntax
     return render_template(
@@ -84,7 +87,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         form=form,
         highlight=highlight,
         student=student,
-        exam=exam,
+        exam=config.config.exam,
     )
 
 
