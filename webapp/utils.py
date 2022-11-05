@@ -4,12 +4,28 @@ import sys
 import traceback
 from functools import wraps
 
-from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import get_jwt, get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 from jwt import PyJWTError
 
-from flask import Request
+from flask import Request, redirect
 
+from webapp.managers import AppConfigManager
 from webapp.repositories import StudentRepository, TeacherRepository
+
+
+def student_jwt_reset(config: AppConfigManager, path: str):
+    def wrapper(function):
+        @wraps(function)
+        def decorator(*args, **kwargs):
+            if not config.config.enable_registration:
+                return redirect('/')
+            if verify_jwt_in_request(True):
+                response = redirect(path)
+                unset_jwt_cookies(response)
+                return response
+            return function(*args, **kwargs)
+        return decorator
+    return wrapper
 
 
 def student_jwt_optional(students: StudentRepository):

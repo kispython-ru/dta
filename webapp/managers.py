@@ -350,9 +350,51 @@ class TeacherManager:
 
 
 class StudentManager:
-    def __init__(self, students: StudentRepository, mailers: MailerRepository):
+    def __init__(self, config: AppConfigManager, students: StudentRepository, mailers: MailerRepository):
         self.students = students
         self.mailers = mailers
+        self.config = config
+
+    def register(self, email: str, password: str) -> str:
+        if self.exists(email):
+            if self.confirmed(email):
+                return "Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'."
+            return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+                    f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
+                    "для подтверждения.")
+        if not self.email_allowed(email):
+            domains = self.mailers.get_domains()
+            desc = ", ".join(domains).rstrip().rstrip(',')
+            return (f'Данный поставщик услуг электронной почты не поддерживается. '
+                    f'Поддерживаемые поставщики: {desc}.')
+        self.create(email, password)
+        return (f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. "
+                f"Отправьте пустое сообщение с Вашего адреса электронной почты {email} на "
+                f"наш адрес {self.config.config.imap_login} для подтверждения.")
+
+    def change_password(self, email: str, new_password: str) -> str:
+        if not self.exists(email):
+            return "Такой адрес почты не зарегистрирован!"
+        if not self.confirmed(email):
+            return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+                    f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
+                    " для подтверждения.")
+        if not self.change_password(email, new_password):
+            return f"Изменение пароля невозможно, обратитесь к администратору."
+        return (f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
+                f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
+                " для подтверждения операции изменения пароля.")
+
+    def login(self, email: str, password: str) -> str | None:
+        if not self.exists(email):
+            return "Такой адрес почты не зарегистрирован!"
+        if not self.confirmed(email):
+            return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
+                    f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
+                    " для подтверждения Вашего аккаунта.")
+        if not self.check_password(email, password):
+            return "Неправильный пароль."
+        return None
 
     def check_password(self, email: str, password: str) -> Student | None:
         student = self.students.find_by_email(email)

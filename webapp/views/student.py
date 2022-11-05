@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
@@ -6,11 +6,17 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import AnonMessageForm, StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
+from webapp.forms import (
+    AnonMessageForm,
+    StudentChangePasswordForm,
+    StudentLoginForm,
+    StudentMessageForm,
+    StudentRegisterForm
+)
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional
+from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional, student_jwt_reset
 
 
 blueprint = Blueprint("student", __name__)
@@ -19,7 +25,7 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
-students = StudentManager(db.students, db.mailers)
+students = StudentManager(config, db.students, db.mailers)
 
 
 @blueprint.route("/", methods=["GET"])
@@ -80,110 +86,47 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
             db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
             return render_template("student/success.jinja", status=status, exam=config.config.exam, student=student)
         form.password.errors.append("Указан неправильный пароль.")
-    highlight = config.config.highlight_syntax
     return render_template(
         "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        exam=config.config.exam,
         status=status,
         form=form,
-        highlight=highlight,
         student=student,
-        exam=config.config.exam,
     )
 
 
 @blueprint.route("/login", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/login")
 def login():
-    if not config.config.enable_registration:
-        return redirect('/')
-    if verify_jwt_in_request(True):
-        response = redirect('/login')
-        unset_jwt_cookies(response)
-        return response
     form = StudentLoginForm()
     if not form.validate_on_submit():
         return render_template("student/login.jinja", form=form)
-    if not students.exists(form.login.data):
-        form.login.errors.append("Такой адрес почты не зарегистрирован!")
+    error = students.login(form.login.data, form.password.data)
+    if error:
+        form.login.errors.append(error)
         return render_template("student/login.jinja", form=form)
-    if not students.confirmed(form.login.data):
-        form.login.errors.append(
-            f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-            f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
-            " для подтверждения Вашего аккаунта.")
-        return render_template("student/login.jinja", form=form)
-    student = students.check_password(form.login.data, form.password.data)
-    if student is None:
-        form.login.errors.append("Неправильный пароль.")
-        return render_template("student/login.jinja", form=form)
-    access = create_access_token(identity=student.id)
     response = redirect("/")
-    set_access_cookies(response, access)
+    student = db.students.find_by_email(form.login.data)
+    set_access_cookies(response, create_access_token(identity=student.id))
     return response
 
 
 @blueprint.route("/register", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/register")
 def register():
-    if not config.config.enable_registration:
-        return redirect('/')
-    if verify_jwt_in_request(True):
-        response = redirect('/register')
-        unset_jwt_cookies(response)
-        return response
     form = StudentRegisterForm()
-    if not form.validate_on_submit():
-        return render_template("student/register.jinja", form=form)
-    if students.exists(form.login.data):
-        if not students.confirmed(form.login.data):
-            form.login.errors.append(
-                f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-                f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
-                " для подтверждения.")
-            return render_template("student/register.jinja", form=form)
-        form.login.errors.append("Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'.")
-        return render_template("student/register.jinja", form=form)
-    if not students.email_allowed(form.login.data):
-        domains = db.mailers.get_domains()
-        desc = ", ".join(domains).rstrip().rstrip(',')
-        form.login.errors.append(
-            f'Данный поставщик услуг электронной почты не поддерживается. '
-            f'Поддерживаемые поставщики: {desc}.')
-        return render_template("student/register.jinja", form=form)
-    students.create(form.login.data, form.password.data)
-    form.login.errors.append(
-        f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. "
-        f"Отправьте пустое сообщение с Вашего адреса электронной почты {form.login.data} на "
-        f"наш адрес {config.config.imap_login} для подтверждения."
-    )
+    if form.validate_on_submit():
+        form.login.errors.append(students.register(form.login.data, form.password.data))
     return render_template("student/register.jinja", form=form)
 
 
 @blueprint.route("/change-password", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/change-password")
 def change_password():
-    if not config.config.enable_registration:
-        return redirect('/')
-    if verify_jwt_in_request(True):
-        response = redirect('/change-password')
-        unset_jwt_cookies(response)
-        return response
     form = StudentChangePasswordForm()
-    if not form.validate_on_submit():
-        return render_template("student/password.jinja", form=form)
-    if not students.exists(form.login.data):
-        form.login.errors.append("Такой адрес почты не зарегистрирован!")
-        return render_template("student/password.jinja", form=form)
-    if not students.confirmed(form.login.data):
-        form.login.errors.append(
-            f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-            f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
-            " для подтверждения.")
-        return render_template("student/password.jinja", form=form)
-    if not students.change_password(form.login.data, form.password.data):
-        form.login.errors.append(f"Изменение пароля невозможно, обратитесь к администратору.")
-        return render_template("student/password.jinja", form=form)
-    form.login.errors.append(
-        f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
-        f"электронной почты {form.login.data} на наш адрес {config.config.imap_login}"
-        " для подтверждения операции изменения пароля.")
+    if form.validate_on_submit():
+        form.login.errors.append(students.change_password(form.login.data, form.password.data))
     return render_template("student/password.jinja", form=form)
 
 
