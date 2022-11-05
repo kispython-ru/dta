@@ -8,11 +8,14 @@ class CodeLength:
     max = 10000
 
 
-class MessageForm(FlaskForm):
+class AnonMessageForm(FlaskForm):
     code = StringField("code", [
         DataRequired(message="Данное поле не может быть пустым!"),
         Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать как минимум 10 символов!"),
     ])
+
+
+class StudentMessageForm(AnonMessageForm):
     password = PasswordField('password', [
         DataRequired(message="Данное поле не может быть пустым!"),
         Length(min=8, message="Пароль содержит как минимум 8 символов."),

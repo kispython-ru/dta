@@ -118,16 +118,18 @@
             {% endfor %}
           </ul>
         {% endif %}
-        <div class="form-group mb-2">
-          <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
-          <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>
-        </div>
-        {% if form.password.errors %}
-          <ul class="errors">
-            {% for error in form.password.errors %}
-              <li class="text-danger">{{ error }}</li>
-            {% endfor %}
-          </ul>
+        {% if not exam and not status.disabled %}
+          <div class="form-group mb-2">
+            <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
+            <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>
+          </div>
+          {% if form.password.errors %}
+            <ul class="errors">
+              {% for error in form.password.errors %}
+                <li class="text-danger">{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
         {% endif %}
         {{ form.csrf_token }}
         <div class="row">

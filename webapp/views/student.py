@@ -6,7 +6,7 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request
 
-from webapp.forms import MessageForm, StudentChangePasswordForm, StudentLoginForm, StudentRegisterForm
+from webapp.forms import AnonMessageForm, StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -36,7 +36,8 @@ def group(student: Student | None, group_id: int):
     group = statuses.get_group_statuses(group_id)
     seed = db.seeds.get_final_seed(group_id)
     blocked = config.config.final_tasks and seed is None
-    return render_template("student/group.jinja", group=group, blocked=blocked, student=student)
+    exam = config.config.final_tasks is not None
+    return render_template("student/group.jinja", group=group, blocked=blocked, exam=exam, student=student)
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
@@ -45,13 +46,17 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     highlight = config.config.highlight_syntax
     registration = config.config.enable_registration
+    exam = config.config.final_tasks is not None
+    no_registration = not config.config.enable_registration or exam
+    form = AnonMessageForm() if no_registration else StudentMessageForm()
     return render_template(
         "student/task.jinja",
         status=status,
-        form=MessageForm(),
+        form=form,
         highlight=highlight,
         student=student,
-        registration=registration
+        registration=registration,
+        exam=exam,
     )
 
 
@@ -59,16 +64,18 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
 @student_jwt_optional(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    form = MessageForm()
+    exam = config.config.final_tasks is not None
+    no_registration = not config.config.enable_registration or exam
+    form = AnonMessageForm() if no_registration else StudentMessageForm()
     valid = form.validate_on_submit() and not status.checked
     available = status.external.active and not config.config.readonly
-    allowed = student is not None or not config.config.enable_registration
+    allowed = student is not None or no_registration
     if valid and available and allowed:
-        if students.check_password(student.email, form.password.data):
+        if no_registration or students.check_password(student.email, form.password.data):
             ip = get_real_ip(request)
             db.messages.submit_task(tid, vid, gid, form.code.data, ip)
             db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-            return render_template("student/success.jinja", status=status, student=student)
+            return render_template("student/success.jinja", status=status, exam=exam, student=student)
         form.password.errors.append("Указан неправильный пароль.")
     highlight = config.config.highlight_syntax
     return render_template(
@@ -77,6 +84,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         form=form,
         highlight=highlight,
         student=student,
+        exam=exam,
     )
 
 
