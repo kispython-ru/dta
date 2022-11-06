@@ -8,5 +8,8 @@
     "HIGHLIGHT_SYNTAX": false,
     "READONLY": false,
     "TASK_BASE_URL": "http://sovietov.com/kispython",
-    "FINAL_TASKS": null
+    "FINAL_TASKS": null,
+    "ENABLE_REGISTRATION": false,
+    "IMAP_LOGIN": "example@example.com",
+    "IMAP_PASSWORD": "CHANGE_ME"
 }

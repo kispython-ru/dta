@@ -1,11 +1,22 @@
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended.exceptions import JWTExtendedException
+from jwt.exceptions import PyJWTError
+
 from flask import Blueprint
 from flask import current_app as app
-from flask import render_template, request
+from flask import redirect, render_template, request
 
-from webapp.forms import MessageForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager
+from webapp.forms import (
+    AnonMessageForm,
+    StudentChangePasswordForm,
+    StudentLoginForm,
+    StudentMessageForm,
+    StudentRegisterForm
+)
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
+from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip
+from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional, student_jwt_reset
 
 
 blueprint = Blueprint("student", __name__)
@@ -14,57 +25,144 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
+students = StudentManager(config, db.students, db.mailers)
 
 
 @blueprint.route("/", methods=["GET"])
-def dashboard():
+@student_jwt_optional(db.students)
+def dashboard(student: Student | None):
     groupings = groups.get_groupings()
-    exam = config.config.final_tasks is not None
-    return render_template("student/dashboard.jinja", groupings=groupings, exam=exam)
+    return render_template(
+        "student/dashboard.jinja",
+        groupings=groupings,
+        registration=config.config.registration,
+        exam=config.config.exam,
+        student=student
+    )
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
-def group(group_id: int):
+@student_jwt_optional(db.students)
+def group(student: Student | None, group_id: int):
     group = statuses.get_group_statuses(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    blocked = config.config.final_tasks and seed is None
-    return render_template("student/group.jinja", group=group, blocked=blocked)
+    blocked = config.config.exam and seed is None
+    return render_template(
+        "student/group.jinja",
+        group=group,
+        blocked=blocked,
+        registration=config.config.registration,
+        student=student
+    )
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-def task(gid: int, vid: int, tid: int):
+@student_jwt_optional(db.students)
+def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    highlight = config.config.highlight_syntax
+    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     return render_template(
         "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
         status=status,
-        form=MessageForm(),
-        highlight=highlight,
+        form=form,
+        student=student,
     )
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-def submit_task(gid: int, vid: int, tid: int):
+@student_jwt_optional(db.students)
+def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    form = MessageForm()
+    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     valid = form.validate_on_submit() and not status.checked
     available = status.external.active and not config.config.readonly
-    if valid and available:
-        code = form.code.data
-        ip = get_real_ip(request)
-        db.messages.submit_task(tid, vid, gid, code, ip)
-        db.statuses.submit_task(tid, vid, gid, code, ip)
-        return render_template("student/success.jinja", status=status)
-    highlight = config.config.highlight_syntax
+    allowed = student is not None or not config.config.registration
+    if valid and available and allowed:
+        if not config.config.registration or students.check_password(student.email, form.password.data):
+            ip = get_real_ip(request)
+            db.messages.submit_task(tid, vid, gid, form.code.data, ip)
+            db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
+            return render_template(
+                "student/success.jinja",
+                status=status,
+                registration=config.config.registration,
+                student=student
+            )
+        form.password.errors.append("Указан неправильный пароль.")
     return render_template(
         "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
         status=status,
         form=form,
-        highlight=highlight,
+        student=student,
     )
+
+
+@blueprint.route("/login", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/login")
+def login():
+    form = StudentLoginForm()
+    if not form.validate_on_submit():
+        return render_template("student/login.jinja", form=form)
+    error = students.login(form.login.data, form.password.data)
+    if error:
+        form.login.errors.append(error)
+        return render_template("student/login.jinja", form=form)
+    response = redirect("/")
+    student = db.students.find_by_email(form.login.data)
+    set_access_cookies(response, create_access_token(identity=student.id))
+    return response
+
+
+@blueprint.route("/register", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/register")
+def register():
+    form = StudentRegisterForm()
+    if form.validate_on_submit():
+        form.login.errors.append(students.register(form.login.data, form.password.data))
+    return render_template("student/register.jinja", form=form)
+
+
+@blueprint.route("/change-password", methods=['GET', 'POST'])
+@student_jwt_reset(config, "/change-password")
+def change_password():
+    form = StudentChangePasswordForm()
+    if form.validate_on_submit():
+        form.login.errors.append(students.change_password(form.login.data, form.password.data))
+    return render_template("student/password.jinja", form=form)
+
+
+@blueprint.route("/logout", methods=['GET'])
+def logout():
+    response = redirect("/")
+    unset_jwt_cookies(response)
+    return response
+
+
+@blueprint.app_template_filter('hide')
+def hide_email(value: str):
+    if '@' not in value:
+        return value
+    username, domain = value.split('@')
+    length = len(username)
+    if length == 1:
+        return f'*@{domain}'
+    repeat = min((length - 1), 10) * '*'
+    return f'{username[0]}{repeat}@{domain}'
 
 
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/admin")
+    return render_template("error.jinja", redirect="/teacher")
+
+
+@blueprint.errorhandler(JWTExtendedException)
+@blueprint.errorhandler(PyJWTError)
+def handle_authorization_errors(e):
+    response = redirect('/login')
+    unset_jwt_cookies(response)
+    return response

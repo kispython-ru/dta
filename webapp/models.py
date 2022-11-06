@@ -103,3 +103,17 @@ class Teacher(Base):
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
     login = sa.Column("login", sa.String, nullable=False)
     password_hash = sa.Column("password_hash", sa.String, nullable=False)
+
+
+class Student(Base):
+    __tablename__ = "students"
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    email = sa.Column("email", sa.String, nullable=False)
+    password_hash = sa.Column("password_hash", sa.String, nullable=True)
+    unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
+
+
+class Mailer(Base):
+    __tablename__ = "mailers"
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    domain = sa.Column("domain", sa.String, nullable=False)

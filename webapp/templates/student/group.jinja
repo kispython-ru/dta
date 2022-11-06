@@ -14,6 +14,20 @@
         {{ group.title }}
       </li>
     </ol>
+    {% if registration %}
+      {% if student is not none %}
+        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
+          <span class="text-muted">{{ student.email | hide }}</span>
+          <a class="breadcrumb-item text-decoration-none" href="/logout">
+            Выйти
+          </a>
+        </span>
+      {% else %}
+        <a class="breadcrumb-item text-decoration-none" href="/login">
+          Войти
+        </a>
+      {% endif %}
+    {% endif %}
   </div>
 </nav>
 <div class="container mt-3">
@@ -27,13 +41,12 @@
   {% else %}
     <h5 class="card-title fw-bold">
       Варианты заданий группы
-      <span class="badge alert-secondary" style="font-size: inherit">
+      <span class="text-primary" style="font-size: inherit">
         {{ group.title }}
       </span>
     </h5>
     <h6 class="card-subtitle mb-3 text-muted">
-      Список вариантов для студентов группы {{ group.title }}.
-      Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
+      Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
     </h6>
     <div class="mb-5" style="overflow-x:auto">
       <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">

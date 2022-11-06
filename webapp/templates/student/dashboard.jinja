@@ -14,6 +14,20 @@
         Цифровой ассистент преподавателя
       </li>
     </ol>
+    {% if registration %}
+      {% if student is not none %}
+        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
+          <span class="text-muted">{{ student.email | hide }}</span>
+          <a class="breadcrumb-item text-decoration-none" href="/logout">
+            Выйти
+          </a>
+        </span>
+      {% else %}
+        <a class="breadcrumb-item text-decoration-none" href="/login">
+          Войти
+        </a>
+      {% endif %}
+    {% endif %}
   </div>
 </nav>
 <div class="container mt-3">

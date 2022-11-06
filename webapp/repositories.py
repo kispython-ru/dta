@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 from webapp.models import (
     FinalSeed,
     Group,
+    Mailer,
     Message,
     MessageCheck,
     Status,
+    Student,
     Task,
     TaskStatus,
     Teacher,
@@ -367,12 +369,75 @@ class TeacherRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_by_id(self, id: int) -> Teacher | None:
+        with self.db.create_session() as session:
+            teacher = session.query(Teacher).get(id)
+            return teacher
+
     def find_by_login(self, login: str) -> Teacher | None:
         with self.db.create_session() as session:
             teacher = session.query(Teacher) \
                 .filter_by(login=login) \
                 .first()
             return teacher
+
+
+class StudentRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def get_by_id(self, id: int) -> Student | None:
+        with self.db.create_session() as session:
+            student = session.query(Student).get(id)
+            return student
+
+    def find_by_email(self, email: str) -> Student | None:
+        with self.db.create_session() as session:
+            student = session.query(Student) \
+                .filter_by(email=email) \
+                .first()
+            return student
+
+    def change_password(self, email: str, password: str) -> bool:
+        with self.db.create_session() as session:
+            query = session.query(Student).filter_by(email=email)
+            student: Student = query.first()
+            if student.unconfirmed_hash is not None:
+                return False
+            query.update(dict(unconfirmed_hash=password))
+
+    def confirm(self, email: str):
+        with self.db.create_session() as session:
+            query = session.query(Student).filter_by(email=email)
+            student: Student = query.first()
+            if student.unconfirmed_hash is not None:
+                query.update(dict(
+                    password_hash=student.unconfirmed_hash,
+                    unconfirmed_hash=None,
+                ))
+
+    def create(self, email: str, password: str) -> Student:
+        with self.db.create_session() as session:
+            student = Student(email=email, unconfirmed_hash=password)
+            session.add(student)
+            return student
+
+
+class MailerRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def exists(self, domain: str) -> bool:
+        with self.db.create_session() as session:
+            mailer = session.query(Mailer) \
+                .filter_by(domain=domain) \
+                .first()
+            return bool(mailer)
+
+    def get_domains(self) -> list[str]:
+        with self.db.create_session() as session:
+            mailers: list[Mailer] = session.query(Mailer).all()
+            return [mailer.domain for mailer in mailers]
 
 
 class AppDatabase:
@@ -386,3 +451,5 @@ class AppDatabase:
         self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
         self.teachers = TeacherRepository(db)
+        self.students = StudentRepository(db)
+        self.mailers = MailerRepository(db)

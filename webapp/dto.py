@@ -14,6 +14,17 @@ class AppConfig:
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
         self.readonly: bool = config["READONLY"]
+        self.enable_registration: bool = config["ENABLE_REGISTRATION"]
+        self.imap_login: bool = config["IMAP_LOGIN"]
+        self.imap_password: bool = config["IMAP_PASSWORD"]
+
+    @property
+    def exam(self) -> bool:
+        return self.final_tasks is not None
+
+    @property
+    def registration(self) -> bool:
+        return not self.exam and self.enable_registration
 
 
 class ExternalTaskDto:

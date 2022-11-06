@@ -19,6 +19,20 @@
         №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
       </li>
     </ol>
+    {% if registration %}
+      {% if student is not none %}
+        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
+          <span class="text-muted">{{ student.email | hide }}</span>
+          <a class="breadcrumb-item text-decoration-none" href="/logout">
+            Выйти
+          </a>
+        </span>
+      {% else %}
+        <a class="breadcrumb-item text-decoration-none" href="/login">
+          Войти
+        </a>
+      {% endif %}
+    {% endif %}
   </div>
 </nav>
 <div class="container mt-3">
@@ -73,47 +87,69 @@
       <div class="text-muted mb-2">
         Во избежание утери данных рекомендуется сохранять отправляемые программы локально.
       </div>
-      <div class="form-group mb-2">
-        <textarea
-          id="code-textarea"
-          name="code"
-          type="text"
-          class="form-control"
-          {% if status.disabled %}disabled{%endif%}
-          placeholder="Ответ на задание"
-          style="min-height: 250px;font-family: monospace, monospace;"></textarea>
-        <small class="form-text text-muted">
-          <div>Введите ответ на задание в поле выше.</div>
-          <div>
-            В отправляемом коде на языке программирования Python должна присутствовать функция 
-            <code>main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
-            использование модулей только из стандартной библиотеки Python.
+      {% if registration and not student %}
+        <div class="row">
+          <div class="col-md-8">
+            <a class="btn btn-outline-danger w-100 d-block" href="/login">
+              Войдите или зарегистрируйтесь, чтобы отправить решение на проверку
+            </a>
           </div>
-        </small>
-      </div>
-      {% if form.code.errors %}
-        <ul class="errors">
-          {% for error in form.code.errors %}
-            <li class="text-danger">{{ error }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-      {{ form.csrf_token }}
-      <div class="row">
-        <div class="col-md-8">
-          <button
-            type="submit"
-            {% if status.disabled %}disabled{%endif%}
-            class="btn btn-primary w-100 d-block">
-            Отправить задание на проверку
-          </button>
         </div>
-      </div>
+      {% else %}
+        <div class="form-group mb-2">
+          <textarea
+            id="code-textarea"
+            name="code"
+            type="text"
+            class="form-control"
+            {% if status.disabled or registration and not student %}disabled{%endif%}
+            placeholder="Ответ на задание"
+            style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
+          <small class="form-text text-muted">
+            <div>
+              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция 
+              <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
+              использование модулей только из стандартной библиотеки Python.
+            </div>
+          </small>
+        </div>
+        {% if form.code.errors %}
+          <ul class="errors">
+            {% for error in form.code.errors %}
+              <li class="text-danger">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if registration and not status.disabled %}
+          <div class="form-group mb-2">
+            <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
+            <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>
+          </div>
+          {% if form.password.errors %}
+            <ul class="errors">
+              {% for error in form.password.errors %}
+                <li class="text-danger">{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endif %}
+        {{ form.csrf_token }}
+        <div class="row">
+          <div class="col-md-8">
+            <button
+              type="submit"
+              class="btn btn-primary w-100 d-block"
+              {% if status.disabled or registration and not student %}disabled{%endif%}>
+              Отправить решение на проверку
+            </button>
+          </div>
+        </div>
+      {% endif %}
     </form>
   </div>
 </div>
 
-{% if highlight and not status.disabled %}
+{% if highlight and not (status.disabled or registration and not student) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
   <script type="text/javascript"> 
