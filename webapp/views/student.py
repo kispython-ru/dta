@@ -142,6 +142,18 @@ def logout():
     return response
 
 
+@blueprint.app_template_filter('hide')
+def hide_email(value: str):
+    if '@' not in value:
+        return value
+    username, domain = value.split('@')
+    length = len(username)
+    if length == 1:
+        return f'*@{domain}'
+    repeat = min((length - 1), 10) * '*'
+    return f'{username[0]}{repeat}@{domain}'
+
+
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
