@@ -73,7 +73,7 @@ def submit_task(gid: int, vid: int, tid: int):
     if status.checked or not status.external.active or config.config.readonly:
         raise ValueError("Submissions are disallowed.")
     ip = get_real_ip(request)
-    db.messages.submit_task(tid, vid, gid, code, ip)
+    db.messages.submit_task(tid, vid, gid, code, ip, None)
     db.statuses.submit_task(tid, vid, gid, code, ip)
     status = statuses.get_task_status(gid, vid, tid)
     return jsonify(dict(

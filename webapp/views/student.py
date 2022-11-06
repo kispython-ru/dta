@@ -82,7 +82,8 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     if valid and available and allowed:
         if not config.config.registration or students.check_password(student.email, form.password.data):
             ip = get_real_ip(request)
-            db.messages.submit_task(tid, vid, gid, form.code.data, ip)
+            sid = student.id if student else None
+            db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
             db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
             return render_template(
                 "student/success.jinja",

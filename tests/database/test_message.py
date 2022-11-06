@@ -8,7 +8,7 @@ def test_message_creation(db: AppDatabase):
     code = unique_str()
     ip = unique_str()
 
-    db.messages.submit_task(task, variant, group, code, ip)
+    db.messages.submit_task(task, variant, group, code, ip, None)
     messages = db.messages.get_all()
 
     assert any(message.task == task for message in messages)
@@ -21,8 +21,8 @@ def test_message_get_latest(db: AppDatabase):
 
     task_2 = unique_int()
     db.tasks.create_by_ids([task_2])
-    db.messages.submit_task(task_1, variant, group, code, ip)
-    db.messages.submit_task(task_2, variant, group, code, ip)
+    db.messages.submit_task(task_1, variant, group, code, ip, None)
+    db.messages.submit_task(task_2, variant, group, code, ip, None)
 
     latest = db.messages.get_latest(2)
     assert len(latest) == 2
@@ -33,7 +33,7 @@ def test_message_mark_at_process(db: AppDatabase):
     code = unique_str()
     ip = unique_str()
 
-    db.messages.submit_task(task, variant, group, code, ip)
+    db.messages.submit_task(task, variant, group, code, ip, None)
     messages = db.messages.get_all()
     message = next(mess for mess in messages if mess.task == task)
     assert message is not None
@@ -56,7 +56,7 @@ def test_message_get_pending(db: AppDatabase):
     task_3 = unique_int()
     db.tasks.create_by_ids([task_2, task_3])
 
-    message = db.messages.submit_task(task_1, variant, group, code, ip)
+    message = db.messages.submit_task(task_1, variant, group, code, ip, None)
     db.messages.mark_as_processed(message.id)
 
     messages = db.messages.get_all()

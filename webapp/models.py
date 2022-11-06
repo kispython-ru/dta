@@ -67,7 +67,7 @@ class TaskStatus(Base):
     code = sa.Column("code", sa.String, nullable=False)
     ip = sa.Column("ip", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
-    status: sa.Column[Status] = sa.Column("status", IntEnum(Status), nullable=False)
+    status = sa.Column("status", IntEnum(Status), nullable=False)
 
 
 class Message(Base):
@@ -80,6 +80,7 @@ class Message(Base):
     code = sa.Column("code", sa.String, nullable=False)
     ip = sa.Column("ip", sa.String, nullable=False)
     processed = sa.Column("processed", sa.Boolean, nullable=False)
+    student = sa.Column("student", sa.Integer, sa.ForeignKey("students.id"), nullable=True)
 
 
 class MessageCheck(Base):
@@ -111,6 +112,7 @@ class Student(Base):
     email = sa.Column("email", sa.String, nullable=False)
     password_hash = sa.Column("password_hash", sa.String, nullable=True)
     unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
+    blocked = sa.Column("blocked", sa.Boolean, nullable=True)
 
 
 class Mailer(Base):

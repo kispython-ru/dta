@@ -80,7 +80,7 @@ class ExternalTaskManager:
 
     @property
     def random_active(self) -> bool:
-        return self.seed is not None and self.seed.active
+        return self.seed and self.seed.active
 
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
         if self.seed is None:
@@ -237,13 +237,15 @@ class ExportManager:
         messages: MessageRepository,
         statuses: StatusManager,
         variants: VariantRepository,
-        tasks: TaskRepository
+        tasks: TaskRepository,
+        students: StudentRepository,
     ):
         self.groups = groups
         self.messages = messages
         self.statuses = statuses
         self.variants = variants
         self.tasks = tasks
+        self.students = students
 
     def export_messages(self, count: int | None, separator: str) -> str:
         messages = self.__get_latest_messages(count)
@@ -268,7 +270,7 @@ class ExportManager:
         messages: list[Message],
         group_titles: dict[int, str]
     ) -> list[list[str]]:
-        rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Код"]]
+        rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Отправитель", "Код"]]
         for message in messages:
             gt = group_titles[message.group]
             time = message.time.strftime("%Y-%m-%d %H:%M:%S")
@@ -277,7 +279,9 @@ class ExportManager:
             code = message.code
             ip = message.ip
             id = message.id
-            rows.append([id, time, gt, task, variant, ip, code])
+            sid = message.student
+            email = self.students.get_by_id(sid).email if sid else None
+            rows.append([id, time, gt, task, variant, ip, email, code])
         return rows
 
     def __create_exam_table(self, group_id: int) -> list[list[str]]:
@@ -342,7 +346,7 @@ class TeacherManager:
 
     def check_password(self, login: str, password: str) -> Teacher | None:
         teacher = self.teachers.find_by_login(login)
-        if teacher is not None:
+        if teacher:
             given = password.encode('utf8')
             actual = teacher.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
@@ -357,11 +361,14 @@ class StudentManager:
 
     def register(self, email: str, password: str) -> str:
         if self.exists(email):
+            if self.blocked(email):
+                return "Данный адрес электронной почты заблокирован."
             if self.confirmed(email):
                 return "Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'."
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
-                    "для подтверждения.")
+                    "для подтверждения. В течение 5 минут после отправки письма Ваш аккаунт "
+                    "будет активирован.")
         if not self.email_allowed(email):
             domains = self.mailers.get_domains()
             desc = ", ".join(domains).rstrip().rstrip(',')
@@ -370,35 +377,43 @@ class StudentManager:
         self.create(email, password)
         return (f"Вы успешно зарегистрировались, однако Ваш адрес электронной почты не подтверждён. "
                 f"Отправьте пустое сообщение с Вашего адреса электронной почты {email} на "
-                f"наш адрес {self.config.config.imap_login} для подтверждения.")
+                f"наш адрес {self.config.config.imap_login} для подтверждения. В течение 5 минут "
+                "после отправки письма Ваш аккаунт будет активирован.")
 
     def change_password(self, email: str, new_password: str) -> str:
         if not self.exists(email):
             return "Такой адрес почты не зарегистрирован!"
+        if self.blocked(email):
+            return "Данный адрес электронной почты заблокирован."
         if not self.confirmed(email):
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-                    f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
-                    " для подтверждения.")
+                    f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
+                    "для подтверждения. В течение 5 минут после отправки письма Ваш аккаунт "
+                    "будет активирован.")
         if not self.change_password(email, new_password):
             return f"Изменение пароля невозможно, обратитесь к администратору."
         return (f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
-                f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
-                " для подтверждения операции изменения пароля.")
+                f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
+                "для подтверждения операции изменения пароля. В течение 5 минут после отправки "
+                "письма Вы сможете использовать новый пароль для входа на сайт.")
 
     def login(self, email: str, password: str) -> str | None:
         if not self.exists(email):
             return "Такой адрес почты не зарегистрирован!"
+        if self.blocked(email):
+            return "Данный адрес электронной почты заблокирован."
         if not self.confirmed(email):
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
-                    f"электронной почты {email} на наш адрес {self.config.config.imap_login}"
-                    " для подтверждения Вашего аккаунта.")
+                    f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
+                    "для подтверждения Вашего аккаунта. В течение 5 минут после отправки "
+                    "письма Вы сможете использовать новый пароль для входа на сайт.")
         if not self.check_password(email, password):
             return "Неправильный пароль."
         return None
 
     def check_password(self, email: str, password: str) -> Student | None:
         student = self.students.find_by_email(email)
-        if student is not None and student.password_hash is not None:
+        if student and student.password_hash:
             given = password.encode('utf8')
             actual = student.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
@@ -406,7 +421,7 @@ class StudentManager:
 
     def change_password(self, email: str, password: str) -> bool:
         student = self.students.find_by_email(email)
-        if student is not None and student.password_hash is not None:
+        if student and student.password_hash:
             given = password.encode('utf8')
             hashed = bcrypt.hashpw(given, bcrypt.gensalt())
             self.students.change_password(email, hashed.decode('utf8'))
@@ -415,7 +430,11 @@ class StudentManager:
 
     def confirmed(self, email: str) -> bool:
         student = self.students.find_by_email(email)
-        return student is not None and student.password_hash is not None
+        return student and student.password_hash
+
+    def blocked(self, email: str) -> bool:
+        student = self.students.find_by_email(email)
+        return student and student.blocked
 
     def exists(self, email: str) -> bool:
         student = self.students.find_by_email(email)
