@@ -19,17 +19,19 @@
         №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
       </li>
     </ol>
-    {% if student is not none %}
-      <span class="breadcrumb-item text-decoration-none">
-        <span class="text-muted">{{ student.email }}</span>
-        <a class="breadcrumb-item text-decoration-none" href="/logout">
-          Выйти
+    {% if registration %}
+      {% if student is not none %}
+        <span class="breadcrumb-item text-decoration-none">
+          <span class="text-muted">{{ student.email }}</span>
+          <a class="breadcrumb-item text-decoration-none" href="/logout">
+            Выйти
+          </a>
+        </span>
+      {% else %}
+        <a class="breadcrumb-item text-decoration-none" href="/login">
+          Войти
         </a>
-      </span>
-    {% elif not exam %}
-      <a class="breadcrumb-item text-decoration-none" href="/login">
-        Войти
-      </a>
+      {% endif %}
     {% endif %}
   </div>
 </nav>
@@ -118,7 +120,7 @@
             {% endfor %}
           </ul>
         {% endif %}
-        {% if not exam and not status.disabled %}
+        {% if registration and not status.disabled %}
           <div class="form-group mb-2">
             <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
             <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>

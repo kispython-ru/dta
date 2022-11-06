@@ -35,6 +35,7 @@ def dashboard(student: Student | None):
     return render_template(
         "student/dashboard.jinja",
         groupings=groupings,
+        registration=config.config.registration,
         exam=config.config.exam,
         student=student
     )
@@ -50,7 +51,7 @@ def group(student: Student | None, group_id: int):
         "student/group.jinja",
         group=group,
         blocked=blocked,
-        exam=config.config.exam,
+        registration=config.config.registration,
         student=student
     )
 
@@ -64,7 +65,6 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
-        exam=config.config.exam,
         status=status,
         form=form,
         student=student,
@@ -84,12 +84,17 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
             ip = get_real_ip(request)
             db.messages.submit_task(tid, vid, gid, form.code.data, ip)
             db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-            return render_template("student/success.jinja", status=status, exam=config.config.exam, student=student)
+            return render_template(
+                "student/success.jinja",
+                status=status,
+                registration=config.config.registration,
+                student=student
+            )
         form.password.errors.append("Указан неправильный пароль.")
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
-        exam=config.config.exam,
+        registration=config.config.registration,
         status=status,
         form=form,
         student=student,

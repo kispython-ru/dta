@@ -24,17 +24,19 @@
         Уведомление
       </li>
     </ol>
-    {% if student is not none %}
-      <span class="breadcrumb-item text-decoration-none">
-        <span class="text-muted">{{ student.email }}</span>
-        <a class="breadcrumb-item text-decoration-none" href="/logout">
-          Выйти
+    {% if registration %}
+      {% if student is not none %}
+        <span class="breadcrumb-item text-decoration-none">
+          <span class="text-muted">{{ student.email }}</span>
+          <a class="breadcrumb-item text-decoration-none" href="/logout">
+            Выйти
+          </a>
+        </span>
+      {% else %}
+        <a class="breadcrumb-item text-decoration-none" href="/login">
+          Войти
         </a>
-      </span>
-    {% elif not exam %}
-      <a class="breadcrumb-item text-decoration-none" href="/login">
-        Войти
-      </a>
+      {% endif %}
     {% endif %}
   </div>
 </nav>

@@ -24,7 +24,7 @@ class AppConfig:
 
     @property
     def registration(self) -> bool:
-        return not self.exam or self.enable_registration
+        return not self.exam and self.enable_registration
 
 
 class ExternalTaskDto:

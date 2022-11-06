@@ -17,7 +17,7 @@ def student_jwt_reset(config: AppConfigManager, path: str):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):
-            if not config.config.enable_registration:
+            if not config.config.registration:
                 return redirect('/')
             if verify_jwt_in_request(True):
                 response = redirect(path)
