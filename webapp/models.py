@@ -112,7 +112,7 @@ class Student(Base):
     email = sa.Column("email", sa.String, nullable=False)
     password_hash = sa.Column("password_hash", sa.String, nullable=True)
     unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
-    blocked = sa.Column("blocked", sa.Boolean, nullable=True)
+    blocked = sa.Column("blocked", sa.Boolean, nullable=False)
 
 
 class Mailer(Base):

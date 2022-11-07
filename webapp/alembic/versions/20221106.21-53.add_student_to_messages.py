@@ -6,6 +6,7 @@ Create Date: 2022-11-06 21:53:37.037891
 
 """
 from alembic import op
+from alembic.operations.batch import BatchOperationsImpl
 import sqlalchemy as sa
 
 
@@ -17,7 +18,14 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column("messages", sa.Column("student", sa.Integer, nullable=True))
+    bop: BatchOperationsImpl
+    with op.batch_alter_table("messages") as bop:
+        bop.add_column(sa.Column(
+            "student",
+            sa.Integer,
+            sa.ForeignKey("students.id", name="student"),
+            nullable=True,
+        ))
 
 
 def downgrade():

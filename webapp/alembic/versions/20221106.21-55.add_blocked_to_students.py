@@ -6,6 +6,7 @@ Create Date: 2022-11-06 21:55:33.207993
 
 """
 from alembic import op
+from alembic.operations.batch import BatchOperationsImpl
 import sqlalchemy as sa
 
 
@@ -18,6 +19,10 @@ depends_on = None
 
 def upgrade():
     op.add_column("students", sa.Column("blocked", sa.Boolean, nullable=True))
+    op.execute("update students set blocked = false")
+    bop: BatchOperationsImpl
+    with op.batch_alter_table("students") as bop:
+        bop.alter_column("blocked", nullable=False)
 
 
 def downgrade():
