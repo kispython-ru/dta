@@ -238,7 +238,8 @@ class MessageRepository:
         variant: int,
         group: int,
         code: str,
-        ip: str
+        ip: str,
+        student: int | None,
     ) -> Message:
         with self.db.create_session() as session:
             message = Message(
@@ -249,6 +250,7 @@ class MessageRepository:
                 group=group,
                 code=code,
                 ip=ip,
+                student=student,
             )
             session.add(message)
             return message

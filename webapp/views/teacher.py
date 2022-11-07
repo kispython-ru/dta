@@ -18,7 +18,7 @@ config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
-exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks)
+exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students)
 teachers = TeacherManager(db.teachers)
 
 
