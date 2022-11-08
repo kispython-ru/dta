@@ -390,7 +390,7 @@ class StudentManager:
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
                     "для подтверждения. В течение 5 минут после отправки письма Ваш аккаунт "
                     "будет активирован.")
-        if not self.change_password(email, new_password):
+        if not self.update_password(email, new_password):
             return f"Изменение пароля невозможно, обратитесь к администратору."
         return (f"Запрос на изменение пароля создан! Отправьте пустое сообщение с Вашего адреса "
                 f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
@@ -419,7 +419,7 @@ class StudentManager:
             if bcrypt.checkpw(given, actual):
                 return student
 
-    def change_password(self, email: str, password: str) -> bool:
+    def update_password(self, email: str, password: str) -> bool:
         student = self.students.find_by_email(email)
         if student and student.password_hash:
             given = password.encode('utf8')
