@@ -420,7 +420,7 @@ class StudentRepository:
 
     def create(self, email: str, password: str) -> Student:
         with self.db.create_session() as session:
-            student = Student(email=email, unconfirmed_hash=password)
+            student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
             return student
 
