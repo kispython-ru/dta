@@ -76,14 +76,14 @@
       {% else %}
         <div class="mb-2"></div>
       {% endif %}
-      {% if status.achievements | length > 0 %}
-        <div>Способы решения задачи:</div>
-        <ul>
-          {% for dto in status.achievements %}
-            <li>{{ dto.active }} {{ dto.count }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
+    {% endif %}
+    {% if status.achievements %}
+      <div>Способы решения задачи:</div>
+      <ul>
+        {% for dto in status.achievements %}
+          <li>{{ dto.active }} {{ dto.count }}</li>
+        {% endfor %}
+      </ul>
     {% endif %}
   </div>
   <div class="card m-auto mt-3 mb-5">

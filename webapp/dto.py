@@ -147,11 +147,11 @@ class TaskStatusDto:
         active = self.external.active
         return checked or not active or self.readonly
 
-    def map_achievements(self, status: TaskStatus, achievements: list[int]):
+    def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
         for order, count in enumerate(achievements):
-            active = order in status.achievements
-            dto = AchievementDto(active, count)
+            earned = status.achievements if status and status.achievements else []
+            dto = AchievementDto(order in earned, count)
             dtos.append(dto)
         return dtos
 
