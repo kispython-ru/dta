@@ -77,15 +77,25 @@
         <div class="mb-2"></div>
       {% endif %}
     {% endif %}
-    {% if status.achievements %}
-      <div>Способы решения задачи:</div>
-      <ul>
-        {% for dto in status.achievements %}
-          <li>{{ dto.active }} {{ dto.count }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
   </div>
+  {% if status.status == 2 %}
+    <div>
+      <h6 class="card-title fw-bold">
+        Достижения
+      </h6>
+      <h6 class="card-subtitle mb-2 text-muted">
+        Сможете ли Вы решить задачу всеми способами, известными нейронной сети?
+      </h6>
+      {% if status.achievements %}
+        {% for dto in status.achievements %}
+          <div class="callout callout-{{ 'success' if dto.active else 'default text-muted' }}">
+            <div>{{ dto.title }}</div>
+            <small>{{ dto.description }}</small>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  {% endif %}
   <div class="card m-auto mt-3 mb-5">
     <form class="card-body" action="{{ status.submission_url }}" method="POST">
       <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>

@@ -56,9 +56,22 @@ class TaskDto:
 
 
 class AchievementDto:
-    def __init__(self, active: bool, count: int):
+    def __init__(self, order: int, active: bool, count: int):
+        self.order = order
         self.active = active
         self.count = count
+
+    @property
+    def title(self):
+        pop = 'Самое популярное' if self.order == 0 else f'{self.order + 1}-е по популярности'
+        return f'{pop} решение'
+
+    @property
+    def description(self):
+        endone = int(str(self.count)[-1]) == 1
+        students = 'студентом' if endone else 'студентами'
+        similarity = f'Похожим способом данная задача была решена {self.count} {students}.'
+        return similarity
 
 
 class TaskStatusDto:
@@ -151,7 +164,7 @@ class TaskStatusDto:
         dtos = []
         for order, count in enumerate(achievements):
             earned = status.achievements if status and status.achievements else []
-            dto = AchievementDto(order in earned, count)
+            dto = AchievementDto(order, order in earned, count)
             dtos.append(dto)
         return dtos
 
