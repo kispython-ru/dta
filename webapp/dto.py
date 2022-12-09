@@ -55,6 +55,12 @@ class TaskDto:
         self.formulation = task.formulation
 
 
+class AchievementDto:
+    def __init__(self, active: bool, count: int):
+        self.active = active
+        self.count = count
+
+
 class TaskStatusDto:
     def __init__(
         self,
@@ -64,6 +70,7 @@ class TaskStatusDto:
         status: TaskStatus | None,
         external: ExternalTaskDto,
         config: AppConfig,
+        achievements: list[int],
     ):
         self.task = task.id
         self.formulation = task.formulation
@@ -76,8 +83,8 @@ class TaskStatusDto:
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status == Status.Checked
         self.error_message = status.output if self.status == Status.Failed else None
-        self.analytics = status.output if self.status == Status.Checked else None
         self.readonly = config.readonly
+        self.achievements = self.map_achievements(status, achievements)
 
     @property
     def submission_url(self) -> str:
@@ -139,6 +146,14 @@ class TaskStatusDto:
         checked = self.status == Status.Checked
         active = self.external.active
         return checked or not active or self.readonly
+
+    def map_achievements(self, status: TaskStatus, achievements: list[int]):
+        dtos = []
+        for order, count in enumerate(achievements):
+            active = order in status.achievements
+            dto = AchievementDto(active, count)
+            dtos.append(dto)
+        return dtos
 
     def map_status(self, map: dict[Status, str]):
         return map[self.status]
