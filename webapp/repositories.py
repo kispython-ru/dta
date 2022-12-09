@@ -163,6 +163,16 @@ class TaskStatusRepository:
                 .first()
             return status
 
+    def record_achievement(self, task: int, variant: int, group: int, achievement: int):
+        existing = self.get_task_status(task, variant, group)
+        if not existing:
+            return
+        achievements = existing.achievements + [achievement]
+        with self.db.create_session() as session:
+            session.query(TaskStatus) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .update(dict(achievements=achievements))
+
     def update_status(
             self,
             task: int,

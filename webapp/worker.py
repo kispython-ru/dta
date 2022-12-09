@@ -80,11 +80,19 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             )
             print(f"Check result: {ok}, {error}")
             status = Status.Checked if ok else Status.Failed
-            output = error if not ok else analyze_solution(
-                analytics_path=config.config.analytics_path,
-                code=message.code,
-                task=ext.task,
-            )
+            if ok:
+                order, _ = analyze_solution(
+                    analytics_path=config.config.analytics_path,
+                    code=message.code,
+                    task=ext.task,
+                )
+                print(f'Recording achievement {order}!')
+                db.statuses.record_achievement(
+                    task=message.task,
+                    variant=message.variant,
+                    group=message.group,
+                    achievement=order,
+                )
             db.messages.mark_as_processed(message.id)
             db.statuses.update_status(
                 task=message.task,
@@ -93,12 +101,12 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 code=message.code,
                 status=status,
                 ip=message.ip,
-                output=output,
+                output=error,
             )
             db.checks.record_check(
                 message=message.id,
                 status=status,
-                output=output,
+                output=error,
             )
         except BaseException:
             exception = get_exception_info()

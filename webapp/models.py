@@ -1,6 +1,7 @@
 import enum
-
 import sqlalchemy as sa
+import json
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -22,6 +23,21 @@ class IntEnum(sa.TypeDecorator):
     def process_result_value(self, value, dialect):
         return self._enumtype(value)
 
+
+class JsonArray(sa.TypeDecorator):
+    impl = sa.Text
+
+    def process_bind_param(self, value, dialect):
+        if not value:
+            return '[]'
+        if isinstance(value, list):
+            return json.dumps(value)
+        raise ValueError("Bad value type for JSON array.")
+
+    def process_result_value(self, value, dialect):
+        if not value:
+            return []
+        return json.loads(value)
 
 class Status(enum.IntEnum):
     Submitted = 0
@@ -68,6 +84,7 @@ class TaskStatus(Base):
     ip = sa.Column("ip", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
     status = sa.Column("status", IntEnum(Status), nullable=False)
+    achievements = sa.Column("achievements", JsonArray, nullable=True)
 
 
 class Message(Base):
