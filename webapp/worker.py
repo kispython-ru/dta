@@ -71,7 +71,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:
-            (ok, error) = check_solution(
+            ok, error = check_solution(
                 core_path=core_path,
                 group_title=ext.group_title,
                 task=ext.task,
@@ -90,6 +90,8 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             )
             db.messages.mark_as_processed(message.id)
             db.checks.record_check(message.id, status.status, error)
+            if not ok:
+                continue
             analyzed, order = analyze_solution(
                 analytics_path=config.config.analytics_path,
                 code=message.code,
