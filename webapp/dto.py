@@ -165,7 +165,7 @@ class TaskStatusDto:
 
     @property
     def show_achievements(self) -> bool:
-        return self.map_status({
+        return self.achievements and self.map_status({
             Status.Submitted: False,
             Status.Failed: False,
             Status.NotSubmitted: False,
