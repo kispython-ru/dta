@@ -78,13 +78,13 @@
       {% endif %}
     {% endif %}
   </div>
-  {% if status.status == 2 %}
+  {% if status.show_achievements %}
     <div>
       <h6 class="card-title fw-bold">
-        Способы решения
+        Достижения
       </h6>
       <h6 class="card-subtitle mb-2 text-muted">
-        Сможете ли Вы решить задачу всеми способами, известными нейронной сети?
+        Сможете ли Вы решить задачу всеми способами, известными искусственной нейронной сети?
       </h6>
       {% if status.achievements %}
         {% for dto in status.achievements %}

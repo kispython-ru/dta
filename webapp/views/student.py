@@ -74,12 +74,11 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
 @student_jwt_optional(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
+    allowed = student is not None or not config.config.registration
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm() if config.config.registration else AnonMessageForm()
-    valid = form.validate_on_submit() and not status.checked
-    available = status.external.active and not config.config.readonly
-    allowed = student is not None or not config.config.registration
-    if valid and available and allowed:
+    valid = form.validate_on_submit()
+    if valid and allowed and not status.disabled:
         if not config.config.registration or students.check_password(student.email, form.password.data):
             ip = get_real_ip(request)
             sid = student.id if student else None

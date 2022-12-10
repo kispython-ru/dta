@@ -163,6 +163,17 @@ class TaskStatusDto:
         active = self.external.active
         return not active or self.readonly
 
+    @property
+    def show_achievements(self) -> bool:
+        return self.map_status({
+            Status.Submitted: False,
+            Status.Failed: False,
+            Status.NotSubmitted: False,
+            Status.Checked: True,
+            Status.CheckedSubmitted: True,
+            Status.CheckedFailed: True,
+        })
+
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
         for order, count in enumerate(achievements):
