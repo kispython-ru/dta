@@ -94,8 +94,8 @@ class TaskStatusDto:
         self.base_url = config.task_base_url
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
-        self.checked = self.status == Status.Checked
-        self.error_message = status.output if self.status == Status.Failed else None
+        self.checked = self.status in [Status.Checked, Status.CheckedSubmitted, Status.CheckedFailed]
+        self.error_message = status.output if self.status in [Status.Failed, Status.CheckedFailed] else None
         self.readonly = config.readonly
         self.achievements = self.map_achievements(status, achievements)
 
@@ -118,8 +118,9 @@ class TaskStatusDto:
     def cell_background(self) -> str:
         return self.map_status({
             Status.Submitted: "inherit",
-            Status.Checking: "inherit",
             Status.Checked: "#e3ffee",
+            Status.CheckedSubmitted: "#e3ffee",
+            Status.CheckedFailed: "#e3ffee",
             Status.Failed: "#ffe3ee",
             Status.NotSubmitted: "inherit",
         })
@@ -128,8 +129,9 @@ class TaskStatusDto:
     def name(self) -> str:
         return self.map_status({
             Status.Submitted: "Отправлено",
-            Status.Checking: "Проверяется",
             Status.Checked: "Принято",
+            Status.CheckedSubmitted: "Отправлено",
+            Status.CheckedFailed: "Ошибка!",
             Status.Failed: "Ошибка!",
             Status.NotSubmitted: "Не отправлено",
         })
@@ -138,8 +140,9 @@ class TaskStatusDto:
     def code(self) -> str:
         return self.map_status({
             Status.Submitted: "?",
-            Status.Checking: "...",
             Status.Checked: "+",
+            Status.CheckedSubmitted: "+",
+            Status.CheckedFailed: "+",
             Status.Failed: "x",
             Status.NotSubmitted: "-",
         })
@@ -148,17 +151,17 @@ class TaskStatusDto:
     def color(self) -> str:
         return self.map_status({
             Status.Submitted: "primary",
-            Status.Checking: "warning",
             Status.Checked: "success",
+            Status.CheckedSubmitted: "success",
+            Status.CheckedFailed: "success",
             Status.Failed: "danger",
             Status.NotSubmitted: "secondary",
         })
 
     @property
     def disabled(self) -> bool:
-        checked = self.status == Status.Checked
         active = self.external.active
-        return checked or not active or self.readonly
+        return not active or self.readonly
 
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []

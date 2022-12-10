@@ -79,34 +79,30 @@ def process_pending_messages(core_path: str, db: AppDatabase):
                 code=message.code,
             )
             print(f"Check result: {ok}, {error}")
-            status = Status.Checked if ok else Status.Failed
-            if ok:
-                order, _ = analyze_solution(
-                    analytics_path=config.config.analytics_path,
-                    code=message.code,
-                    task=ext.task,
-                )
-                print(f'Recording achievement {order}!')
-                db.statuses.record_achievement(
-                    task=message.task,
-                    variant=message.variant,
-                    group=message.group,
-                    achievement=order,
-                )
-            db.messages.mark_as_processed(message.id)
-            db.statuses.update_status(
+            status = db.statuses.check(
                 task=message.task,
                 variant=message.variant,
                 group=message.group,
                 code=message.code,
-                status=status,
+                ok=ok,
+                output=error,
                 ip=message.ip,
-                output=error,
             )
-            db.checks.record_check(
-                message=message.id,
-                status=status,
-                output=error,
+            db.messages.mark_as_processed(message.id)
+            db.checks.record_check(message.id, status.status, error)
+            analyzed, order = analyze_solution(
+                analytics_path=config.config.analytics_path,
+                code=message.code,
+                task=ext.task,
+            )
+            print(f'Analysis result: {analyzed}, {order}')
+            if not analyzed:
+                continue
+            db.statuses.record_achievement(
+                task=message.task,
+                variant=message.variant,
+                group=message.group,
+                achievement=order,
             )
         except BaseException:
             exception = get_exception_info()

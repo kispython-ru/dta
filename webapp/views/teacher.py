@@ -99,7 +99,7 @@ def accept(teacher: Teacher, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
     if group.id == message.group and config.config.no_background_worker:
-        process_message(message, Status.Checked, None)
+        process_message(message, True, None)
     return redirect(f"/teacher/group/{group_id}")
 
 
@@ -110,7 +110,7 @@ def reject(teacher: Teacher, group_id: int, message_id: int):
     message = db.messages.get_by_id(message_id)
     if group.id == message.group and config.config.no_background_worker:
         comment = request.args.get("comment")
-        process_message(message, Status.Failed, comment)
+        process_message(message, False, comment)
     return redirect(f"/teacher/group/{group_id}")
 
 
@@ -153,19 +153,19 @@ def handle_authorization_errors(e):
     return response
 
 
-def process_message(message: Message, status: Status, comment: str | None):
+def process_message(message: Message, ok: bool, comment: str | None):
     db.messages.mark_as_processed(message.id)
-    db.statuses.update_status(
+    status = db.statuses.check(
         task=message.task,
         variant=message.variant,
         group=message.group,
         code=message.code,
-        status=status,
-        ip=message.ip,
+        ok=ok,
         output=comment,
+        ip=message.ip,
     )
     db.checks.record_check(
         message=message.id,
-        status=status,
+        status=status.status,
         output=comment,
     )

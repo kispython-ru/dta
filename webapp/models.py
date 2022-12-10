@@ -1,7 +1,7 @@
 import enum
-import sqlalchemy as sa
 import json
 
+import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -26,6 +26,7 @@ class IntEnum(sa.TypeDecorator):
 
 class JsonArray(sa.TypeDecorator):
     impl = sa.Text
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):
         if not value:
@@ -39,12 +40,14 @@ class JsonArray(sa.TypeDecorator):
             return []
         return json.loads(value)
 
+
 class Status(enum.IntEnum):
     Submitted = 0
-    Checking = 1
     Checked = 2
     Failed = 3
     NotSubmitted = 4
+    CheckedSubmitted = 5
+    CheckedFailed = 6
 
 
 Base = declarative_base()

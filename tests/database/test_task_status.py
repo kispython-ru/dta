@@ -39,33 +39,30 @@ def test_task_status_get_task_status(db: AppDatabase):
     assert task_status.status == Status.Submitted
 
 
-def test_task_status_update_status(db: AppDatabase):
+def test_task_status_check_existing(db: AppDatabase):
     (group, variant, task) = arrange_task(db)
     db.statuses.submit_task(task, variant, group, unique_str(), unique_str())
+    for ok, expected in [
+        (False, Status.Failed),
+        (False, Status.Failed),
+        (True, Status.Checked),
+        (False, Status.CheckedFailed),
+        (True, Status.Checked),
+    ]:
+        db.statuses.check(task, variant, group, unique_str(), ok, unique_str(), unique_str())
+        task_status = db.statuses.get_task_status(task, variant, group)
+        assert task_status.status == expected
 
-    for ts_enum in Status:
-        if ts_enum != Status.Checked:
-            db.statuses.update_status(
-                task,
-                variant,
-                group,
-                unique_str(),
-                ts_enum.value,
-                unique_str(),
-                unique_str()
-            )
-            task_status = db.statuses.get_task_status(task, variant, group)
-            assert task_status.status == ts_enum.value
 
-    db.statuses.update_status(
-        task,
-        variant,
-        group,
-        unique_str(),
-        Status.Checked,
-        unique_str(),
-        unique_str()
-    )
-
-    task_status = db.statuses.get_task_status(task, variant, group)
-    assert task_status.status == Status.Checked
+def test_task_status_check_unexisting(db: AppDatabase):
+    (group, variant, task) = arrange_task(db)
+    for ok, expected in [
+        (False, Status.Failed),
+        (False, Status.Failed),
+        (True, Status.Checked),
+        (False, Status.CheckedFailed),
+        (True, Status.Checked),
+    ]:
+        db.statuses.check(task, variant, group, unique_str(), ok, unique_str(), unique_str())
+        task_status = db.statuses.get_task_status(task, variant, group)
+        assert task_status.status == expected

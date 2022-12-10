@@ -1,8 +1,8 @@
 import csv
 import io
-import random
 import json
 import os
+import random
 from typing import Callable
 
 import bcrypt

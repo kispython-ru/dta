@@ -45,20 +45,13 @@ def test_task_status_html_status(db: AppDatabase, client: FlaskClient):
     db.statuses.submit_task(tasks_id, variant_id, group_id, unique_str(), unique_str())
 
     c = 'd-block text-center text-decoration-none p-1'
-    statuses = [[Status.NotSubmitted, '-', 'background-color:inherit'],
-                [Status.Failed, 'x', 'background-color:#ffe3ee'],
-                [Status.Checked, '+', 'background-color:#e3ffee']]
-
-    for status, text, color in statuses:
-        db.statuses.update_status(
-            tasks_id,
-            variant_id,
-            group_id,
-            unique_str(),
-            status.value,
-            unique_str(),
-            unique_str()
-        )
+    for ok, text, color in [
+        (False, 'x', 'background-color:#ffe3ee'),
+        (True, '+', 'background-color:#e3ffee'),
+        (False, '+', 'background-color:#e3ffee'),
+        (True, '+', 'background-color:#e3ffee'),
+    ]:
+        db.statuses.check(tasks_id, variant_id, group_id, unique_str(), ok, unique_str(), unique_str())
         response = client.get(f'/group/{group_id}')
         html_group = response.get_data(as_text=True)
 
