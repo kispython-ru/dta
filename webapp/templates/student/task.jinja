@@ -92,7 +92,7 @@
       {% if status.achievements %}
         {% for dto in status.achievements %}
           <div class="callout callout-{{ 'success' if dto.active else 'default text-muted' }}">
-            <div>{{ dto.title }}</div>
+            <div>{{ dto.title }} {{ '✓' if dto.active else '' }}</div>
             <small>{{ dto.description }}</small>
           </div>
         {% endfor %}
