@@ -174,6 +174,10 @@ class TaskStatusDto:
             Status.CheckedFailed: True,
         })
 
+    @property
+    def earned(self) -> int:
+        return len(list(filter(lambda a: a.active, self.achievements)))
+
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
         for order, count in enumerate(achievements):

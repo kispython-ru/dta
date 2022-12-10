@@ -81,7 +81,10 @@
   {% if status.show_achievements %}
     <div>
       <h6 class="card-title fw-bold">
-        Достижения
+        Разблокированные достижения 
+        <small class="text-muted">
+          {{ status.earned }} из {{ status.achievements | length }}
+        </small>
       </h6>
       <h6 class="card-subtitle mb-2 text-muted">
         Сможете ли Вы решить задачу всеми способами, известными искусственной нейронной сети?
