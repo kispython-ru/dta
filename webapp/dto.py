@@ -55,6 +55,25 @@ class TaskDto:
         self.formulation = task.formulation
 
 
+class AchievementDto:
+    def __init__(self, order: int, active: bool, count: int):
+        self.order = order
+        self.active = active
+        self.count = count
+
+    @property
+    def title(self):
+        pop = 'Самое популярное' if self.order == 0 else f'{self.order + 1}-е по популярности'
+        return f'{pop} решение'
+
+    @property
+    def description(self):
+        endone = int(str(self.count)[-1]) == 1
+        students = 'студентом' if endone else 'студентами'
+        similarity = f'Похожим способом данная задача была решена {self.count} {students}.'
+        return similarity
+
+
 class TaskStatusDto:
     def __init__(
         self,
@@ -64,6 +83,7 @@ class TaskStatusDto:
         status: TaskStatus | None,
         external: ExternalTaskDto,
         config: AppConfig,
+        achievements: list[int],
     ):
         self.task = task.id
         self.formulation = task.formulation
@@ -74,10 +94,10 @@ class TaskStatusDto:
         self.base_url = config.task_base_url
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
-        self.checked = self.status == Status.Checked
-        self.error_message = status.output if self.status == Status.Failed else None
-        self.analytics = status.output if self.status == Status.Checked else None
+        self.checked = self.status in [Status.Checked, Status.CheckedSubmitted, Status.CheckedFailed]
+        self.error_message = status.output if self.status in [Status.Failed, Status.CheckedFailed] else None
         self.readonly = config.readonly
+        self.achievements = self.map_achievements(status, achievements)
 
     @property
     def submission_url(self) -> str:
@@ -98,8 +118,9 @@ class TaskStatusDto:
     def cell_background(self) -> str:
         return self.map_status({
             Status.Submitted: "inherit",
-            Status.Checking: "inherit",
             Status.Checked: "#e3ffee",
+            Status.CheckedSubmitted: "#e3ffee",
+            Status.CheckedFailed: "#e3ffee",
             Status.Failed: "#ffe3ee",
             Status.NotSubmitted: "inherit",
         })
@@ -108,8 +129,9 @@ class TaskStatusDto:
     def name(self) -> str:
         return self.map_status({
             Status.Submitted: "Отправлено",
-            Status.Checking: "Проверяется",
             Status.Checked: "Принято",
+            Status.CheckedSubmitted: "Отправлено",
+            Status.CheckedFailed: "Ошибка!",
             Status.Failed: "Ошибка!",
             Status.NotSubmitted: "Не отправлено",
         })
@@ -118,8 +140,9 @@ class TaskStatusDto:
     def code(self) -> str:
         return self.map_status({
             Status.Submitted: "?",
-            Status.Checking: "...",
             Status.Checked: "+",
+            Status.CheckedSubmitted: "+",
+            Status.CheckedFailed: "+",
             Status.Failed: "x",
             Status.NotSubmitted: "-",
         })
@@ -128,17 +151,40 @@ class TaskStatusDto:
     def color(self) -> str:
         return self.map_status({
             Status.Submitted: "primary",
-            Status.Checking: "warning",
             Status.Checked: "success",
+            Status.CheckedSubmitted: "success",
+            Status.CheckedFailed: "success",
             Status.Failed: "danger",
             Status.NotSubmitted: "secondary",
         })
 
     @property
     def disabled(self) -> bool:
-        checked = self.status == Status.Checked
         active = self.external.active
-        return checked or not active or self.readonly
+        return not active or self.readonly
+
+    @property
+    def show_achievements(self) -> bool:
+        return self.achievements and self.map_status({
+            Status.Submitted: False,
+            Status.Failed: False,
+            Status.NotSubmitted: False,
+            Status.Checked: True,
+            Status.CheckedSubmitted: True,
+            Status.CheckedFailed: True,
+        })
+
+    @property
+    def earned(self) -> int:
+        return len(list(filter(lambda a: a.active, self.achievements)))
+
+    def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
+        dtos = []
+        for order, count in enumerate(achievements):
+            earned = status.achievements if status and status.achievements else []
+            dto = AchievementDto(order, order in earned, count)
+            dtos.append(dto)
+        return dtos
 
     def map_status(self, map: dict[Status, str]):
         return map[self.status]

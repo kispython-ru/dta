@@ -2,6 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
+from numpy import var
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -152,73 +153,12 @@ class TaskStatusRepository:
                 .all()
             return statuses
 
-    def get_task_status(
-            self,
-            task: int,
-            variant: int,
-            group: int) -> TaskStatus | None:
+    def get_task_status(self, task: int, variant: int, group: int) -> TaskStatus | None:
         with self.db.create_session() as session:
             status = session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
                 .first()
             return status
-
-    def update_status(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str,
-            status: int,
-            output: str,
-            ip: str):
-        existing = self.get_task_status(task, variant, group)
-        if existing is not None and existing.status == Status.Checked:
-            return  # We've already accepted this task!
-        with self.db.create_session() as session:
-            if existing is not None:
-                session.query(TaskStatus) \
-                    .filter_by(task=task, variant=variant, group=group) \
-                    .update(dict(code=code, status=status, output=output, ip=ip))
-                return
-            session.add(TaskStatus(
-                time=datetime.datetime.now(),
-                task=task,
-                variant=variant,
-                group=group,
-                code=code,
-                status=status,
-                output=output,
-                ip=ip,
-            ))
-
-    def submit_task(
-            self,
-            task: int,
-            variant: int,
-            group: int,
-            code: str,
-            ip: str) -> TaskStatus:
-        existing = self.get_task_status(task, variant, group)
-        with self.db.create_session() as session:
-            if existing is not None:
-                if existing.status == Status.Checked:
-                    return  # We've already accepted this task!
-                session.query(TaskStatus) \
-                    .filter_by(task=task, variant=variant, group=group) \
-                    .delete()
-            task_status = TaskStatus(
-                task=task,
-                variant=variant,
-                group=group,
-                code=code,
-                output=None,
-                time=datetime.datetime.now(),
-                status=Status.Submitted,
-                ip=ip,
-            )
-            session.add(task_status)
-            return task_status
 
     def delete_group_task_statuses(self, group: int):
         with self.db.create_session() as session:
@@ -226,6 +166,50 @@ class TaskStatusRepository:
                 .filter_by(group=group) \
                 .delete()
             return status
+
+    def record_achievement(self, task: int, variant: int, group: int, achievement: int):
+        existing = self.get_task_status(task, variant, group)
+        if not existing:
+            return
+        achievements = list(set(existing.achievements + [achievement]))
+        with self.db.create_session() as session:
+            session.query(TaskStatus) \
+                .filter_by(task=task, variant=variant, group=group) \
+                .update(dict(achievements=achievements))
+
+    def check(self, task: int, variant: int, group: int, code: str, ok: bool, output: str, ip: str):
+        def status():
+            existing = self.get_task_status(task, variant, group)
+            if existing and existing.status in [Status.Checked, Status.CheckedFailed, Status.CheckedSubmitted]:
+                return Status.Checked if ok else Status.CheckedFailed
+            return Status.Checked if ok else Status.Failed
+        return self.create_or_update(task, variant, group, code, status(), output, ip)
+
+    def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> TaskStatus:
+        checked = [Status.Checked, Status.CheckedFailed, Status.CheckedSubmitted]
+        existing = self.get_task_status(task, variant, group)
+        status = Status.CheckedSubmitted if existing and existing.status in checked else Status.Submitted
+        return self.create_or_update(task, variant, group, code, status, None, ip)
+
+    def create_or_update(self, task: int, variant: int, group: int, code: str, status: int, output: str, ip: str):
+        now = datetime.datetime.now()
+        with self.db.create_session() as session:
+            query = session.query(TaskStatus).filter_by(task=task, variant=variant, group=group)
+            if query.count():
+                query.update(dict(code=code, status=status, output=output, ip=ip, time=now))
+                updated: TaskStatus = query.one()
+                return updated
+            model = TaskStatus(
+                time=now,
+                task=task,
+                variant=variant,
+                group=group,
+                code=code,
+                status=status,
+                output=output,
+                ip=ip)
+            session.add(model)
+            return model
 
 
 class MessageRepository:
@@ -293,11 +277,12 @@ class MessageRepository:
                 .one()
             return message
 
-    def get(self, task: int, variant: int, group: int) -> Message | None:
+    def get(self, task: int, variant: int, group: int) -> list[Message]:
         with self.db.create_session() as session:
             return session.query(Message) \
                 .filter_by(task=task, variant=variant, group=group) \
-                .first()
+                .order_by(Message.time.desc()) \
+                .all()
 
     def mark_as_processed(self, message: int):
         with self.db.create_session() as session:

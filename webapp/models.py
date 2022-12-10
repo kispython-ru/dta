@@ -1,4 +1,5 @@
 import enum
+import json
 
 import sqlalchemy as sa
 from sqlalchemy import create_engine
@@ -23,12 +24,30 @@ class IntEnum(sa.TypeDecorator):
         return self._enumtype(value)
 
 
+class JsonArray(sa.TypeDecorator):
+    impl = sa.Text
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if not value:
+            return '[]'
+        if isinstance(value, list):
+            return json.dumps(value)
+        raise ValueError("Bad value type for JSON array.")
+
+    def process_result_value(self, value, dialect):
+        if not value:
+            return []
+        return json.loads(value)
+
+
 class Status(enum.IntEnum):
     Submitted = 0
-    Checking = 1
     Checked = 2
     Failed = 3
     NotSubmitted = 4
+    CheckedSubmitted = 5
+    CheckedFailed = 6
 
 
 Base = declarative_base()
@@ -68,6 +87,7 @@ class TaskStatus(Base):
     ip = sa.Column("ip", sa.String, nullable=False)
     output = sa.Column("output", sa.String, nullable=True)
     status = sa.Column("status", IntEnum(Status), nullable=False)
+    achievements = sa.Column("achievements", JsonArray, nullable=True)
 
 
 class Message(Base):

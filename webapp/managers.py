@@ -1,5 +1,7 @@
 import csv
 import io
+import json
+import os
 import random
 from typing import Callable
 
@@ -144,6 +146,7 @@ class StatusManager:
         self.statuses = statuses
         self.config = config
         self.seeds = seeds
+        self.achievements = None
 
     def get_group_statuses(self, group_id: int) -> GroupDto:
         config = self.config.config
@@ -177,7 +180,24 @@ class StatusManager:
         e = self.__get_external_task_manager(group)
         ext = e.get_external_task(task.id, variant.id)
         task_dto = TaskDto(group, task, config, e.random_active)
-        return TaskStatusDto(group, variant, task_dto, status, ext, config)
+        achievements = self.__read_achievements()
+        stid = str(task.id)
+        achievements = achievements[stid] if stid in achievements else []
+        return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+
+    def __read_achievements(self) -> dict[str, list[int]]:
+        if self.achievements is not None:
+            return self.achievements
+        analytics = self.config.config.analytics_path
+        spec = os.path.join(analytics, 'specification.json')
+        if not os.path.exists(spec):
+            self.achievements = dict()
+            return self.achievements
+        with open(spec, 'r') as file:
+            content = file.read()
+            spec = json.loads(content)
+            self.achievements = spec
+        return self.achievements
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)
@@ -204,7 +224,7 @@ class StatusManager:
             composite_key: tuple[int, int] = (variant.id, task.id)
             status = statuses.get(composite_key)
             e = external.get_external_task(task.id, variant.id)
-            dto = TaskStatusDto(group, variant, task, status, e, config)
+            dto = TaskStatusDto(group, variant, task, status, e, config, [])
             dtos.append(dto)
         return VariantDto(variant, dtos)
 
