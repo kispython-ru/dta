@@ -16,11 +16,16 @@ check: lint test
 
 .PHONY: flask
 flask:
-	cd webapp && export FLASK_APP=app && export FLASK_ENV=development && flask run
+	export FLASK_APP=webapp.app && export FLASK_ENV=development && flask run
+
+.PHONY: seed
+seed:
+	rm webapp.db
+	python -m webapp.app --seed
 
 .PHONY: flask-win
 flask-win:
-	cd webapp && set "FLASK_APP=app" && set "FLASK_ENV=development" && flask run
+	set "FLASK_APP=webapp.app" && set "FLASK_ENV=development" && flask run
 
 .PHONY: image
 image:
@@ -33,13 +38,5 @@ container:
 .PHONY: migration
 migration:
 	cd webapp && alembic revision -m "$(TITLE)"
-
-.PHONY: logo
-logo:
-	python logo.py
-
-.PHONY: seed
-seed:
-	cd webapp && export SEED=1 && export FLASK_APP=app && export FLASK_ENV=development && flask run
 
 .DEFAULT_GOAL :=

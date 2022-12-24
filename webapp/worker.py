@@ -5,13 +5,13 @@ from multiprocessing import Process
 from flask import Blueprint
 from flask import current_app as app
 
+from webapp.dto import AppConfig
 from webapp.managers import AppConfigManager, ExternalTaskManager
-from webapp.repositories import AppDatabase, Status
+from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
 
 
 blueprint = Blueprint("worker", __name__)
-config = AppConfigManager(lambda: app.config)
 
 
 def check_solution(
@@ -48,7 +48,7 @@ def analyze_solution(analytics_path: str, task: int, code: str):
     return analytics
 
 
-def process_pending_messages(core_path: str, db: AppDatabase):
+def process_pending_messages(config: AppConfig, db: AppDatabase):
     pending_messages = db.messages.get_pending_messages()
     message_count = len(pending_messages)
     if message_count == 0:
@@ -65,14 +65,14 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             tasks=db.tasks,
             groups=db.groups,
             variants=db.variants,
-            config=config.config,
+            config=config,
         )
         ext = external_manager.get_external_task(task.id, variant.id)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:
             ok, error = check_solution(
-                core_path=core_path,
+                core_path=config.core_path,
                 group_title=ext.group_title,
                 task=ext.task,
                 variant=ext.variant,
@@ -93,7 +93,7 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             if not ok:
                 continue
             analyzed, order = analyze_solution(
-                analytics_path=config.config.analytics_path,
+                analytics_path=config.analytics_path,
                 code=message.code,
                 task=ext.task,
             )
@@ -111,12 +111,12 @@ def process_pending_messages(core_path: str, db: AppDatabase):
             print(f"Error occured while checking for messages: {exception}")
 
 
-def background_worker(connection_string: str, core_path: str):
-    print(f"Starting background worker for database: {connection_string}")
-    db = AppDatabase(lambda: connection_string)
+def background_worker(config: AppConfig):
+    print(f"Starting background worker for database: {config.connection_string}")
+    db = AppDatabase(lambda: config.connection_string)
     while True:
         try:
-            process_pending_messages(core_path, db)
+            process_pending_messages(config, db)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")
@@ -125,12 +125,10 @@ def background_worker(connection_string: str, core_path: str):
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    if config.config.no_background_worker:
+    manager = AppConfigManager(lambda: app.config)
+    if manager.config.no_background_worker:
         return
-    process = Process(target=background_worker, args=(
-        config.config.connection_string,
-        config.config.core_path
-    ))
+    process = Process(target=background_worker, args=(manager.config,))
     try:
         process.start()
         app.config["WORKER_PID"] = process.pid

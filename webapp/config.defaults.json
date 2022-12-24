@@ -1,7 +1,7 @@
 {
     "CONNECTION_STRING": "sqlite:///web-app.db",
-    "CORE_PATH": "../mocks",
-    "ANALYTICS_PATH": "../mocks",
+    "CORE_PATH": "./mocks",
+    "ANALYTICS_PATH": "./mocks",
     "SECRET_KEY": "CHANGE_ME",
     "API_TOKEN": "CHANGE_ME",
     "DISABLE_BACKGROUND_WORKER": false,
