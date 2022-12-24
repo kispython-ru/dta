@@ -11,21 +11,8 @@ import webapp.views.api as api
 import webapp.views.student as student
 import webapp.views.teacher as teacher
 import webapp.worker as worker
-from alembic import command
-from alembic.config import Config
-from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd
+from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate
 from webapp.utils import load_config_files
-
-
-def migrate(connection_string: str):
-    base = os.path.dirname(os.path.abspath(__file__))
-    ini = os.path.join(base, "alembic.ini")
-    script = os.path.join(base, "alembic")
-    config = Config(ini)
-    config.set_main_option("sqlalchemy.url", connection_string)
-    if script is not None:
-        config.set_main_option("script_location", script)
-    command.upgrade(config, "head")
 
 
 def configure(directory: str) -> Flask:
@@ -50,18 +37,16 @@ def configure(directory: str) -> Flask:
     return app
 
 
-def config_path() -> str:
+def config() -> str:
     path = os.environ.get("CONFIG_PATH")
     directory = path if path else os.path.join(os.getcwd(), 'webapp')
     return directory
 
 
 def create_app() -> Flask:
-    dir = config_path()
-    return configure(dir)
+    return configure(config())
 
 
 if __name__ == "__main__":
-    dir = config_path()
-    cmd = CmdManager(dir, [SeedCmd, AnalyzeCmd])
+    cmd = CmdManager(config(), [SeedCmd, AnalyzeCmd])
     cmd.run()

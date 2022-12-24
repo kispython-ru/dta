@@ -177,6 +177,11 @@ class TaskStatusRepository:
                 .filter_by(task=task, variant=variant, group=group) \
                 .update(dict(achievements=achievements))
 
+    def clear_achievements(self):
+        with self.db.create_session() as session:
+            session.query(TaskStatus) \
+                .update(dict(achievements=None))
+
     def check(self, task: int, variant: int, group: int, code: str, ok: bool, output: str, ip: str):
         def status():
             existing = self.get_task_status(task, variant, group)
@@ -300,6 +305,12 @@ class MessageCheckRepository:
             return session.query(MessageCheck) \
                 .filter_by(message=message) \
                 .first()
+
+    def checked(self) -> list[MessageCheck]:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck) \
+                .filter_by(status=Status.Checked) \
+                .all()
 
     def record_check(
         self,

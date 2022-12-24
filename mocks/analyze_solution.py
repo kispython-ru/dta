@@ -7,4 +7,4 @@ def analyze_solution(task, code):
         return True, 0
     if rnd == 1:
         return True, 1
-    return False, 0
+    return False, 2
