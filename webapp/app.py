@@ -15,7 +15,7 @@ from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate
 from webapp.utils import load_config_files
 
 
-def configure(directory: str) -> Flask:
+def configure_app(directory: str) -> Flask:
     config = load_config_files(directory)
     app = Flask(__name__)
     app.url_map.strict_slashes = False
@@ -44,7 +44,7 @@ def config() -> str:
 
 
 def create_app() -> Flask:
-    return configure(config())
+    return configure_app(config())
 
 
 if __name__ == "__main__":
