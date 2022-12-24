@@ -1,6 +1,7 @@
 import logging
 import mailbox
 import os
+from datetime import timedelta
 
 from flask_jwt_extended import JWTManager
 
@@ -23,6 +24,7 @@ def configure_app(directory: str) -> Flask:
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
     app.config["JWT_COOKIE_SECURE"] = False
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
     app.config["JSON_AS_ASCII"] = False
     app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
     app.config.update(config)
