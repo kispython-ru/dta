@@ -23,7 +23,8 @@ class CmdManager:
         self.runners: dict[str, Cmd] = dict()
         for command in commands:
             runner = command(dir)
-            self.runners[runner.command] = runner
+            key = runner.command.strip('-')
+            self.runners[key] = runner
             self.parser.add_argument(
                 runner.command,
                 help=runner.help,
@@ -37,7 +38,7 @@ class CmdManager:
         for key, enabled in vars(args).items():
             if not enabled:
                 continue
-            print(f'Running {key.strip("-")} cmd...')
+            print(f'Running {key} cmd...')
             runner = self.runners[key]
             runner.run()
             executed = True
@@ -45,6 +46,9 @@ class CmdManager:
 
 
 class SeedCmd(Cmd):
+    def __init__(self, dir: str):
+        super().__init__(dir, "--seed", "Seeds the database using data from core.")
+
     def run(self):
         print(f'Seeding the database using config from {self.dir}')
         manager = AppConfigManager(lambda: load_config_files(self.dir))
@@ -58,7 +62,10 @@ class SeedCmd(Cmd):
         db.variants.create_by_ids(range(0, 39 + 1))
 
 
-class UpdateAnalyticsCmd:
+class UpdateAnalyticsCmd(Cmd):
+    def __init__(self, dir: str):
+        super().__init__(dir, "--update-analytics", "Evaluates analytics for all accepted programs.")
+
     def run(self):
-        print('Updating analyticc responses...')
+        print('Updating analytics responses...')
         pass
