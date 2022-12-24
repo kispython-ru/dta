@@ -34,7 +34,8 @@ class CmdManager:
                 runner.command,
                 help=runner.help,
                 required=False,
-                action='store_true')
+                action='store_true'
+            )
 
     def run(self):
         args = self.parser.parse_args()
