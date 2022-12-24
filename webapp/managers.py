@@ -25,7 +25,7 @@ from webapp.repositories import (
 
 
 class AppConfigManager:
-    def __init__(self, get_config: Callable[[], Config]):
+    def __init__(self, get_config: Callable[[], dict]):
         self.get_config = get_config
 
     @property
