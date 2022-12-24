@@ -1,28 +1,20 @@
 from argparse import ArgumentParser
-from typing import Callable
+from typing import Any, Callable
 
 import webapp.worker as worker
 from webapp.managers import AppConfigManager
 from webapp.repositories import AppDatabase
 from webapp.utils import load_config_files
-
-
-class Cmd:
-    def __init__(self, dir: str, command: str, help: str):
-        self.dir = dir
-        self.command = command
-        self.help = help
-
-    def run(self):
-        pass
+import os
 
 
 class CmdManager:
-    def __init__(self, dir: str, commands: list[Callable[[str], Cmd]]):
+    def __init__(self, commands: list[Callable[[str], Any]]):
+        self.runners: dict[str, Any] = dict()
         self.parser = ArgumentParser()
-        self.runners: dict[str, Cmd] = dict()
-        for command in commands:
-            runner = command(dir)
+        self.parser.add_argument("--cwd", help="working directory", required=True)
+        for cmd in commands:
+            runner = cmd()
             key = runner.command.strip('-')
             self.runners[key] = runner
             self.parser.add_argument(
@@ -33,25 +25,28 @@ class CmdManager:
             )
 
     def run(self) -> bool:
+        args = vars(self.parser.parse_args())
+        directory = os.path.abspath(args.pop('cwd'))
+        os.chdir(directory)
         executed = False
-        args = self.parser.parse_args()
-        for key, enabled in vars(args).items():
+        for key, enabled in args.items():
             if not enabled:
                 continue
             print(f'Running {key} cmd...')
             runner = self.runners[key]
-            runner.run()
+            runner.run(directory)
             executed = True
         return executed
 
 
-class SeedCmd(Cmd):
-    def __init__(self, dir: str):
-        super().__init__(dir, "--seed", "Seeds the database using data from core.")
+class SeedCmd:
+    def __init__(self):
+        self.command = "--seed"
+        self.help = "seeds the database using core"
 
-    def run(self):
-        print(f'Seeding the database using config from {self.dir}')
-        manager = AppConfigManager(lambda: load_config_files(self.dir))
+    def run(self, dir: str):
+        print(f'Seeding the database using config from {dir}')
+        manager = AppConfigManager(lambda: load_config_files(dir))
         groups, tasks = worker.load_tests(manager.config.core_path)
         db = AppDatabase(lambda: manager.config.connection_string)
         db.groups.delete_all()
@@ -62,10 +57,11 @@ class SeedCmd(Cmd):
         db.variants.create_by_ids(range(0, 39 + 1))
 
 
-class UpdateAnalyticsCmd(Cmd):
-    def __init__(self, dir: str):
-        super().__init__(dir, "--update-analytics", "Evaluates analytics for all accepted programs.")
+class UpdateAnalyticsCmd:
+    def __init__(self):
+        self.command = "--update-analytics"
+        self.help = "evaluates analytics for all accepted programs"
 
-    def run(self):
+    def run(self, dir: str):
         print('Updating analytics responses...')
         pass

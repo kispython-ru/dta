@@ -50,18 +50,12 @@ def configure_app(directory: str) -> Flask:
     return app
 
 
-def config_directory():
-    path = os.environ.get("CONFIG_PATH")
-    directory = path if path is not None else os.getcwd()
-    return directory
-
-
 def create_app() -> Flask:
-    dir = config_directory()
+    path = os.environ.get("CONFIG_PATH")
+    dir = path if path is not None else os.getcwd()
     return configure_app(dir)
 
 
 if __name__ == "__main__":
-    dir = config_directory()
-    manager = CmdManager(dir, [SeedCmd, UpdateAnalyticsCmd])
-    manager.run()
+    commands = CmdManager([SeedCmd, UpdateAnalyticsCmd])
+    commands.run()
