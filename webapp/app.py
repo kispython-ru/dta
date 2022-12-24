@@ -13,11 +13,11 @@ import webapp.views.teacher as teacher
 import webapp.worker as worker
 from alembic import command
 from alembic.config import Config
-from webapp.commands import CmdManager, SeedCmd, UpdateAnalyticsCmd
+from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd
 from webapp.utils import load_config_files
 
 
-def migrate_database(connection_string: str):
+def migrate(connection_string: str):
     base = os.path.dirname(os.path.abspath(__file__))
     ini = os.path.join(base, "alembic.ini")
     script = os.path.join(base, "alembic")
@@ -28,7 +28,7 @@ def migrate_database(connection_string: str):
     command.upgrade(config, "head")
 
 
-def configure_app(directory: str) -> Flask:
+def configure(directory: str) -> Flask:
     config = load_config_files(directory)
     app = Flask(__name__)
     app.url_map.strict_slashes = False
@@ -46,16 +46,22 @@ def configure_app(directory: str) -> Flask:
     app.register_blueprint(mailbox.blueprint)
     JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
-    migrate_database(config["CONNECTION_STRING"])
+    migrate(config["CONNECTION_STRING"])
     return app
 
 
-def create_app() -> Flask:
+def config_path() -> str:
     path = os.environ.get("CONFIG_PATH")
-    dir = path if path is not None else os.getcwd()
-    return configure_app(dir)
+    directory = path if path else os.path.join(os.getcwd(), 'webapp')
+    return directory
+
+
+def create_app() -> Flask:
+    dir = config_path()
+    return configure(dir)
 
 
 if __name__ == "__main__":
-    commands = CmdManager([SeedCmd, UpdateAnalyticsCmd])
-    commands.run()
+    dir = config_path()
+    cmd = CmdManager(dir, [SeedCmd, AnalyzeCmd])
+    cmd.run()

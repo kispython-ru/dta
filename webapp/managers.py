@@ -27,11 +27,13 @@ from webapp.repositories import (
 class AppConfigManager:
     def __init__(self, get_config: Callable[[], dict]):
         self.get_config = get_config
+        self.configuration = None
 
     @property
     def config(self) -> AppConfig:
-        configuration = self.get_config()
-        return AppConfig(configuration)
+        if not self.configuration:
+            self.configuration = AppConfig(self.get_config())
+        return self.configuration
 
 
 class GroupManager:

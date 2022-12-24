@@ -9,10 +9,10 @@ import os
 
 
 class CmdManager:
-    def __init__(self, commands: list[Callable[[str], Any]]):
+    def __init__(self, dir: str, commands: list[Callable[[str], Any]]):
         self.runners: dict[str, Any] = dict()
         self.parser = ArgumentParser()
-        self.parser.add_argument("--cwd", help="working directory", required=True)
+        self.dir = dir
         for cmd in commands:
             runner = cmd()
             key = runner.command.strip('-')
@@ -25,16 +25,14 @@ class CmdManager:
             )
 
     def run(self) -> bool:
-        args = vars(self.parser.parse_args())
-        directory = os.path.abspath(args.pop('cwd'))
-        os.chdir(directory)
+        args = self.parser.parse_args()
         executed = False
-        for key, enabled in args.items():
+        for key, enabled in vars(args).items():
             if not enabled:
                 continue
-            print(f'Running {key} cmd...')
+            print(f'Running {key} cmd')
             runner = self.runners[key]
-            runner.run(directory)
+            runner.run(self.dir)
             executed = True
         return executed
 
@@ -45,23 +43,26 @@ class SeedCmd:
         self.help = "seeds the database using core"
 
     def run(self, dir: str):
-        print(f'Seeding the database using config from {dir}')
         manager = AppConfigManager(lambda: load_config_files(dir))
-        groups, tasks = worker.load_tests(manager.config.core_path)
-        db = AppDatabase(lambda: manager.config.connection_string)
+        connection = manager.config.connection_string
+        core = manager.config.core_path
+        print(f'Seeding db {connection} using core {core}...')
+        groups, tasks = worker.load_tests(core)
+        db = AppDatabase(lambda: connection)
         db.groups.delete_all()
         db.groups.create_by_names(groups)
         db.tasks.delete_all()
         db.tasks.create_by_ids(tasks)
         db.variants.delete_all()
         db.variants.create_by_ids(range(0, 39 + 1))
+        print(f'Successfully seeded db {connection} using core {core}!')
 
 
-class UpdateAnalyticsCmd:
+class AnalyzeCmd:
     def __init__(self):
-        self.command = "--update-analytics"
+        self.command = "--analyze"
         self.help = "evaluates analytics for all accepted programs"
 
     def run(self, dir: str):
-        print('Updating analytics responses...')
+        print('Analyzing accepted programs...')
         pass
