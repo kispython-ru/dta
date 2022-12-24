@@ -27,6 +27,12 @@ make test
 make flask
 ```
 
+4. If you wish to seed the database, run:
+```bash
+poetry shell
+make seed # python -m webapp.app --seed
+```
+
 #### Windows 10
 
 1. Install [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html). Make sure `python` is added to `PATH`. You can check this by navigating to `System (Control Panel)` -> `Advanced system settings` -> `Environment Variables` -> `System Variables` -> `PATH` -> `Edit`.
@@ -49,6 +55,12 @@ poetry install
 poetry shell
 make test
 make flask-win
+```
+
+6. If you wish to seed the database, run:
+```bash
+poetry shell
+make seed # python -m webapp.app --seed
 ```
 
 ### Acknoledgements
