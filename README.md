@@ -84,3 +84,5 @@ The Digital Teaching Assistant system is described in the following papers:
 4. Demidova L.A., Sovietov P.N., Gorchakov A.V. [**Clustering of Program Source Text Representations Based on Markov Chains**](https://doi.org/10.21667/1995-4565-2022-81-51-64) // *Vestnik of Ryazan State Radio Engineering University*. **2022**, 81, pp. 51-64.
 
 5. Demidova L.A., Gorchakov A.V. [**Classification of Program Texts Represented as Markov Chains with Biology-Inspired Algorithms-Enhanced Extreme Learning Machines**](https://www.mdpi.com/1999-4893/15/9/329) // *Algorithms*. **2022**, 15 (9), p. 329.
+
+6. Gorchakov A.V., Demidova L.A., Sovietov P.N. [**Automated program text analysis using representations based on Markov chains and Extreme Learning Machines**](http://vestnik.rsreu.ru/ru/archive/2022/vypusk-82/1299-1995-4565-2022-82-89-103) // *Vestnik of Ryazan State Radio Engineering University*. **2022**, 82, pp. 89-103.
