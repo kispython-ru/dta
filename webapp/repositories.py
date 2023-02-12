@@ -419,6 +419,29 @@ class StudentRepository:
             student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
             return student
+        
+    def create_external(
+        self,
+        email: str,
+        external_id: int,
+        first_name: str,
+        second_name: str,
+        last_name: str,
+        group: str,
+    ) -> Student:
+        """Create student with external id and name"""
+        with self.db.create_session() as session:
+            student = Student(
+                email=email,
+                external_id=external_id,
+                first_name=first_name,
+                second_name=second_name,
+                last_name=last_name,
+                group=group,
+                blocked=False,
+            )
+            session.add(student)
+            return student
 
 
 class MailerRepository:

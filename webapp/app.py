@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 
 from flask import Flask
 
+import webapp.lks as lks
 import webapp.mailbox as mailbox
 import webapp.views.api as api
 import webapp.views.student as student
@@ -14,6 +15,23 @@ import webapp.views.teacher as teacher
 import webapp.worker as worker
 from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate
 from webapp.utils import load_config_files
+
+
+def configure_lks_oauth(app: Flask, config: dict) -> None:
+    """Create LKS OAuth client if it is enabled"""
+
+    if not config["ENABLE_LKS_OAUTH"]:
+        return
+
+    if not config["LKS_OAUTH_CLIENT_ID"] or not config["LKS_OAUTH_CLIENT_SECRET"]:
+        raise ValueError("LKS OAuth is enabled, but client id or secret is not set")
+
+    lks.init_app(
+        app,
+        config["LKS_OAUTH_CLIENT_ID"],
+        config["LKS_OAUTH_CLIENT_SECRET"],
+        config["LKS_API_BASE_URL"],
+    )
 
 
 def configure_app(directory: str) -> Flask:
@@ -28,6 +46,7 @@ def configure_app(directory: str) -> Flask:
     app.config["JSON_AS_ASCII"] = False
     app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
     app.config.update(config)
+    configure_lks_oauth(app, config)
     app.register_blueprint(student.blueprint)
     app.register_blueprint(teacher.blueprint)
     app.register_blueprint(api.blueprint)
@@ -36,12 +55,13 @@ def configure_app(directory: str) -> Flask:
     JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
     migrate(config["CONNECTION_STRING"])
+
     return app
 
 
 def config() -> str:
     path = os.environ.get("CONFIG_PATH")
-    directory = path if path else os.path.join(os.getcwd(), 'webapp')
+    directory = path if path else os.path.join(os.getcwd(), "webapp")
     return directory
 
 

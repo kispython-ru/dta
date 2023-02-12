@@ -1,11 +1,13 @@
+from authlib.integrations.requests_client import OAuth2Auth
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, url_for
 
+import webapp.lks as lks_oauth_helper
 from webapp.forms import (
     AnonMessageForm,
     StudentChangePasswordForm,
@@ -23,7 +25,9 @@ blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+statuses = StatusManager(
+    db.tasks, db.groups, db.variants, db.statuses, config, db.seeds
+)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -37,7 +41,7 @@ def dashboard(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         exam=config.config.exam,
-        student=student
+        student=student,
     )
 
 
@@ -52,7 +56,7 @@ def group(student: Student | None, group_id: int):
         group=group,
         blocked=blocked,
         registration=config.config.registration,
-        student=student
+        student=student,
     )
 
 
@@ -79,7 +83,9 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     valid = form.validate_on_submit()
     if valid and allowed and not status.disabled:
-        if not config.config.registration or students.check_password(student.email, form.password.data):
+        if not config.config.registration or students.check_password(
+            student.email, form.password.data
+        ):
             ip = get_real_ip(request)
             sid = student.id if student else None
             db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
@@ -88,7 +94,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
                 "student/success.jinja",
                 status=status,
                 registration=config.config.registration,
-                student=student
+                student=student,
             )
         form.password.errors.append("Указан неправильный пароль.")
     return render_template(
@@ -101,57 +107,116 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
-@blueprint.route("/login", methods=['GET', 'POST'])
+@blueprint.route("/login", methods=["GET", "POST"])
 @student_jwt_reset(config, "/login")
 def login():
     form = StudentLoginForm()
     if not form.validate_on_submit():
-        return render_template("student/login.jinja", form=form)
+        return render_template(
+            "student/login.jinja",
+            form=form,
+            lks_oauth_enabled=config.config.enable_lks_oauth,
+        )
     error = students.login(form.login.data, form.password.data)
     if error:
         form.login.errors.append(error)
-        return render_template("student/login.jinja", form=form)
+        return render_template(
+            "student/login.jinja",
+            form=form,
+            lks_oauth_enabled=config.config.enable_lks_oauth,
+        )
     response = redirect("/")
     student = db.students.find_by_email(form.login.data)
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
 
 
-@blueprint.route("/register", methods=['GET', 'POST'])
+@blueprint.route("/login/lks", methods=["GET", "POST"])
+@student_jwt_reset(config, "/login/lks")
+def login_with_lks():
+    if not config.config.enable_lks_oauth:
+        print("LKS OAuth is disabled")
+        return redirect("/")
+
+    client = lks_oauth_helper.oauth.create_client("lks")
+
+    return client.authorize_redirect(
+        url_for("student.login_with_lks_callback", _external=True)
+    )
+
+
+@blueprint.route("/login/lks/callback", methods=["GET", "POST"])
+@student_jwt_reset(config, "/login/lks/callback")
+def login_with_lks_callback():
+    if not config.config.enable_lks_oauth:
+        return redirect("/")
+
+    client = lks_oauth_helper.oauth.create_client("lks")
+
+    token = client.authorize_access_token()
+    auth = OAuth2Auth(token)
+    user = lks_oauth_helper.get_me(auth)
+
+    email = user.email
+    student = db.students.find_by_email(email)
+    if not student:
+        student = db.students.create_external(
+            email,
+            user.id,
+            user.name,
+            user.last_name,
+            user.last_name,
+            user.academic_group,
+        )
+    print(f"Student {student.id} logged in with LKS OAuth")
+    response = redirect("/")
+    # TODO: create Sessions table and store external session for LKS API manipulations
+    set_access_cookies(response, create_access_token(identity=student.id))
+    return response
+    
+
+
+@blueprint.route("/register", methods=["GET", "POST"])
 @student_jwt_reset(config, "/register")
 def register():
     form = StudentRegisterForm()
     if form.validate_on_submit():
         form.login.errors.append(students.register(form.login.data, form.password.data))
-    return render_template("student/register.jinja", form=form)
+    return render_template(
+        "student/register.jinja",
+        form=form,
+        lks_oauth_enabled=config.config.enable_lks_oauth,
+    )
 
 
-@blueprint.route("/change-password", methods=['GET', 'POST'])
+@blueprint.route("/change-password", methods=["GET", "POST"])
 @student_jwt_reset(config, "/change-password")
 def change_password():
     form = StudentChangePasswordForm()
     if form.validate_on_submit():
-        form.login.errors.append(students.change_password(form.login.data, form.password.data))
+        form.login.errors.append(
+            students.change_password(form.login.data, form.password.data)
+        )
     return render_template("student/password.jinja", form=form)
 
 
-@blueprint.route("/logout", methods=['GET'])
+@blueprint.route("/logout", methods=["GET"])
 def logout():
     response = redirect("/")
     unset_jwt_cookies(response)
     return response
 
 
-@blueprint.app_template_filter('hide')
+@blueprint.app_template_filter("hide")
 def hide_email(value: str):
-    if '@' not in value:
+    if "@" not in value:
         return value
-    username, domain = value.split('@')
+    username, domain = value.split("@")
     length = len(username)
     if length == 1:
-        return f'*@{domain}'
-    repeat = min((length - 1), 10) * '*'
-    return f'{username[0]}{repeat}@{domain}'
+        return f"*@{domain}"
+    repeat = min((length - 1), 10) * "*"
+    return f"{username[0]}{repeat}@{domain}"
 
 
 @blueprint.errorhandler(Exception)
@@ -163,6 +228,6 @@ def handle_view_errors(e):
 @blueprint.errorhandler(JWTExtendedException)
 @blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
-    response = redirect('/login')
+    response = redirect("/login")
     unset_jwt_cookies(response)
     return response

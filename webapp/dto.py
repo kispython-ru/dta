@@ -17,6 +17,9 @@ class AppConfig:
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]
         self.imap_login: bool = config["IMAP_LOGIN"]
         self.imap_password: bool = config["IMAP_PASSWORD"]
+        self.enable_lks_oauth: bool = config["ENABLE_LKS_OAUTH"]
+        self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
+        self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
 
     @property
     def exam(self) -> bool:
