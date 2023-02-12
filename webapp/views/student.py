@@ -164,7 +164,7 @@ def login_with_lks_callback():
             email,
             user.id,
             user.name,
-            user.last_name,
+            user.second_name,
             user.last_name,
             user.academic_group,
         )
