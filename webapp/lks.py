@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, List, NamedTuple
 
 import requests
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.requests_client import OAuth2Auth
-from flask_jwt_extended import get_jwt, get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 
 from flask import Flask
 
