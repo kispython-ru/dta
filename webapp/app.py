@@ -7,13 +7,13 @@ from flask_jwt_extended import JWTManager
 
 from flask import Flask
 
-import webapp.lks as lks
 import webapp.mailbox as mailbox
 import webapp.views.api as api
 import webapp.views.student as student
 import webapp.views.teacher as teacher
 import webapp.worker as worker
 from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate
+from webapp.lks import lks_oauth_helper
 from webapp.utils import load_config_files
 
 
@@ -26,7 +26,7 @@ def configure_lks_oauth(app: Flask, config: dict) -> None:
     if not config["LKS_OAUTH_CLIENT_ID"] or not config["LKS_OAUTH_CLIENT_SECRET"]:
         raise ValueError("LKS OAuth is enabled, but client id or secret is not set")
 
-    lks.init_app(
+    lks_oauth_helper.register(
         app,
         config["LKS_OAUTH_CLIENT_ID"],
         config["LKS_OAUTH_CLIENT_SECRET"],

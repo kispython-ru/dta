@@ -18,16 +18,12 @@ depends_on = None
 
 def upgrade():
     op.add_column("students", sa.Column("external_id", sa.BigInteger, nullable=True))
-    op.add_column("students", sa.Column("first_name", sa.String, nullable=True))
-    op.add_column("students", sa.Column("second_name", sa.String, nullable=True))
-    op.add_column("students", sa.Column("last_name", sa.String, nullable=True))
+    op.add_column("students", sa.Column("provider", sa.String, nullable=True))
     op.add_column("students", sa.Column("group", sa.String, nullable=True))
     
 
 
 def downgrade():
     op.drop_column("students", "external_id")
-    op.drop_column("students", "first_name")
-    op.drop_column("students", "second_name")
-    op.drop_column("students", "last_name")
+    op.drop_column("students", "provider")
     op.drop_column("students", "group")

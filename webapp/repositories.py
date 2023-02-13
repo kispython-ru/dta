@@ -388,6 +388,15 @@ class StudentRepository:
         with self.db.create_session() as session:
             student = session.query(Student).get(id)
             return student
+        
+    def get_by_external(self, external_id: str, provider: str) -> Student | None:
+        """Get student by external id and registration provider name."""
+        with self.db.create_session() as session:
+            return (
+                session.query(Student)
+                .filter_by(external_id=external_id, provider=provider)
+                .first()
+            )
 
     def find_by_email(self, email: str) -> Student | None:
         with self.db.create_session() as session:
@@ -424,24 +433,24 @@ class StudentRepository:
         self,
         email: str,
         external_id: int,
-        first_name: str,
-        second_name: str,
-        last_name: str,
-        group: str,
+        group: str | None,
+        provider: str,
     ) -> Student:
-        """Create student with external id and name"""
+        """Create student with external id and provider name (name of OAuth2 provider e.g. Google)"""
         with self.db.create_session() as session:
             student = Student(
                 email=email,
                 external_id=external_id,
-                first_name=first_name,
-                second_name=second_name,
-                last_name=last_name,
                 group=group,
+                provider=provider,
                 blocked=False,
             )
             session.add(student)
             return student
+        
+    def update_group(self, student: Student, group: str | None):
+        with self.db.create_session() as session:
+            session.query(Student).filter_by(id=student.id).update(dict(group=group))
 
 
 class MailerRepository:

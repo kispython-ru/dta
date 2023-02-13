@@ -7,7 +7,6 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import redirect, render_template, request, url_for
 
-import webapp.lks as lks_oauth_helper
 from webapp.forms import (
     AnonMessageForm,
     StudentChangePasswordForm,
@@ -15,6 +14,7 @@ from webapp.forms import (
     StudentMessageForm,
     StudentRegisterForm
 )
+from webapp.lks import lks_oauth_helper
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -110,21 +110,13 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 @blueprint.route("/login", methods=["GET", "POST"])
 @student_jwt_reset(config, "/login")
 def login():
-    form = StudentLoginForm()
+    form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
-        return render_template(
-            "student/login.jinja",
-            form=form,
-            lks_oauth_enabled=config.config.enable_lks_oauth,
-        )
+        return render_template("student/login.jinja", form=form)
     error = students.login(form.login.data, form.password.data)
     if error:
         form.login.errors.append(error)
-        return render_template(
-            "student/login.jinja",
-            form=form,
-            lks_oauth_enabled=config.config.enable_lks_oauth,
-        )
+        return render_template("student/login.jinja", form=form)
     response = redirect("/")
     student = db.students.find_by_email(form.login.data)
     set_access_cookies(response, create_access_token(identity=student.id))
@@ -151,35 +143,41 @@ def login_with_lks_callback():
     if not config.config.enable_lks_oauth:
         return redirect("/")
 
-    client = lks_oauth_helper.oauth.create_client("lks")
+    client = lks_oauth_helper.oauth.create_client(lks_oauth_helper.name)
 
     token = client.authorize_access_token()
     auth = OAuth2Auth(token)
     user = lks_oauth_helper.get_me(auth)
 
-    email = user.email
-    student = db.students.find_by_email(email)
-    if not student:
-        student = db.students.create_external(
-            email,
-            user.id,
-            user.name,
-            user.second_name,
-            user.last_name,
-            user.academic_group,
-        )
+    student = db.students.get_by_external(
+        user.id,
+        lks_oauth_helper.name,
+    )
+
+    if student:
+        db.students.update_group(student, user.academic_group)
+
+    else:
+        email = user.login
+        student_by_email = db.students.find_by_email(email)
+        if not student_by_email:
+            student = db.students.create_external(
+                email,
+                user.id,
+                user.academic_group,
+                lks_oauth_helper.name,
+            )
+
     print(f"Student {student.id} logged in with LKS OAuth")
     response = redirect("/")
-    # TODO: create Sessions table and store external session for LKS API manipulations
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
     
 
-
 @blueprint.route("/register", methods=["GET", "POST"])
 @student_jwt_reset(config, "/register")
 def register():
-    form = StudentRegisterForm()
+    form = StudentRegisterForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if form.validate_on_submit():
         form.login.errors.append(students.register(form.login.data, form.password.data))
     return render_template(
