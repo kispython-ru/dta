@@ -382,7 +382,6 @@ class StudentManager:
         self.config = config
 
     def register(self, email: str, password: str) -> str:
-        email = email.lower()
         if self.exists(email):
             if self.blocked(email):
                 return "Данный адрес электронной почты заблокирован."
@@ -404,7 +403,6 @@ class StudentManager:
                 "после отправки письма Ваш аккаунт будет активирован.")
 
     def change_password(self, email: str, new_password: str) -> str:
-        email = email.lower()
         if not self.exists(email):
             return "Такой адрес почты не зарегистрирован!"
         if self.blocked(email):
@@ -422,7 +420,6 @@ class StudentManager:
                 "письма Вы сможете использовать новый пароль для входа на сайт.")
 
     def login(self, email: str, password: str) -> str | None:
-        email = email.lower()
         if not self.exists(email):
             return "Такой адрес почты не зарегистрирован!"
         if self.blocked(email):
@@ -437,7 +434,6 @@ class StudentManager:
         return None
 
     def check_password(self, email: str, password: str) -> Student | None:
-        email = email.lower()
         student = self.students.find_by_email(email)
         if student and student.password_hash:
             given = password.encode('utf8')
@@ -446,7 +442,6 @@ class StudentManager:
                 return student
 
     def update_password(self, email: str, password: str) -> bool:
-        email = email.lower()
         student = self.students.find_by_email(email)
         if student and student.password_hash:
             given = password.encode('utf8')
@@ -456,28 +451,23 @@ class StudentManager:
         return False
 
     def confirmed(self, email: str) -> bool:
-        email = email.lower()
         student = self.students.find_by_email(email)
         return student and student.password_hash
 
     def blocked(self, email: str) -> bool:
-        email = email.lower()
         student = self.students.find_by_email(email)
         return student and student.blocked
 
     def exists(self, email: str) -> bool:
-        email = email.lower()
         student = self.students.find_by_email(email)
         return bool(student)
 
     def email_allowed(self, email: str) -> bool:
-        email = email.lower()
         _, domain = email.split('@')
         exists = self.mailers.exists(domain)
         return exists
 
     def create(self, email: str, password: str) -> int:
-        email = email.lower()
         given = password.encode('utf8')
         hashed = bcrypt.hashpw(given, bcrypt.gensalt())
         student = self.students.create(email, hashed.decode('utf8'))

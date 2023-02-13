@@ -390,6 +390,7 @@ class StudentRepository:
             return student
 
     def find_by_email(self, email: str) -> Student | None:
+        email = email.lower()
         with self.db.create_session() as session:
             student = session.query(Student) \
                 .filter_by(email=email) \
@@ -397,6 +398,7 @@ class StudentRepository:
             return student
 
     def change_password(self, email: str, password: str) -> bool:
+        email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
             student: Student = query.first()
@@ -405,6 +407,7 @@ class StudentRepository:
             query.update(dict(unconfirmed_hash=password))
 
     def confirm(self, email: str):
+        email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
             student: Student = query.first()
@@ -415,6 +418,7 @@ class StudentRepository:
                 ))
 
     def create(self, email: str, password: str) -> Student:
+        email = email.lower()
         with self.db.create_session() as session:
             student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
