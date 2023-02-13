@@ -19,6 +19,16 @@ from webapp.utils import load_config_files
 
 def configure_lks_oauth(app: Flask, config: dict) -> None:
     """Create LKS OAuth client if it is enabled"""
+    if not all(
+        key in config
+        for key in [
+            "ENABLE_LKS_OAUTH",
+            "LKS_OAUTH_CLIENT_ID",
+            "LKS_OAUTH_CLIENT_SECRET",
+            "LKS_API_BASE_URL",
+        ]
+    ):
+        return
 
     if not config["ENABLE_LKS_OAUTH"]:
         return
