@@ -24,16 +24,17 @@
           <b class="card-title d-block">Регистрация</b>
           <div class="form-group mb-2">
             <label>Электронная почта</label>
-            <input name="login" type="text" class="form-control" placeholder="Адрес электронной почты"
-              value="{{ form.login.data if form.login.data }}">
+            <input name="login" type="text" class="form-control"
+                   placeholder="Адрес электронной почты"
+                   value="{{ form.login.data if form.login.data }}">
             <small class="form-text text-muted">Введите адрес электронной почты.</small>
           </div>
           {% if form.login.errors %}
-          <small class="d-block alert alert-danger">
-            {% for error in form.login.errors %}
-            <div>{{ error }}</div>
-            {% endfor %}
-          </small>
+            <small class="d-block alert alert-danger">
+              {% for error in form.login.errors %}
+              <div>{{ error }}</div>
+              {% endfor %}
+            </small>
           {% endif %}
           <div class="form-group mb-2">
             <label>Пароль</label>
@@ -41,11 +42,11 @@
             <small class="form-text text-muted">Введите пароль.</small>
           </div>
           {% if form.password.errors %}
-          <small class="d-block alert alert-danger">
-            {% for error in form.password.errors %}
-            <div>{{ error }}</div>
-            {% endfor %}
-          </small>
+            <small class="d-block alert alert-danger">
+              {% for error in form.password.errors %}
+              <div>{{ error }}</div>
+              {% endfor %}
+            </small>
           {% endif %}
           <div class="form-group mb-2">
             <label>Подтверждение пароля</label>
@@ -53,11 +54,11 @@
             <small class="form-text text-muted">Подтвердите пароль.</small>
           </div>
           {% if form.confirm.errors %}
-          <small class="d-block alert alert-danger">
-            {% for error in form.confirm.errors %}
-            <div>{{ error }}</div>
-            {% endfor %}
-          </small>
+            <small class="d-block alert alert-danger">
+              {% for error in form.confirm.errors %}
+                <div>{{ error }}</div>
+              {% endfor %}
+            </small>
           {% endif %}
           {{ form.csrf_token }}
           <div class="row">

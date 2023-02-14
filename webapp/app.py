@@ -18,7 +18,6 @@ from webapp.utils import load_config_files
 
 
 def configure_lks_oauth(app: Flask, config: dict) -> None:
-    """Create LKS OAuth client if it is enabled"""
     if not all(
         key in config
         for key in [
@@ -29,13 +28,10 @@ def configure_lks_oauth(app: Flask, config: dict) -> None:
         ]
     ):
         return
-
     if not config["ENABLE_LKS_OAUTH"]:
         return
-
     if not config["LKS_OAUTH_CLIENT_ID"] or not config["LKS_OAUTH_CLIENT_SECRET"]:
         raise ValueError("LKS OAuth is enabled, but client id or secret is not set")
-
     lks_oauth_helper.register(
         app,
         config["LKS_OAUTH_CLIENT_ID"],
@@ -65,13 +61,12 @@ def configure_app(directory: str) -> Flask:
     JWTManager(app)
     logging.basicConfig(level=logging.DEBUG)
     migrate(config["CONNECTION_STRING"])
-
     return app
 
 
 def config() -> str:
     path = os.environ.get("CONFIG_PATH")
-    directory = path if path else os.path.join(os.getcwd(), "webapp")
+    directory = path if path else os.path.join(os.getcwd(), 'webapp')
     return directory
 
 

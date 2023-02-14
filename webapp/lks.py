@@ -24,7 +24,7 @@ class LksOAuthHelper:
     def __init__(self):
         self.name = "lks"
         self.oauth = OAuth()
-        self.lks_base_url = None  # type: str | None
+        self.lks_base_url: str | None = None
 
     def register(
         self,

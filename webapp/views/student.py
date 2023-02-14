@@ -25,9 +25,7 @@ blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(
-    db.tasks, db.groups, db.variants, db.statuses, config, db.seeds
-)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -83,9 +81,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     form = StudentMessageForm() if config.config.registration else AnonMessageForm()
     valid = form.validate_on_submit()
     if valid and allowed and not status.disabled:
-        if not config.config.registration or students.check_password(
-            student.email, form.password.data
-        ):
+        if not config.config.registration or students.check_password(student.email, form.password.data):
             ip = get_real_ip(request)
             sid = student.id if student else None
             db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
@@ -107,7 +103,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
-@blueprint.route("/login", methods=["GET", "POST"])
+@blueprint.route("/login", methods=['GET', 'POST'])
 @student_jwt_reset(config, "/login")
 def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
@@ -127,11 +123,8 @@ def login():
 @student_jwt_reset(config, "/login/lks")
 def login_with_lks():
     if not config.config.enable_lks_oauth:
-        print("LKS OAuth is disabled")
         return redirect("/")
-
     client = lks_oauth_helper.oauth.create_client("lks")
-
     return client.authorize_redirect(
         url_for("student.login_with_lks_callback", _external=True)
     )
@@ -142,21 +135,14 @@ def login_with_lks():
 def login_with_lks_callback():
     if not config.config.enable_lks_oauth:
         return redirect("/")
-
     client = lks_oauth_helper.oauth.create_client(lks_oauth_helper.name)
-
     token = client.authorize_access_token()
     auth = OAuth2Auth(token)
     user = lks_oauth_helper.get_me(auth)
 
-    student = db.students.get_by_external(
-        user.id,
-        lks_oauth_helper.name,
-    )
-
+    student = db.students.get_by_external(user.id, lks_oauth_helper.name)
     if student:
         db.students.update_group(student, user.academic_group)
-
     else:
         email = user.login
         student_by_email = db.students.find_by_email(email)
@@ -168,7 +154,6 @@ def login_with_lks_callback():
                 lks_oauth_helper.name,
             )
 
-    print(f"Student {student.id} logged in with LKS OAuth")
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
@@ -180,11 +165,7 @@ def register():
     form = StudentRegisterForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if form.validate_on_submit():
         form.login.errors.append(students.register(form.login.data, form.password.data))
-    return render_template(
-        "student/register.jinja",
-        form=form,
-        lks_oauth_enabled=config.config.enable_lks_oauth,
-    )
+    return render_template("student/register.jinja", form=form)
 
 
 @blueprint.route("/change-password", methods=['GET', 'POST'])
