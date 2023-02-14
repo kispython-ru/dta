@@ -11,5 +11,9 @@
     "FINAL_TASKS": null,
     "ENABLE_REGISTRATION": false,
     "IMAP_LOGIN": "example@example.com",
-    "IMAP_PASSWORD": "CHANGE_ME"
+    "IMAP_PASSWORD": "CHANGE_ME",
+    "ENABLE_LKS_OAUTH": false,
+    "LKS_OAUTH_CLIENT_ID": "kispython.ru",
+    "LKS_OAUTH_CLIENT_SECRET": "CHANGE_ME",
+    "LKS_API_BASE_URL": "https://auth-app.mirea.ru"
 }
