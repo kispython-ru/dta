@@ -187,34 +187,32 @@ def register():
     )
 
 
-@blueprint.route("/change-password", methods=["GET", "POST"])
+@blueprint.route("/change-password", methods=['GET', 'POST'])
 @student_jwt_reset(config, "/change-password")
 def change_password():
     form = StudentChangePasswordForm()
     if form.validate_on_submit():
-        form.login.errors.append(
-            students.change_password(form.login.data, form.password.data)
-        )
+        form.login.errors.append(students.change_password(form.login.data, form.password.data))
     return render_template("student/password.jinja", form=form)
 
 
-@blueprint.route("/logout", methods=["GET"])
+@blueprint.route("/logout", methods=['GET'])
 def logout():
     response = redirect("/")
     unset_jwt_cookies(response)
     return response
 
 
-@blueprint.app_template_filter("hide")
+@blueprint.app_template_filter('hide')
 def hide_email(value: str):
-    if "@" not in value:
+    if '@' not in value:
         return value
-    username, domain = value.split("@")
+    username, domain = value.split('@')
     length = len(username)
     if length == 1:
-        return f"*@{domain}"
-    repeat = min((length - 1), 10) * "*"
-    return f"{username[0]}{repeat}@{domain}"
+        return f'*@{domain}'
+    repeat = min((length - 1), 10) * '*'
+    return f'{username[0]}{repeat}@{domain}'
 
 
 @blueprint.errorhandler(Exception)
@@ -226,6 +224,6 @@ def handle_view_errors(e):
 @blueprint.errorhandler(JWTExtendedException)
 @blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
-    response = redirect("/login")
+    response = redirect('/login')
     unset_jwt_cookies(response)
     return response
