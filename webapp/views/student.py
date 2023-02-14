@@ -145,8 +145,8 @@ def login_with_lks_callback():
         db.students.update_group(student, user.academic_group)
     else:
         email = user.login
-        student_by_email = db.students.find_by_email(email)
-        if not student_by_email:
+        student = db.students.find_by_email(email)
+        if not student:
             student = db.students.create_external(
                 email,
                 user.id,
