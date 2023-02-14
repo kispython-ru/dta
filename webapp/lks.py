@@ -44,9 +44,8 @@ class LksOAuthHelper:
             api_base_url=f"{lks_base_url}/api",
             client_kwargs={"scope": "profile"},
         )
-        
-        self.lks_base_url = lks_base_url
 
+        self.lks_base_url = lks_base_url
         self.oauth.init_app(app)
 
     def request(

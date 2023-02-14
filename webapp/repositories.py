@@ -388,9 +388,8 @@ class StudentRepository:
         with self.db.create_session() as session:
             student = session.query(Student).get(id)
             return student
-        
+
     def get_by_external(self, external_id: str, provider: str) -> Student | None:
-        """Get student by external id and registration provider name."""
         with self.db.create_session() as session:
             return (
                 session.query(Student)
@@ -432,7 +431,7 @@ class StudentRepository:
             student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
             return student
-        
+
     def create_external(
         self,
         email: str,
@@ -440,7 +439,6 @@ class StudentRepository:
         group: str | None,
         provider: str,
     ) -> Student:
-        """Create student with external id and provider name (name of OAuth2 provider e.g. Google)"""
         with self.db.create_session() as session:
             student = Student(
                 email=email,
@@ -451,7 +449,7 @@ class StudentRepository:
             )
             session.add(student)
             return student
-        
+
     def update_group(self, student: Student, group: str | None):
         with self.db.create_session() as session:
             session.query(Student).filter_by(id=student.id).update(dict(group=group))

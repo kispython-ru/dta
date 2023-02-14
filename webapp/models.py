@@ -129,13 +129,10 @@ class Teacher(Base):
 class Student(Base):
     __tablename__ = "students"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
-    # External ID is used to identify students if they are registered by 
-    # external provider (e.g. LKS MIREA OAuth)
     external_id = sa.Column("external_id", sa.BigInteger, nullable=True)
-    # Provider is used to identify external provider (e.g. LKS MIREA OAuth)
     provider = sa.Column("provider", sa.String, nullable=True)
     email = sa.Column("email", sa.String, nullable=False)
-    group = sa.Column("group", sa.String, nullable=True)  # TODO: Maybe change to group_id?
+    group = sa.Column("group", sa.String, nullable=True)
     password_hash = sa.Column("password_hash", sa.String, nullable=True)
     unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
     blocked = sa.Column("blocked", sa.Boolean, nullable=False)

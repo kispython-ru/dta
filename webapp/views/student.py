@@ -172,7 +172,7 @@ def login_with_lks_callback():
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
-    
+
 
 @blueprint.route("/register", methods=["GET", "POST"])
 @student_jwt_reset(config, "/register")
