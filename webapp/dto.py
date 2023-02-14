@@ -132,9 +132,9 @@ class TaskStatusDto:
     def name(self) -> str:
         return self.map_status({
             Status.Submitted: "Отправлено",
-            Status.Checked: "Принято",
-            Status.CheckedSubmitted: "Отправлено",
-            Status.CheckedFailed: "Ошибка!",
+            Status.Checked: "Зачтено",
+            Status.CheckedSubmitted: "Зачтено. Отправлено повторно",
+            Status.CheckedFailed: "Зачтено. Ошибка при повторной отправке!",
             Status.Failed: "Ошибка!",
             Status.NotSubmitted: "Не отправлено",
         })
