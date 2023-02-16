@@ -3,9 +3,9 @@ from flask_jwt_extended import create_access_token, set_access_cookies, unset_jw
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
-from flask import Blueprint
+from flask import Blueprint, abort
 from flask import current_app as app
-from flask import redirect, render_template, request, abort
+from flask import redirect, render_template, request
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.lks import lks_oauth_helper

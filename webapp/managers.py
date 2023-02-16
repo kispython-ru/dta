@@ -7,19 +7,19 @@ from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto, SubmissionDto
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto
 from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
     MailerRepository,
+    MessageCheckRepository,
     MessageRepository,
     StudentRepository,
     TaskRepository,
     TaskStatusRepository,
     TeacherRepository,
-    VariantRepository,
-    MessageCheckRepository
+    VariantRepository
 )
 
 
