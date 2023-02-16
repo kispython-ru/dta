@@ -70,6 +70,9 @@ def background_worker(login: str, password: str, connection: str):
 def start_background_worker():
     if not config.config.enable_registration:
         return
+    if not config.config.imap_login or not config.config.imap_password:
+        print("IMAP credentials not provided, disabling email confirmation.")
+        return
     process = Process(target=background_worker, args=(
         config.config.imap_login,
         config.config.imap_password,

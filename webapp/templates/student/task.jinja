@@ -92,7 +92,7 @@
         </small>
       </h6>
       <h6 class="card-subtitle mb-2 text-muted">
-        Сможете ли Вы решить задачу всеми способами, известными искусственной нейронной сети?
+        Сможете ли Вы решить задачу всеми способами, известными <a class="text-decoration-none" href="https://vk.cc/cjEtOV">искусственной нейронной сети</a>?
       </h6>
       {% if status.achievements %}
         {% for dto in status.achievements %}
@@ -142,19 +142,6 @@
               <li class="text-danger">{{ error }}</li>
             {% endfor %}
           </ul>
-        {% endif %}
-        {% if registration and not status.disabled %}
-          <div class="form-group mb-2">
-            <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
-            <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>
-          </div>
-          {% if form.password.errors %}
-            <ul class="errors">
-              {% for error in form.password.errors %}
-                <li class="text-danger">{{ error }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
         {% endif %}
         {{ form.csrf_token }}
         <div class="row">

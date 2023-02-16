@@ -66,6 +66,19 @@
               </a>
             </div>
           </div>
+          {% if form.lks_oauth_enabled %}
+          <div class="row mt-0">
+            <div class="col-12">
+              <hr>
+            </div>
+            <div class="col-12">
+              <a href="/login/lks" class="btn btn-outline-primary w-100 d-block">
+                <img src="{{ url_for('static', filename='mirea.ico') }}" alt="Иконка ЛКС" width="16" height="16">
+                Войти через ЛКС РТУ МИРЭА
+              </a>
+            </div>
+          </div>
+          {% endif %}
         </form>
       </div>
     </div>

@@ -397,7 +397,16 @@ class StudentRepository:
             student = session.query(Student).get(id)
             return student
 
+    def get_by_external(self, external_id: str, provider: str) -> Student | None:
+        with self.db.create_session() as session:
+            return (
+                session.query(Student)
+                .filter_by(external_id=external_id, provider=provider)
+                .first()
+            )
+
     def find_by_email(self, email: str) -> Student | None:
+        email = email.lower()
         with self.db.create_session() as session:
             student = session.query(Student) \
                 .filter_by(email=email) \
@@ -405,6 +414,7 @@ class StudentRepository:
             return student
 
     def change_password(self, email: str, password: str) -> bool:
+        email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
             student: Student = query.first()
@@ -413,6 +423,7 @@ class StudentRepository:
             query.update(dict(unconfirmed_hash=password))
 
     def confirm(self, email: str):
+        email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
             student: Student = query.first()
@@ -423,10 +434,33 @@ class StudentRepository:
                 ))
 
     def create(self, email: str, password: str) -> Student:
+        email = email.lower()
         with self.db.create_session() as session:
             student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
             return student
+
+    def create_external(
+        self,
+        email: str,
+        external_id: int,
+        group: str | None,
+        provider: str,
+    ) -> Student:
+        with self.db.create_session() as session:
+            student = Student(
+                email=email,
+                external_id=external_id,
+                group=group,
+                provider=provider,
+                blocked=False,
+            )
+            session.add(student)
+            return student
+
+    def update_group(self, student: Student, group: str | None):
+        with self.db.create_session() as session:
+            session.query(Student).filter_by(id=student.id).update(dict(group=group))
 
 
 class MailerRepository:

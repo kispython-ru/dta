@@ -17,6 +17,10 @@ class AppConfig:
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]
         self.imap_login: bool = config["IMAP_LOGIN"]
         self.imap_password: bool = config["IMAP_PASSWORD"]
+        self.enable_lks_oauth: bool = config["ENABLE_LKS_OAUTH"]
+        self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
+        self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
+        self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
 
     @property
     def exam(self) -> bool:
@@ -129,9 +133,9 @@ class TaskStatusDto:
     def name(self) -> str:
         return self.map_status({
             Status.Submitted: "Отправлено",
-            Status.Checked: "Принято",
-            Status.CheckedSubmitted: "Отправлено",
-            Status.CheckedFailed: "Ошибка!",
+            Status.Checked: "Зачтено",
+            Status.CheckedSubmitted: "Зачтено. Отправлено повторно",
+            Status.CheckedFailed: "Зачтено. Ошибка при повторной отправке!",
             Status.Failed: "Ошибка!",
             Status.NotSubmitted: "Не отправлено",
         })
