@@ -52,7 +52,7 @@ class LksOAuthHelper:
         self,
         method: str,
         url: str,
-        auth,
+        token,
         data: dict = None,
         headers: dict = None,
         params: dict = None,
@@ -68,7 +68,6 @@ class LksOAuthHelper:
         """
         if headers is None:
             headers = {}
-        token = auth.token
         headers |= {"Authorization": f"{token['token_type']} {token['access_token']}"}
 
         if params is not None:
@@ -82,7 +81,7 @@ class LksOAuthHelper:
 
         return request.urlopen(req)
 
-    def get_me(self, auth) -> "LksUserModel":
+    def get_me(self, token) -> "LksUserModel":
         """Get information about the current user."""
 
         if not self.lks_base_url:
@@ -91,7 +90,7 @@ class LksOAuthHelper:
         res = self.request(
             "GET",
             f"{self.lks_base_url}/api/?action=getData&url=https://lk.mirea.ru/profile/",
-            auth=auth,
+            token=token,
         )
 
         json_res = json.loads(res.read())
