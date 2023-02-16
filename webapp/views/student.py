@@ -1,3 +1,4 @@
+from authlib.integrations.requests_client import OAuth2Auth
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
@@ -136,7 +137,8 @@ def login_with_lks_callback():
         return redirect("/")
     client = lks_oauth_helper.oauth.create_client(lks_oauth_helper.name)
     token = client.authorize_access_token()
-    user = lks_oauth_helper.get_me(token)
+    auth = OAuth2Auth(token)
+    user = lks_oauth_helper.get_me(auth)
 
     student = db.students.get_by_external(user.id, lks_oauth_helper.name)
     if student:
