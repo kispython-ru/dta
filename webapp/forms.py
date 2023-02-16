@@ -31,6 +31,10 @@ class TeacherLoginForm(FlaskForm):
 
 
 class StudentLoginForm(FlaskForm):
+    def __init__(self, lks_oauth_enabled: bool = False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lks_oauth_enabled = lks_oauth_enabled
+
     login = StringField('email', [
         DataRequired(message="Данное поле не может быть пустым!"),
         Regexp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", message=(

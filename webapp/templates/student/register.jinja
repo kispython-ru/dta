@@ -32,7 +32,7 @@
           {% if form.login.errors %}
             <small class="d-block alert alert-danger">
               {% for error in form.login.errors %}
-                <div>{{ error }}</div>
+              <div>{{ error }}</div>
               {% endfor %}
             </small>
           {% endif %}
@@ -44,7 +44,7 @@
           {% if form.password.errors %}
             <small class="d-block alert alert-danger">
               {% for error in form.password.errors %}
-                <div>{{ error }}</div>
+              <div>{{ error }}</div>
               {% endfor %}
             </small>
           {% endif %}
@@ -73,6 +73,19 @@
               </a>
             </div>
           </div>
+          {% if form.lks_oauth_enabled %}
+          <div class="row mt-3">
+            <div class="col-12">
+              <hr>
+            </div>
+            <div class="col-12">
+              <a href="/login/lks" class="btn btn-outline-primary w-100 d-block">
+                <img src="{{ url_for('static', filename='mirea.ico') }}" alt="Иконка ЛКС" width="16" height="16">
+                Войти через ЛКС
+              </a>
+            </div>
+          </div>
+          {% endif %}
         </form>
       </div>
     </div>
