@@ -26,12 +26,17 @@
     </ol>
     {% if registration %}
       {% if student is not none %}
-        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
-          <span class="text-muted">{{ student.email | hide }}</span>
-          <a class="breadcrumb-item text-decoration-none" href="/logout">
-            Выйти
-          </a>
-        </span>
+        <div class="d-flex gap-3 mt-2 mt-md-0">
+            <div>
+                <span class="text-muted">{{ student.email | hide }}</span>
+                <a class="breadcrumb-item text-decoration-none" href="/logout">
+                    Выйти
+                </a>
+            </div>
+            <a class="text-decoration-none" href="/submissions">
+                Решения
+            </a>
+        </div>
       {% else %}
         <a class="breadcrumb-item text-decoration-none" href="/login">
           Войти

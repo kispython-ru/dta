@@ -21,12 +21,17 @@
     </ol>
     {% if registration %}
       {% if student is not none %}
-        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
-          <span class="text-muted">{{ student.email | hide }}</span>
-          <a class="breadcrumb-item text-decoration-none" href="/logout">
-            Выйти
-          </a>
-        </span>
+        <div class="d-flex gap-3 mt-2 mt-md-0">
+            <div>
+                <span class="text-muted">{{ student.email | hide }}</span>
+                <a class="breadcrumb-item text-decoration-none" href="/logout">
+                    Выйти
+                </a>
+            </div>
+            <a class="text-decoration-none" href="/submissions">
+                Решения
+            </a>
+        </div>
       {% else %}
         <a class="breadcrumb-item text-decoration-none" href="/login">
           Войти
@@ -81,7 +86,7 @@
   {% if status.show_achievements %}
     <div>
       <h6 class="card-title fw-bold">
-        Разблокированные достижения 
+        Разблокированные достижения
         <small class="text-muted">
           {{ status.earned }} из {{ status.achievements | length }}
         </small>
@@ -125,7 +130,7 @@
             style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
           <small class="form-text text-muted">
             <div>
-              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция 
+              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция
               <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
               использование модулей только из стандартной библиотеки Python.
             </div>
@@ -170,7 +175,7 @@
 {% if highlight and not (status.disabled or registration and not student) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
-  <script type="text/javascript"> 
+  <script type="text/javascript">
     CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true, indentUnit: 4 })
   </script>
 {% endif %}
