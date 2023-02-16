@@ -4,7 +4,7 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, abort
 
 from webapp.forms import (
     AnonMessageForm,
@@ -39,6 +39,20 @@ def dashboard(student: Student | None):
         registration=config.config.registration,
         exam=config.config.exam,
         student=student
+    )
+
+
+@blueprint.route("/submissions", methods=["GET"])
+@student_jwt_optional(db.students)
+def submissions(student: Student | None):
+    if student is None:
+        abort(401)
+    submissions_statuses = statuses.get_submissions_statuses(student)
+    return render_template(
+        "student/submissions.jinja",
+        submissions=submissions_statuses,
+        student=student,
+        highlight=config.config.highlight_syntax,
     )
 
 
