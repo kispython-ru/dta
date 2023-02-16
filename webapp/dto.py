@@ -225,4 +225,3 @@ class SubmissionDto:
         self.code = code
         self.checkedAt = checkedAt
         self.sentAt = sentAt
-
