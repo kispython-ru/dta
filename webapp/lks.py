@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from urllib import parse, request
 
 from authlib.integrations.flask_client import OAuth
-from authlib.integrations.requests_client import OAuth2Auth
 
 from flask import Flask
 
@@ -53,7 +52,7 @@ class LksOAuthHelper:
         self,
         method: str,
         url: str,
-        auth: OAuth2Auth,
+        auth,
         data: dict = None,
         headers: dict = None,
         params: dict = None,
@@ -69,7 +68,6 @@ class LksOAuthHelper:
         """
         if headers is None:
             headers = {}
-            
         token = auth.token
         headers |= {"Authorization": f"{token['token_type']} {token['access_token']}"}
 
@@ -84,7 +82,7 @@ class LksOAuthHelper:
 
         return request.urlopen(req)
 
-    def get_me(self, auth: OAuth2Auth) -> "LksUserModel":
+    def get_me(self, auth) -> "LksUserModel":
         """Get information about the current user."""
 
         if not self.lks_base_url:
