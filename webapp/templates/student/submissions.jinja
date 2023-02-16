@@ -1,0 +1,101 @@
+{% extends 'layout.jinja' %}
+{% block head %}
+    <style>
+        .CodeMirror-cursor {
+            display: none;
+        }
+
+        .CodeMirror {
+            height: auto;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="collapse navbar-collapse container">
+        <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+            <li>
+                <a class="logo-container text-decoration-none" href="/">
+                    <div class="logo">
+                        <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}"/>
+                    </div>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Решения
+            </li>
+        </ol>
+        <div class="d-flex gap-3 mt-2 mt-md-0">
+            <div>
+                <span class="text-muted">{{ student.email | hide }}</span>
+                <a class="breadcrumb-item text-decoration-none" href="/logout">
+                    Выйти
+                </a>
+            </div>
+            <a class="text-decoration-none" href="/submissions">
+                Решения
+            </a>
+        </div>
+    </div>
+    </nav>
+    <div class="container mt-3">
+    <h5 class="card-title fw-bold mb-2">
+        Отправленные решения
+    </h5>
+    <h6 class="card-subtitle mb-4 text-muted">
+        Новые решения показаны сверху.
+    </h6>
+    {% if submissions is defined and submissions|length > 0 %}
+        {% for submission in submissions %}
+            <article class="card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title fw-bold mb-1">
+                        Задача <a href="{{ submission.status.submission_url }}" class="badge alert-primary"
+                                  style="font-size: inherit; text-decoration: none">№{{ submission.status.task + 1 }}</a>,
+                        вариант <span class="badge alert-secondary"
+                                      style="font-size: inherit">№{{ submission.status.variant + 1 }}</span>,
+                        группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary"
+                                  style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>
+                    </h6>
+                    <div class="mb-3">
+                        <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
+                        <span class="badge alert-secondary">Отправлено: {{ submission.sentAt.strftime('%d.%m.%Y %H:%M') }}</span>
+                        <span class="badge alert-secondary">Проверено: {{ submission.checkedAt.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                    <textarea
+                            name="code"
+                            type="text"
+                            class="form-control"
+                            disabled
+                            rows="{{ submission.linesCount }}"
+                            placeholder="Ответ на задание"
+                            style="font-family: monospace;">{{ submission.code }}</textarea>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        Список отправленных решений пуст
+    {% endif %}
+    </div>
+
+    {% if highlight %}
+        <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
+        <script type="text/javascript">
+        codeElements = document.getElementsByName("code")
+        for (codeElement of codeElements) {
+            const editor = CodeMirror.fromTextArea(
+                codeElement,
+                {
+                    mode: 'python',
+                    lineNumbers: true,
+                    indentUnit: 4,
+                    readOnly: true,
+                    height: 'auto',
+                    viewportMargin: Infinity
+                }
+            )
+        }
+        </script>
+    {% endif %}
+{% endblock %}
