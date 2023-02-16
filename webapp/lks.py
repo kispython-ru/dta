@@ -1,7 +1,6 @@
-import json
 from dataclasses import dataclass
-from urllib import parse, request
 
+import requests
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.requests_client import OAuth2Auth
 
@@ -55,9 +54,11 @@ class LksOAuthHelper:
         url: str,
         auth: OAuth2Auth,
         data: dict = None,
+        json: dict = None,
         headers: dict = None,
         params: dict = None,
-    ):
+        **kwargs,
+    ) -> requests.Response:
         """Send an authenticated request to the LKS API.
 
         `auth` is created using the access token from the JWT. For example:
@@ -67,22 +68,17 @@ class LksOAuthHelper:
         auth = OAuth2Auth(token)
         ```
         """
-        if headers is None:
-            headers = {}
-            
-        token = auth.token
-        headers |= {"Authorization": f"{token['token_type']} {token['access_token']}"}
 
-        if params is not None:
-            url = f"{url}?{parse.urlencode(params)}"
-
-        if data is not None:
-            data = json.dumps(data).encode("utf-8")
-            headers["Content-Type"] = "application/json"
-
-        req = request.Request(url, data=data, headers=headers, method=method)
-
-        return request.urlopen(req)
+        return requests.request(
+            method,
+            url,
+            data=data,
+            json=json,
+            headers=headers,
+            params=params,
+            auth=auth,
+            **kwargs,
+        )
 
     def get_me(self, auth: OAuth2Auth) -> "LksUserModel":
         """Get information about the current user."""
@@ -96,12 +92,14 @@ class LksOAuthHelper:
             auth=auth,
         )
 
-        json_res = json.loads(res.read())
+        res.raise_for_status()
+
+        json = res.json()
 
         student = next(
             (
                 element
-                for element in json_res["STUDENTS"].values()
+                for element in json["STUDENTS"].values()
                 if "Д" not in element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"]
                 and "Ж" not in element["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"]
             ),
@@ -110,12 +108,12 @@ class LksOAuthHelper:
 
         try:
             return LksUserModel(
-                id=json_res["ID"],
-                login=json_res["arUser"]["LOGIN"],
-                email=json_res["arUser"]["EMAIL"],
-                name=json_res["arUser"]["NAME"],
-                last_name=json_res["arUser"]["LAST_NAME"],
-                second_name=json_res["arUser"]["SECOND_NAME"],
+                id=json["ID"],
+                login=json["arUser"]["LOGIN"],
+                email=json["arUser"]["EMAIL"],
+                name=json["arUser"]["NAME"],
+                last_name=json["arUser"]["LAST_NAME"],
+                second_name=json["arUser"]["SECOND_NAME"],
                 is_active=student["ACTIVE"] == "Y",
                 personal_number=student["PROPERTIES"]["PERSONAL_NUMBER"]["VALUE"],
                 academic_group=student["PROPERTIES"]["ACADEMIC_GROUP"]["VALUE_TEXT"],
