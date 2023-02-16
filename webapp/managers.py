@@ -7,9 +7,7 @@ from typing import Callable
 
 import bcrypt
 
-from flask import Config
-
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto, SubmissionDto
 from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -20,7 +18,8 @@ from webapp.repositories import (
     TaskRepository,
     TaskStatusRepository,
     TeacherRepository,
-    VariantRepository
+    VariantRepository,
+    MessageCheckRepository
 )
 
 
@@ -141,6 +140,7 @@ class StatusManager:
         statuses: TaskStatusRepository,
         config: AppConfigManager,
         seeds: FinalSeedRepository,
+        checks: MessageCheckRepository
     ):
         self.tasks = tasks
         self.groups = groups
@@ -148,6 +148,7 @@ class StatusManager:
         self.statuses = statuses
         self.config = config
         self.seeds = seeds
+        self.checks = checks
         self.achievements = None
 
     def get_group_statuses(self, group_id: int) -> GroupDto:
@@ -186,6 +187,14 @@ class StatusManager:
         stid = str(task.id)
         achievements = achievements[stid] if stid in achievements else []
         return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+
+    def get_submissions_statuses(self, student) -> [SubmissionDto]:
+        checks_and_messages = self.checks.get_by_student(student)
+        submissions = []
+        for check, message in checks_and_messages:
+            status = self.get_task_status(message.group, message.variant, message.task)
+            submissions.append(SubmissionDto(status, message.code, check.time, message.time))
+        return submissions
 
     def __read_achievements(self) -> dict[str, list[int]]:
         if self.achievements is not None:
