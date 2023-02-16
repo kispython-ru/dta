@@ -71,7 +71,7 @@ def group(student: Student | None, group_id: int):
 @student_jwt_optional(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
+    form = StudentMessageForm()
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
