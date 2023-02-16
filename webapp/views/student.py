@@ -5,15 +5,9 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, request
 
-from webapp.forms import (
-    AnonMessageForm,
-    StudentChangePasswordForm,
-    StudentLoginForm,
-    StudentMessageForm,
-    StudentRegisterForm
-)
+from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.lks import lks_oauth_helper
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
@@ -78,21 +72,19 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     allowed = student is not None or not config.config.registration
     status = statuses.get_task_status(gid, vid, tid)
-    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
+    form = StudentMessageForm()
     valid = form.validate_on_submit()
     if valid and allowed and not status.disabled:
-        if not config.config.registration or students.check_password(student.email, form.password.data):
-            ip = get_real_ip(request)
-            sid = student.id if student else None
-            db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
-            db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-            return render_template(
-                "student/success.jinja",
-                status=status,
-                registration=config.config.registration,
-                student=student,
-            )
-        form.password.errors.append("Указан неправильный пароль.")
+        ip = get_real_ip(request)
+        sid = student.id if student else None
+        db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
+        db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
+        return render_template(
+            "student/success.jinja",
+            status=status,
+            registration=config.config.registration,
+            student=student,
+        )
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
