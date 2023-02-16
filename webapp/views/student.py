@@ -125,9 +125,8 @@ def login_with_lks():
     if not config.config.enable_lks_oauth:
         return redirect("/")
     client = lks_oauth_helper.oauth.create_client("lks")
-    return client.authorize_redirect(
-        url_for("student.login_with_lks_callback", _external=True)
-    )
+    redirect_url = config.config.lks_redirect_url
+    return client.authorize_redirect(redirect_url)
 
 
 @blueprint.route("/login/lks/callback", methods=["GET", "POST"])
@@ -139,7 +138,6 @@ def login_with_lks_callback():
     token = client.authorize_access_token()
     auth = OAuth2Auth(token)
     user = lks_oauth_helper.get_me(auth)
-
     student = db.students.get_by_external(user.id, lks_oauth_helper.name)
     if student:
         db.students.update_group(student, user.academic_group)
@@ -153,7 +151,6 @@ def login_with_lks_callback():
                 user.academic_group,
                 lks_oauth_helper.name,
             )
-
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response

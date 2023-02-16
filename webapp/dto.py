@@ -20,6 +20,7 @@ class AppConfig:
         self.enable_lks_oauth: bool = config["ENABLE_LKS_OAUTH"]
         self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
         self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
+        self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
 
     @property
     def exam(self) -> bool:
