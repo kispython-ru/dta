@@ -23,7 +23,7 @@ def test_task_status_html_link(db: AppDatabase, client: FlaskClient):
     response = client.get(f'/group/{group_id}')
     html_group = response.get_data(as_text=True)
 
-    tag_class = 'd-block text-center text-decoration-none p-1'
+    tag_class = 'd-block text-center text-decoration-none p-1 position-relative'
     tag_contents = [tag for tag in get_tags(html_group, 'a', class_=tag_class)
                     if tag.get('href') == f'/group/{group_id}/variant/'
                                           f'{variant_id}/task/{tasks_id}']
@@ -44,7 +44,7 @@ def test_task_status_html_status(db: AppDatabase, client: FlaskClient):
     group_id = next(group.id for group in db.groups.get_by_prefix(prefix))
     db.statuses.submit_task(tasks_id, variant_id, group_id, unique_str(), unique_str())
 
-    c = 'd-block text-center text-decoration-none p-1'
+    c = 'd-block text-center text-decoration-none p-1 position-relative'
     for ok, text, color in [
         (False, 'x', 'background-color:#ffe3ee'),
         (True, '+', 'background-color:#e3ffee'),
