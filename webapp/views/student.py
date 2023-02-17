@@ -46,7 +46,7 @@ def submissions(student: Student | None, page: int):
         abort(401)
     size = 5
     submissions_statuses = statuses.get_submissions_statuses(student, page * size, size)
-    if not submissions_statuses:
+    if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
     return render_template(
         "student/submissions.jinja",
