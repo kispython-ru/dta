@@ -312,12 +312,14 @@ class MessageCheckRepository:
                 .filter_by(status=Status.Checked) \
                 .all()
 
-    def get_by_student(self, student: Student) -> list[tuple[MessageCheck, Message]]:
+    def get_by_student(self, student: Student, skip: int, take: int) -> list[tuple[MessageCheck, Message]]:
         with self.db.create_session() as session:
             return session.query(MessageCheck, Message) \
                 .join(Message, Message.id == MessageCheck.message) \
                 .filter(Message.student == student.id) \
                 .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
                 .all()
 
     def record_check(

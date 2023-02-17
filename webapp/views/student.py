@@ -38,17 +38,22 @@ def dashboard(student: Student | None):
     )
 
 
-@blueprint.route("/submissions", methods=["GET"])
+@blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})
+@blueprint.route("/submissions/<int:page>", methods=["GET"])
 @student_jwt_optional(db.students)
-def submissions(student: Student | None):
+def submissions(student: Student | None, page: int):
     if student is None:
         abort(401)
-    submissions_statuses = statuses.get_submissions_statuses(student)
+    size = 5
+    submissions_statuses = statuses.get_submissions_statuses(student, page * size, size)
+    if not submissions_statuses:
+        return redirect(f"/submissions/{page - 1}")
     return render_template(
         "student/submissions.jinja",
         submissions=submissions_statuses,
         student=student,
         highlight=config.config.highlight_syntax,
+        page=page,
     )
 
 

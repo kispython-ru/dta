@@ -4,9 +4,9 @@
         .CodeMirror-cursor {
             display: none;
         }
-
         .CodeMirror {
             height: auto;
+            font-size: 14px;
         }
     </style>
 {% endblock %}
@@ -43,7 +43,7 @@
         Отправленные решения
     </h5>
     <h6 class="card-subtitle mb-3 text-muted">
-        Новые решения показаны сверху.
+        Новые решения показаны сверху. Страница {{ page + 1 }}.
     </h6>
     {% if submissions is defined and submissions|length > 0 %}
         {% for submission in submissions %}
@@ -71,6 +71,20 @@
                         style="font-family: monospace;">{{ submission.code }}</textarea>
             </article>
         {% endfor %}
+        <ul class="pagination">
+            {% if page %}
+                <li class="page-item">
+                    <a class="page-link" href="/submissions/{{ page - 1 }}">
+                        Предыдущая страница
+                    </a>
+                </li>
+            {% endif %}
+            <li class="page-item">
+                <a class="page-link" href="/submissions/{{ page + 1 }}">
+                    Следующая страница
+                </a>
+            </li>
+        </ul>
     {% else %}
         Список отправленных решений пуст
     {% endif %}

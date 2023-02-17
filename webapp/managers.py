@@ -8,7 +8,7 @@ from typing import Callable
 import bcrypt
 
 from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto
-from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, Teacher, Variant
+from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
@@ -188,8 +188,8 @@ class StatusManager:
         achievements = achievements[stid] if stid in achievements else []
         return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
 
-    def get_submissions_statuses(self, student) -> [SubmissionDto]:
-        checks_and_messages = self.checks.get_by_student(student)
+    def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
+        checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
         submissions = []
         for check, message in checks_and_messages:
             status = self.get_task_status(message.group, message.variant, message.task)
