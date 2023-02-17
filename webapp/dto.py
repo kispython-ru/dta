@@ -218,10 +218,10 @@ class SubmissionDto:
         self,
         status: TaskStatusDto,
         code: str,
-        checkedAt: str,
-        sentAt: str,
+        checked: str,
+        sent: str,
     ):
         self.status = status
         self.code = code
-        self.checkedAt = checkedAt
-        self.sentAt = sentAt
+        self.checked = checked
+        self.sent = sent

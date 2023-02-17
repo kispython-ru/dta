@@ -175,26 +175,44 @@ class StatusManager:
         return dto
 
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
-        config = self.config.config
-        group = self.groups.get_by_id(gid)
-        variant = self.variants.get_by_id(vid)
-        task = self.tasks.get_by_id(tid)
         status = self.statuses.get_task_status(tid, vid, gid)
-        e = self.__get_external_task_manager(group)
-        ext = e.get_external_task(task.id, variant.id)
-        task_dto = TaskDto(group, task, config, e.random_active)
         achievements = self.__read_achievements()
-        stid = str(task.id)
+        stid = str(tid)
         achievements = achievements[stid] if stid in achievements else []
-        return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+        return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
         checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
         submissions = []
         for check, message in checks_and_messages:
-            status = self.get_task_status(message.group, message.variant, message.task)
+            status = self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
+                task=message.task,
+                variant=message.variant,
+                group=message.group,
+                time=check.time,
+                code=message.code,
+                ip=message.ip,
+                output=check.output,
+                status=check.status,
+                achievements=[]
+            ), [])
             submissions.append(SubmissionDto(status, message.code, check.time, message.time))
         return submissions
+
+    def __get_task_status_dto(
+        self,
+        gid: int, vid: int, tid: int,
+        status: TaskStatus | None,
+        achievements: list[int]
+    ) -> TaskStatusDto:
+        config = self.config.config
+        group = self.groups.get_by_id(gid)
+        variant = self.variants.get_by_id(vid)
+        task = self.tasks.get_by_id(tid)
+        e = self.__get_external_task_manager(group)
+        ext = e.get_external_task(task.id, variant.id)
+        task_dto = TaskDto(group, task, config, e.random_active)
+        return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
 
     def __read_achievements(self) -> dict[str, list[int]]:
         if self.achievements is not None:

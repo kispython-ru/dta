@@ -58,9 +58,15 @@
                 </h6>
                 <div class="mb-2 text-uppercase">
                     <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
-                    <span class="badge alert-light">Отправлено: {{ submission.sentAt.strftime('%d.%m.%Y %H:%M') }}</span>
-                    <span class="badge alert-light">Проверено: {{ submission.checkedAt.strftime('%d.%m.%Y %H:%M') }}</span>
+                    <span class="badge alert-light">Отправлено: {{ submission.sent.strftime('%d.%m.%Y %H:%M') }}</span>
+                    <span class="badge alert-light">Проверено: {{ submission.checked.strftime('%d.%m.%Y %H:%M') }}</span>
                 </div>
+                {% if submission.status.error_message is not none and submission.status.error_message %}
+                    <div>Подробные сведения об ошибке:</div>
+                    <div class="text-muted mb-2" style="white-space: pre-wrap">{{ submission.status.error_message | e }}</div>
+                {% else %}
+                    <div class="mb-2"></div>
+                {% endif %}
                 <textarea
                         name="code"
                         type="text"
