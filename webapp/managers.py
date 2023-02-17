@@ -176,9 +176,7 @@ class StatusManager:
 
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
         status = self.statuses.get_task_status(tid, vid, gid)
-        achievements = self.__read_achievements()
-        stid = str(tid)
-        achievements = achievements[stid] if stid in achievements else []
+        achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
@@ -213,6 +211,12 @@ class StatusManager:
         ext = e.get_external_task(task.id, variant.id)
         task_dto = TaskDto(group, task, config, e.random_active)
         return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+
+    def __get_task_achievements(self, task: int) -> list[int]:
+        achievements = self.__read_achievements()
+        stid = str(task)
+        achievements = achievements[stid] if stid in achievements else []
+        return achievements
 
     def __read_achievements(self) -> dict[str, list[int]]:
         if self.achievements is not None:
@@ -253,7 +257,8 @@ class StatusManager:
             composite_key: tuple[int, int] = (variant.id, task.id)
             status = statuses.get(composite_key)
             e = external.get_external_task(task.id, variant.id)
-            dto = TaskStatusDto(group, variant, task, status, e, config, [])
+            achievements = self.__get_task_achievements(task.id)
+            dto = TaskStatusDto(group, variant, task, status, e, config, achievements)
             dtos.append(dto)
         return VariantDto(variant, dtos)
 
