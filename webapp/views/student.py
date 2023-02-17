@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token, set_access_cookies, unset_jw
 from flask_jwt_extended.exceptions import JWTExtendedException
 from jwt.exceptions import PyJWTError
 
-from flask import Blueprint
+from flask import Blueprint, abort
 from flask import current_app as app
 from flask import redirect, render_template, request
 
@@ -19,7 +19,8 @@ blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+statuses = StatusManager(db.tasks, db.groups, db.variants,
+                         db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -34,6 +35,20 @@ def dashboard(student: Student | None):
         registration=config.config.registration,
         exam=config.config.exam,
         student=student,
+    )
+
+
+@blueprint.route("/submissions", methods=["GET"])
+@student_jwt_optional(db.students)
+def submissions(student: Student | None):
+    if student is None:
+        abort(401)
+    submissions_statuses = statuses.get_submissions_statuses(student)
+    return render_template(
+        "student/submissions.jinja",
+        submissions=submissions_statuses,
+        student=student,
+        highlight=config.config.highlight_syntax,
     )
 
 
@@ -56,7 +71,7 @@ def group(student: Student | None, group_id: int):
 @student_jwt_optional(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
-    form = StudentMessageForm() if config.config.registration else AnonMessageForm()
+    form = StudentMessageForm()
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,

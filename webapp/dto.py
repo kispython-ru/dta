@@ -211,3 +211,17 @@ class GroupDto:
         self.id = int(group.id)
         self.tasks = tasks
         self.variants = variants
+
+
+class SubmissionDto:
+    def __init__(
+        self,
+        status: TaskStatusDto,
+        code: str,
+        checkedAt: str,
+        sentAt: str,
+    ):
+        self.status = status
+        self.code = code
+        self.checkedAt = checkedAt
+        self.sentAt = sentAt

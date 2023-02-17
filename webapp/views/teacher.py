@@ -17,7 +17,7 @@ blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students)
 teachers = TeacherManager(db.teachers)
 
