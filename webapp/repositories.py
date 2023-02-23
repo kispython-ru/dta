@@ -153,6 +153,13 @@ class TaskStatusRepository:
                 .all()
             return statuses
 
+    def get_with_groups(self) -> list[tuple[Group, TaskStatus]]:
+        with self.db.create_session() as session:
+            statuses = session.query(Group, TaskStatus) \
+                .join(TaskStatus, TaskStatus.group == Group.id) \
+                .all()
+            return statuses
+
     def get_task_status(self, task: int, variant: int, group: int) -> TaskStatus | None:
         with self.db.create_session() as session:
             status = session.query(TaskStatus) \

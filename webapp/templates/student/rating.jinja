@@ -1,0 +1,53 @@
+{% extends 'student/student_layout.jinja' %}
+{% block header %}
+    <li class="breadcrumb-item active" aria-current="page">
+        Цифровой ассистент преподавателя
+    </li>
+{% endblock %}
+
+{% block main %}
+    {% if blocked %}
+        <h5 class="card-title fw-bold">
+            Зачёт ещё не начат
+        </h5>
+    {% else %}
+        <h5 class="card-title fw-bold">
+            Рейтинг студентов
+        </h5>
+        <h6 class="card-subtitle mb-3 text-muted">
+            Рейтинг студентов на основании количества решенных разными способами задач
+        </h6>
+        <div class="container">
+            {% for score, students in groupings.items() %}
+                <div>
+                    <small class="mt-2 text-muted d-block">
+                        {% if loop.index == 1 %}
+                            🥇 Топ 1
+                        {% elif loop.index == 2 %}
+                            🥈 Топ 2
+                        {% elif loop.index == 3 %}
+                            🥉 Топ 3
+                        {% else %}
+                            Топ {{ loop.index }}
+                        {% endif %}
+                    </small>
+                    <div class="row">
+                        {% for student in students %}
+                            <div class="col-sm-12 col-md-6 col-xl-4 p-1">
+                                <div class="border rounded p-2 d-flex justify-content-between align-items-start">
+                                    <a class="text-decoration-none w-100 text-start"
+                                       href="/group/{{ student.group.id }}">
+                                        <div class="ms-2 me-auto">
+                                            {{ student.group.title }}, вар. {{ student.variant + 1 }}
+                                        </div>
+                                    </a>
+                                    <span class="badge bg-primary rounded-pill ">{{ student.earned }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

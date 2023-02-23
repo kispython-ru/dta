@@ -1,41 +1,12 @@
-{% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <div class="logo-container">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </div>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Цифровой ассистент преподавателя
-      </li>
-    </ol>
-    {% if registration %}
-      {% if student is not none %}
-        <div class="d-flex gap-3 mt-2 mt-md-0">
-            <div>
-                <span class="text-muted">{{ student.email | hide }}</span>
-                <a class="breadcrumb-item text-decoration-none" href="/logout">
-                    Выйти
-                </a>
-            </div>
-            <a class="text-decoration-none" href="/submissions">
-                Решения
-            </a>
-        </div>
-      {% else %}
-        <a class="breadcrumb-item text-decoration-none" href="/login">
-          Войти
-        </a>
-      {% endif %}
-    {% endif %}
-  </div>
-</nav>
-<div class="container mt-3">
+{% extends 'student/student_layout.jinja' %}
+
+{% block header %}
+    <li class="breadcrumb-item active" aria-current="page">
+         Цифровой ассистент преподавателя
+    </li>
+{% endblock %}
+
+{% block main %}
   <h5 class="card-title fw-bold">
     {% if exam %} Режим зачёта {% else %} Перечень групп {% endif %}
   </h5>
@@ -56,5 +27,4 @@
       </div>
     {% endfor %}
   </div>
-</div>
 {% endblock %}

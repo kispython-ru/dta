@@ -3,11 +3,21 @@ import io
 import json
 import os
 import random
+from itertools import groupby
 from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto
+from webapp.dto import (
+    AppConfig,
+    ExternalTaskDto,
+    GroupDto,
+    StudentInRatingDto,
+    SubmissionDto,
+    TaskDto,
+    TaskStatusDto,
+    VariantDto
+)
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -163,6 +173,22 @@ class StatusManager:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
+
+    def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
+        def key(info: tuple[Group, TaskStatus]):
+            _, status = info
+            return status.group, status.variant
+
+        statuses = self.statuses.get_with_groups()
+        places: dict[int, list[StudentInRatingDto]] = dict()
+        for _, pairs in groupby(sorted(statuses, key=key), key):
+            pairs = list(pairs)
+            group, status = pairs[0]
+            earned = sum(len(status.achievements or [0]) for _, status in pairs)
+            places.setdefault(earned, [])
+            places[earned].append(StudentInRatingDto(group, status.variant, earned))
+        ordered = sorted(places.items(), reverse=True)
+        return dict(ordered[0:self.config.config.places_in_rating])
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config

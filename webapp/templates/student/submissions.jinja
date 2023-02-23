@@ -1,4 +1,5 @@
-{% extends 'layout.jinja' %}
+{% extends 'student/student_layout.jinja' %}
+
 {% block head %}
     <style>
         .CodeMirror-cursor {
@@ -10,35 +11,14 @@
         }
     </style>
 {% endblock %}
-{% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="collapse navbar-collapse container">
-        <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-            <li>
-                <a class="logo-container text-decoration-none" href="/">
-                    <div class="logo">
-                        <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}"/>
-                    </div>
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                Решения
-            </li>
-        </ol>
-        <div class="d-flex gap-3 mt-2 mt-md-0">
-            <div>
-                <span class="text-muted">{{ student.email | hide }}</span>
-                <a class="breadcrumb-item text-decoration-none" href="/logout">
-                    Выйти
-                </a>
-            </div>
-            <a class="text-decoration-none" href="/submissions">
-                Решения
-            </a>
-        </div>
-    </div>
-    </nav>
-    <div class="container mt-3">
+
+{% block header %}
+    <li class="breadcrumb-item active" aria-current="page">
+        Решения
+    </li>
+{% endblock %}
+
+{% block main %}
     <h5 class="card-title fw-bold mb-2">
         Отправленные решения
     </h5>
@@ -94,7 +74,6 @@
     {% else %}
         Список отправленных решений пуст
     {% endif %}
-    </div>
 
     {% if highlight %}
         <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>

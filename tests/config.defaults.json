@@ -16,5 +16,6 @@
     "LKS_OAUTH_CLIENT_ID": "kispython.ru",
     "LKS_OAUTH_CLIENT_SECRET": "CHANGE_ME",
     "LKS_API_BASE_URL": "https://auth-app.mirea.ru",
-    "LKS_REDIRECT_URL": "https://kispython.ru/login/lks/callback"
+    "LKS_REDIRECT_URL": "https://kispython.ru/login/lks/callback",
+    "PLACES_IN_RATING": 8
 }
