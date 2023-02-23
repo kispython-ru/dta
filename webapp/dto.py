@@ -210,6 +210,16 @@ class GroupDto:
         self.variants = variants
 
 
+class GroupInRatingDto:
+    def __init__(
+        self,
+        group: Group,
+        earned: int
+    ):
+        self.group = group
+        self.earned = earned
+
+
 class SubmissionDto:
     def __init__(
         self,

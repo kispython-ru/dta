@@ -7,7 +7,8 @@ from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, \
+    GroupInRatingDto
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -151,6 +152,14 @@ class StatusManager:
         self.checks = checks
         self.achievements = None
 
+    def get_groups_rating(self) -> list[GroupInRatingDto]:
+        config = self.config
+        result = [GroupInRatingDto(group=self.groups.get_by_id(1), earned=10),
+                  GroupInRatingDto(group=self.groups.get_by_id(2), earned=15)]
+        print(result)
+        result = sorted(result, key=lambda x: x.earned, reverse=True)
+        return result
+
     def get_group_statuses(self, group_id: int) -> GroupDto:
         config = self.config.config
         group = self.groups.get_by_id(group_id)
@@ -277,6 +286,7 @@ class StatusManager:
 
     def __get_statuses(self, group: int) -> dict[tuple[int, int], TaskStatus]:
         statuses = self.statuses.get_by_group(group=group)
+        print(sum([len(status.achievements) for status in statuses]))
         dictionary = dict()
         for status in statuses:
             composite_key: tuple[int, int] = (status.variant, status.task)
