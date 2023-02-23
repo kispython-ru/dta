@@ -7,7 +7,8 @@ from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, \
+    GroupInRatingDto
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -163,6 +164,15 @@ class StatusManager:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
+
+    def get_groups_rating(self) -> list[GroupInRatingDto]:
+        result = []
+        for group in self.groups.get_all():
+            statuses = self.statuses.get_by_group(group=group.id)
+            result.append(GroupInRatingDto(group=group, earned=sum([len(status.achievements) for status in statuses])))
+        result = sorted(result, key=lambda x: x.earned, reverse=True)
+        return result
+
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
