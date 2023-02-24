@@ -1,5 +1,5 @@
 {
-    "CONNECTION_STRING": "sqlite:///web-app1.db",
+    "CONNECTION_STRING": "sqlite:///web-app.db",
     "CORE_PATH": "./mocks",
     "ANALYTICS_PATH": "./mocks",
     "SECRET_KEY": "CHANGE_ME",
