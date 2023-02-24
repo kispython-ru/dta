@@ -48,30 +48,6 @@
                     </div>
                 </div>
             {% endfor %}
-
-            {#            <div class="row">#}
-            {#                {% for place in groupings %}#}
-            {#                    <div class="col-sm-12 col-md-6 col-xl-4 p-1">#}
-            {#                        <div class="border rounded p-2 d-flex justify-content-between align-items-start">#}
-            {#                            <a class="text-decoration-none w-100 text-start" href="/group/{{ place.group.id }}">#}
-            {#                                <div class="ms-2 me-auto">#}
-            {#                                    {% if loop.index == 1 %}#}
-            {#                                        🥇#}
-            {#                                    {% elif loop.index == 2 %}#}
-            {#                                        🥈#}
-            {#                                    {% elif loop.index == 3 %}#}
-            {#                                        🥉#}
-            {#                                    {% else %}#}
-            {#                                        {{ loop.index }}.#}
-            {#                                    {% endif %}#}
-            {#                                    {{ place.group.title }}, вар. {{ place.variant + 1 }}#}
-            {#                                </div>#}
-            {#                            </a>#}
-            {#                            <span class="badge bg-primary rounded-pill ">{{ place.earned }}</span>#}
-            {#                        </div>#}
-            {#                    </div>#}
-            {#                {% endfor %}#}
-            {#            </div>#}
         </div>
     {% endif %}
 {% endblock %}
