@@ -51,6 +51,7 @@ def submissions(student: Student | None, page: int):
     return render_template(
         "student/submissions.jinja",
         submissions=submissions_statuses,
+        registration=config.config.registration,
         student=student,
         highlight=config.config.highlight_syntax,
         page=page,
@@ -75,7 +76,7 @@ def group(student: Student | None, group_id: int):
 @blueprint.route("/rating", methods=["GET"])
 @student_jwt_optional(db.students)
 def rating(student: Student | None):
-    groupings = statuses.get_groups_rating()
+    groupings = statuses.get_rating_data()
     return render_template(
         "student/rating.jinja",
         groupings=groupings,

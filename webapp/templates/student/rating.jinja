@@ -1,64 +1,74 @@
-{% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Рейтинг
-      </li>
-    </ol>
-    {% if registration %}
-      {% if student is not none %}
-        <div class="d-flex gap-3 mt-2 mt-md-0">
-            <div>
-                <span class="text-muted">{{ student.email | hide }}</span>
-                <a class="breadcrumb-item text-decoration-none" href="/logout">
-                    Выйти
-                </a>
-            </div>
-            <a class="text-decoration-none" href="/submissions">
-                Решения
-            </a>
+{% extends 'student/student_layout.jinja' %}
+{% block header %}
+    <li class="breadcrumb-item active" aria-current="page">
+        Рейтинг студентов
+    </li>
+{% endblock %}
+
+{% block main %}
+    {% if blocked %}
+        <h5 class="card-title fw-bold">
+            Зачёт ещё не начат
+        </h5>
+    {% else %}
+        <h5 class="card-title fw-bold">
+            Рейтинг студентов на основании количества решенных разными способами задач
+        </h5>
+        <div class="container">
+            {% for score, students in groupings.items() %}
+                <div>
+                    <small class="mt-2 text-muted d-block">
+                        {% if loop.index == 1 %}
+                            🥇 Топ 1
+                        {% elif loop.index == 2 %}
+                            🥈 Топ 2
+                        {% elif loop.index == 3 %}
+                            🥉 Топ 3
+                        {% else %}
+                            Топ {{ loop.index }}
+                        {% endif %}
+                    </small>
+                    <div class="row">
+                        {% for student in students %}
+                            <div class="col-sm-12 col-md-6 col-xl-4 p-1">
+                                <div class="border rounded p-2 d-flex justify-content-between align-items-start">
+                                    <a class="text-decoration-none w-100 text-start"
+                                       href="/group/{{ student.group.id }}">
+                                        <div class="ms-2 me-auto">
+                                            {{ student.group.title }}, вар. {{ student.variant + 1 }}
+                                        </div>
+                                    </a>
+                                    <span class="badge bg-primary rounded-pill ">{{ student.earned }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            {#            <div class="row">#}
+            {#                {% for place in groupings %}#}
+            {#                    <div class="col-sm-12 col-md-6 col-xl-4 p-1">#}
+            {#                        <div class="border rounded p-2 d-flex justify-content-between align-items-start">#}
+            {#                            <a class="text-decoration-none w-100 text-start" href="/group/{{ place.group.id }}">#}
+            {#                                <div class="ms-2 me-auto">#}
+            {#                                    {% if loop.index == 1 %}#}
+            {#                                        🥇#}
+            {#                                    {% elif loop.index == 2 %}#}
+            {#                                        🥈#}
+            {#                                    {% elif loop.index == 3 %}#}
+            {#                                        🥉#}
+            {#                                    {% else %}#}
+            {#                                        {{ loop.index }}.#}
+            {#                                    {% endif %}#}
+            {#                                    {{ place.group.title }}, вар. {{ place.variant + 1 }}#}
+            {#                                </div>#}
+            {#                            </a>#}
+            {#                            <span class="badge bg-primary rounded-pill ">{{ place.earned }}</span>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                {% endfor %}#}
+            {#            </div>#}
         </div>
-      {% else %}
-        <a class="breadcrumb-item text-decoration-none" href="/login">
-          Войти
-        </a>
-      {% endif %}
     {% endif %}
-  </div>
-</nav>
-<div class="container mt-3">
-  {% if blocked %}
-    <h5 class="card-title fw-bold">
-      Зачёт ещё не начат
-    </h5>
-  {% else %}
-    <h5 class="card-title fw-bold">
-      Рейтинг групп на основании открытых вариантов решения задач
-    </h5>
-    <h6 class="card-subtitle mb-3 text-muted">
-      Подробнее про варианты решения можно прочитать тут.
-    </h6>
-    <ul class="list-group list-group-numbered" style="overflow-x:auto">
-        {% for place in groupings %}
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <a class="text-decoration-none w-100 text-start" href="/group/{{ place.group.id }}">
-              <div class="ms-2 me-auto">
-              {{ place.group.title }}
-            </div>
-                </a>
-          <span class="badge bg-primary rounded-pill">{{ place.earned }}</span>
-          </li>
-        {% endfor %}
-    </ul>
-  {% endif %}
-</div>
 {% endblock %}

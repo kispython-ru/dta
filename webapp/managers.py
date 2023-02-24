@@ -8,7 +8,7 @@ from typing import Callable
 import bcrypt
 
 from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, \
-    GroupInRatingDto
+    StudentInRatingDto
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -165,14 +165,27 @@ class StatusManager:
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 
-    def get_groups_rating(self) -> list[GroupInRatingDto]:
-        result = []
+    def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
+        pre_result = []
         for group in self.groups.get_all():
             statuses = self.statuses.get_by_group(group=group.id)
-            result.append(GroupInRatingDto(group=group, earned=sum([len(status.achievements) for status in statuses])))
-        result = sorted(result, key=lambda x: x.earned, reverse=True)
+            variants_achievements = dict().fromkeys([status.variant for status in statuses], 0)
+            for status in statuses:
+                variants_achievements.update(
+                    [(status.variant, len(status.achievements) + variants_achievements.get(status.variant))])
+            for student_variant in variants_achievements.keys():
+                pre_result.append(StudentInRatingDto(group=group, variant=student_variant,
+                                                     earned=variants_achievements.get(student_variant)))
+        pre_result = sorted(pre_result, key=lambda x: x.earned, reverse=True)
+        result: dict[int, list[StudentInRatingDto]] = {}
+        n = 0
+        for place in pre_result:
+            result.setdefault(place.earned, []).append(place)
+            n += 1
+            if n >= self.config.config.places_in_rating:
+                break
+        # result = sorted(result.items(), reverse=True)
         return result
-
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
