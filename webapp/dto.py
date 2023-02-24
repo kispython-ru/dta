@@ -223,7 +223,6 @@ class StudentInRatingDto:
         self.earned = earned
 
 
-
 class SubmissionDto:
     def __init__(
         self,
