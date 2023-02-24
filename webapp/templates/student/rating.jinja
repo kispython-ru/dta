@@ -1,7 +1,7 @@
 {% extends 'student/student_layout.jinja' %}
 {% block header %}
     <li class="breadcrumb-item active" aria-current="page">
-        Рейтинг студентов
+        Цифровой ассистент преподавателя
     </li>
 {% endblock %}
 
@@ -12,8 +12,11 @@
         </h5>
     {% else %}
         <h5 class="card-title fw-bold">
-            Рейтинг студентов на основании количества решенных разными способами задач
+            Рейтинг студентов
         </h5>
+        <h6 class="card-subtitle mb-3 text-muted">
+            Рейтинг студентов на основании количества решенных разными способами задач
+        </h6>
         <div class="container">
             {% for score, students in groupings.items() %}
                 <div>

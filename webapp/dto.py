@@ -21,6 +21,7 @@ class AppConfig:
         self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
         self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
         self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
+        self.places_in_rating: int = config["PLACES_IN_RATING"]
 
     @property
     def exam(self) -> bool:
@@ -210,14 +211,17 @@ class GroupDto:
         self.variants = variants
 
 
-class GroupInRatingDto:
+class StudentInRatingDto:
     def __init__(
         self,
         group: Group,
+        variant: int,
         earned: int
     ):
         self.group = group
+        self.variant = variant
         self.earned = earned
+
 
 
 class SubmissionDto:
