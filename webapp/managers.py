@@ -7,8 +7,7 @@ from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, \
-    StudentInRatingDto
+from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, StudentInRatingDto
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
