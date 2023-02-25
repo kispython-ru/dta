@@ -8,8 +8,8 @@ from flask import make_response, redirect, render_template, request
 
 from webapp.forms import TeacherLoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
-from webapp.models import Message, Status, Teacher
-from webapp.repositories import AppDatabase
+from webapp.models import Message, Status, Teacher, Group, Variant, Task
+from webapp.repositories import AppDatabase, DbContextManager
 from webapp.utils import get_exception_info, teacher_jwt_required
 
 blueprint = Blueprint("teacher", __name__)
@@ -46,8 +46,11 @@ def select_submissions(teacher: Teacher):
 @teacher_jwt_required(db.teachers)
 def dashboard(teacher: Teacher):
     groups = db.groups.get_all() if config.config.no_background_worker else None
-    glist, vlist, tlist = db.groups.get_with_options()
-    return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
+    with DbContextManager(lambda: config.config.connection_string).create_session() as session:
+        glist = session.query(Group).all()
+        vlist = session.query(Variant).all()
+        tlist = session.query(Task).all()
+        return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])
