@@ -30,11 +30,21 @@ def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int):
                            highlight=config.config.highlight_syntax)
 
 
+@blueprint.route("/teacher/submissions", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def select_submissions(teacher: Teacher):
+    gid = request.args.get('gid')
+    vid = request.args.get('vid')
+    tid = request.args.get('tid')
+    return redirect(f'/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}')
+
+
 @blueprint.route("/teacher", methods=["GET"])
 @teacher_jwt_required(db.teachers)
 def dashboard(teacher: Teacher):
     groups = db.groups.get_all() if config.config.no_background_worker else None
-    return render_template("teacher/dashboard.jinja", groups=groups)
+    glist, vlist, tlist = db.groups.get_with_options()
+    return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])

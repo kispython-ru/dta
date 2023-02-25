@@ -60,6 +60,13 @@ class GroupRepository:
             groups = session.query(Group).all()
             return groups
 
+    def get_with_options(self):
+        with self.db.create_session() as session:
+            groups = session.query(Group).all()
+            variants = session.query(Variant).all()
+            tasks = session.query(Task).all()
+            return groups, variants, tasks
+
     def get_by_prefix(self, prefix: str) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group) \
@@ -188,6 +195,7 @@ class TaskStatusRepository:
             if existing and existing.status in [Status.Checked, Status.CheckedFailed, Status.CheckedSubmitted]:
                 return Status.Checked if ok else Status.CheckedFailed
             return Status.Checked if ok else Status.Failed
+
         return self.create_or_update(task, variant, group, code, status(), output, ip)
 
     def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> TaskStatus:
