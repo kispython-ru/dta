@@ -25,7 +25,6 @@ teachers = TeacherManager(db.teachers)
 @teacher_jwt_required(db.teachers)
 def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int):
     submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid)
-    print(submissions_statuses)
     return render_template("teacher/submissions.jinja", submissions=submissions_statuses,
                            highlight=config.config.highlight_syntax)
 
