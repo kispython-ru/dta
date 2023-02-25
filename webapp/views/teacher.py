@@ -46,11 +46,10 @@ def select_submissions(teacher: Teacher):
 @teacher_jwt_required(db.teachers)
 def dashboard(teacher: Teacher):
     groups = db.groups.get_all() if config.config.no_background_worker else None
-    with DbContextManager(lambda: config.config.connection_string).create_session() as session:
-        glist = session.query(Group).all()
-        vlist = session.query(Variant).all()
-        tlist = session.query(Task).all()
-        return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
+    glist = db.groups.get_all()
+    vlist = db.variants.get_all()
+    tlist = db.tasks.get_all()
+    return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])
