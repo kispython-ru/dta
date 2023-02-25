@@ -7,7 +7,16 @@ from typing import Callable
 
 import bcrypt
 
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, SubmissionDto, TaskDto, TaskStatusDto, VariantDto, StudentInRatingDto
+from webapp.dto import (
+    AppConfig,
+    ExternalTaskDto,
+    GroupDto,
+    StudentInRatingDto,
+    SubmissionDto,
+    TaskDto,
+    TaskStatusDto,
+    VariantDto
+)
 from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
@@ -165,17 +174,22 @@ class StatusManager:
         return GroupDto(group, tasks, dtos)
 
     def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
-        pre_result = []
-        for group in self.groups.get_all():
-            statuses = self.statuses.get_by_group(group=group.id)
-            variants_achievements = dict().fromkeys([status.variant for status in statuses], 0)
-            for status in statuses:
-                variants_achievements.update(
-                    [(status.variant, len(status.achievements) + variants_achievements.get(status.variant))])
-            for student_variant in variants_achievements.keys():
-                pre_result.append(StudentInRatingDto(group=group, variant=student_variant,
-                                                     earned=variants_achievements.get(student_variant)))
-        pre_result = sorted(pre_result, key=lambda x: x.earned, reverse=True)
+        def get_index(sf: StudentInRatingDto) -> int:
+            for i, st in enumerate(ls):
+                if st.group == sf.group and st.variant == sf.variant:
+                    return i
+            return -1
+
+        ls: [StudentInRatingDto] = list()
+        for status in self.statuses.get_with_groups():
+            tmp = StudentInRatingDto(status[0], status[1].variant)
+            index = get_index(tmp)
+            if index == -1:
+                tmp.earned = len(status[1].achievements)
+                ls.append(tmp)
+            else:
+                ls[index].earned += len(status[1].achievements)
+        pre_result = sorted(ls, key=lambda x: x.earned, reverse=True)
         result: dict[int, list[StudentInRatingDto]] = {}
         n = 0
         for place in pre_result:
@@ -183,7 +197,6 @@ class StatusManager:
             n += 1
             if n >= self.config.config.places_in_rating:
                 break
-        # result = sorted(result.items(), reverse=True)
         return result
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:

@@ -216,7 +216,7 @@ class StudentInRatingDto:
         self,
         group: Group,
         variant: int,
-        earned: int
+        earned: int = 0
     ):
         self.group = group
         self.variant = variant
