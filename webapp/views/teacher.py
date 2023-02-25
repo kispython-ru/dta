@@ -12,7 +12,6 @@ from webapp.models import Message, Status, Teacher
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, teacher_jwt_required
 
-
 blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
@@ -20,6 +19,15 @@ db = AppDatabase(lambda: config.config.connection_string)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students)
 teachers = TeacherManager(db.teachers)
+
+
+@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int):
+    submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid)
+    print(submissions_statuses)
+    return render_template("teacher/submissions.jinja", submissions=submissions_statuses,
+                           highlight=config.config.highlight_syntax)
 
 
 @blueprint.route("/teacher", methods=["GET"])

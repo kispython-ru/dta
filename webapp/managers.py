@@ -181,6 +181,24 @@ class StatusManager:
         achievements = achievements[stid] if stid in achievements else []
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
+    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int):
+        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id)
+        submissions = []
+        for check, message, student in checks_and_messages:
+            status = self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
+                task=message.task,
+                variant=message.variant,
+                group=message.group,
+                time=check.time,
+                code=message.code,
+                ip=message.ip,
+                output=check.output,
+                status=check.status,
+                achievements=[]
+            ), [])
+            submissions.append((SubmissionDto(status, message.code, check.time, message.time), student))
+        return submissions
+
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
         checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
         submissions = []
