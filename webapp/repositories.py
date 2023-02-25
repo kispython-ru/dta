@@ -330,15 +330,16 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
-    def get_by_task(self, group_id: int, variant_id: int, task_id: int):
+    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
         with self.db.create_session() as session:
-            ob = session.query(MessageCheck, Message, Student) \
+            return session.query(MessageCheck, Message, Student) \
                 .join(Message, Message.id == MessageCheck.message) \
                 .join(Student, Student.id == Message.student) \
                 .filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
                 .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
                 .all()
-            return ob
 
     def record_check(
         self,

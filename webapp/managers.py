@@ -179,8 +179,8 @@ class StatusManager:
         achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
-    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int):
-        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id)
+    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id, skip, take)
         submissions = []
         for check, message, student in checks_and_messages:
             status = self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
