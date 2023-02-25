@@ -174,19 +174,17 @@ class StatusManager:
         return GroupDto(group, tasks, dtos)
 
     def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
-        def get_index(sf: StudentInRatingDto) -> int:
+        def get_index(group_id, variant) -> int:
             for i, st in enumerate(ls):
-                if st.group == sf.group and st.variant == sf.variant:
+                if st.group.id == group_id and st.variant == variant:
                     return i
             return -1
 
         ls: [StudentInRatingDto] = list()
         for status in self.statuses.get_with_groups():
-            tmp = StudentInRatingDto(status[0], status[1].variant)
-            index = get_index(tmp)
+            index = get_index(status[0].id, status[1].variant)
             if index == -1:
-                tmp.earned = len(status[1].achievements)
-                ls.append(tmp)
+                ls.append(StudentInRatingDto(status[0], status[1].variant, len(status[1].achievements)))
             else:
                 ls[index].earned += len(status[1].achievements)
         pre_result = sorted(ls, key=lambda x: x.earned, reverse=True)
