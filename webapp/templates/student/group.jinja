@@ -81,10 +81,15 @@
               </td>
               {% for status in variant.statuses %}
                 <td scope="col" style="border-bottom: 0; padding: 0">
-                  <a class="d-block text-center text-decoration-none p-1"
+                  <a class="d-block text-center text-decoration-none p-1 position-relative"
                     style="background-color:{{ status.cell_background }}"
                     href="{{ status.submission_url }}">
                     {{ status.code }}
+                    {% if status.earned > 1 %}
+                      <span class="achievements-counter">
+                        {{ status.earned }}
+                      </span>
+                    {% endif %}
                   </a>
                 </td>
               {% endfor %}

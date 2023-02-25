@@ -90,6 +90,7 @@ class TaskStatusDto:
         achievements: list[int],
     ):
         self.task = task.id
+        self.earned = sum(1 for a in range(len(achievements)) if status and a in status.achievements)
         self.formulation = task.formulation
         self.ip = status.ip if status is not None else "-"
         self.variant = variant.id
@@ -177,10 +178,6 @@ class TaskStatusDto:
             Status.CheckedSubmitted: True,
             Status.CheckedFailed: True,
         })
-
-    @property
-    def earned(self) -> int:
-        return len(list(filter(lambda a: a.active, self.achievements)))
 
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
