@@ -181,12 +181,12 @@ class StatusManager:
             return -1
 
         ls: [StudentInRatingDto] = list()
-        for status in self.statuses.get_with_groups():
-            index = get_index(status[0].id, status[1].variant)
+        for group, status in self.statuses.get_with_groups():
+            index = get_index(group.id, status.variant)
             if index == -1:
-                ls.append(StudentInRatingDto(status[0], status[1].variant, len(status[1].achievements)))
+                ls.append(StudentInRatingDto(group, status.variant, len(status.achievements)))
             else:
-                ls[index].earned += len(status[1].achievements)
+                ls[index].earned += len(status.achievements)
         pre_result = sorted(ls, key=lambda x: x.earned, reverse=True)
         result: dict[int, list[StudentInRatingDto]] = {}
         n = 0
