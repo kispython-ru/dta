@@ -23,15 +23,24 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
                                 <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
                                 <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li><a class="dropdown-item" href="/logout">Выйти</a></li>
                             </ul>
                         </div>
                     </div>
                 {% else %}
-                    <a class="breadcrumb-item text-decoration-none" href="/login">
-                        Войти
-                    </a>
+                    <div class="d-flex gap-3 mt-2 mt-md-0">
+                        <div>
+                            <a class="breadcrumb-item text-decoration-none" href="/rating">
+                                Рейтинг
+                            </a>
+                        </div>
+                        <a class="text-decoration-none" href="/login">
+                            Войти
+                        </a>
+                    </div>
                 {% endif %}
             {% endif %}
         </div>
