@@ -33,26 +33,26 @@
                 {% for submission in submissions %}
                     <article class="mb-4">
                         <h6 class="card-title fw-bold mb-1">
-                            Задача <a href="{{ submission[0].status.submission_url }}" class="badge alert-primary"
-                                      style="font-size: inherit; text-decoration: none">№{{ submission[0].status.task + 1 }}</a>,
+                            Задача <a href="{{ submission.status.submission_url }}" class="badge alert-primary"
+                                      style="font-size: inherit; text-decoration: none">№{{ submission.status.task + 1 }}</a>,
                             вариант <span class="badge alert-secondary"
-                                          style="font-size: inherit">№{{ submission[0].status.variant + 1 }}</span>,
-                            группа <a href="/group/{{ submission[0].status.group }}" class="badge alert-primary"
-                                      style="font-size: inherit; text-decoration: none">{{ submission[0].status.group_title }}</a>,
+                                          style="font-size: inherit">№{{ submission.status.variant + 1 }}</span>,
+                            группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary"
+                                      style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>,
                             студент <span class="badge alert-secondary"
-                                          style="font-size: inherit">{{ submission[1].email }}</span>,
+                                          style="font-size: inherit">{{ submission.student.email }}</span>,
                             id <span class="badge alert-secondary"
-                                     style="font-size: inherit">{{ submission[1].id }}</span>
+                                     style="font-size: inherit">{{ submission.student.id }}</span>
                         </h6>
                         <div class="mb-2 text-uppercase">
-                            <span class="badge alert-{{ submission[0].status.color }}">{{ submission[0].status.name }}</span>
-                            <span class="badge alert-light">Отправлено: {{ submission[0].sent.strftime('%d.%m.%Y %H:%M') }}</span>
-                            <span class="badge alert-light">Проверено: {{ submission[0].checked.strftime('%d.%m.%Y %H:%M') }}</span>
+                            <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
+                            <span class="badge alert-light">Отправлено: {{ submission.sent.strftime('%d.%m.%Y %H:%M') }}</span>
+                            <span class="badge alert-light">Проверено: {{ submission.checked.strftime('%d.%m.%Y %H:%M') }}</span>
                         </div>
-                        {% if submission[0].status.error_message is not none and submission[0].status.error_message %}
+                        {% if submission.status.error_message is not none and submission.status.error_message %}
                             <div>Подробные сведения об ошибке:</div>
                             <div class="text-muted mb-2"
-                                 style="white-space: pre-wrap">{{ submission[0].status.error_message | e }}</div>
+                                 style="white-space: pre-wrap">{{ submission.status.error_message | e }}</div>
                         {% else %}
                             <div class="mb-2"></div>
                         {% endif %}
@@ -61,9 +61,9 @@
                                 type="text"
                                 class="form-control"
                                 disabled
-                                rows="{{ submission[0].linesCount }}"
+                                rows="{{ submission.linesCount }}"
                                 placeholder="Ответ на задание"
-                                style="font-family: monospace;">{{ submission[0].code }}</textarea>
+                                style="font-family: monospace;">{{ submission.code }}</textarea>
                     </article>
                 {% endfor %}
                 <ul class="pagination">

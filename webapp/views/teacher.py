@@ -8,9 +8,10 @@ from flask import make_response, redirect, render_template, request
 
 from webapp.forms import TeacherLoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
-from webapp.models import Message, Status, Teacher, Group, Variant, Task
+from webapp.models import Group, Message, Status, Task, Teacher, Variant
 from webapp.repositories import AppDatabase, DbContextManager
 from webapp.utils import get_exception_info, teacher_jwt_required
+
 
 blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)

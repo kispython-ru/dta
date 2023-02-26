@@ -1,6 +1,6 @@
 from flask import Config
 
-from webapp.models import Group, Status, Task, TaskStatus, Variant
+from webapp.models import Group, Status, Student, Task, TaskStatus, Variant
 
 
 class AppConfig:
@@ -217,8 +217,10 @@ class SubmissionDto:
         code: str,
         checked: str,
         sent: str,
+        student: Student | None
     ):
         self.status = status
         self.code = code
         self.checked = checked
         self.sent = sent
+        self.student = student
