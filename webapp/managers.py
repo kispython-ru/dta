@@ -30,6 +30,7 @@ from webapp.repositories import (
     TeacherRepository,
     VariantRepository
 )
+from itertools import groupby
 
 
 class AppConfigManager:
@@ -174,23 +175,17 @@ class StatusManager:
         return GroupDto(group, tasks, dtos)
 
     def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
-        def get_index(group_id, variant) -> int:
-            for i, st in enumerate(ls):
-                if st.group.id == group_id and st.variant == variant:
-                    return i
-            return -1
-
+        def kf(d): return d[0].id, d[1].variant
+        data = sorted(self.statuses.get_with_groups(), key=kf)
         ls: [StudentInRatingDto] = list()
-        for group, status in self.statuses.get_with_groups():
-            index = get_index(group.id, status.variant)
-            if index == -1:
-                ls.append(StudentInRatingDto(group, status.variant, len(status.achievements)))
-            else:
-                ls[index].earned += len(status.achievements)
-        pre_result = sorted(ls, key=lambda x: x.earned, reverse=True)
+        for key, info in groupby(data, key=kf):
+            info = list(info)
+            ls.append(
+                StudentInRatingDto(info[0][0], info[0][1].variant, sum(len(item[1].achievements) for item in info)))
+        ls = sorted(ls, key=lambda x: x.earned, reverse=True)
         result: dict[int, list[StudentInRatingDto]] = {}
         n = 0
-        for place in pre_result:
+        for place in ls:
             result.setdefault(place.earned, []).append(place)
             n += 1
             if n >= self.config.config.places_in_rating:
