@@ -179,12 +179,15 @@ class StatusManager:
             _, status = info
             return status.group, status.variant
 
+        achievements = self.__read_achievements()
         statuses = self.statuses.get_with_groups()
         places: dict[int, list[StudentInRatingDto]] = dict()
         for _, pairs in groupby(sorted(statuses, key=key), key):
             pairs = list(pairs)
             group, status = pairs[0]
-            earned = sum(len(status.achievements or [0]) for _, status in pairs)
+            active = sum(len(status.achievements or [0]) for _, status in pairs if str(status.task) in achievements)
+            inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
+            earned = active + inactive
             places.setdefault(earned, [])
             places[earned].append(StudentInRatingDto(group, status.variant, earned))
         ordered = sorted(places.items(), reverse=True)
