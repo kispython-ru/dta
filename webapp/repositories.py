@@ -60,13 +60,6 @@ class GroupRepository:
             groups = session.query(Group).all()
             return groups
 
-    def get_with_options(self):
-        with self.db.create_session() as session:
-            groups = session.query(Group).all()
-            variants = session.query(Variant).all()
-            tasks = session.query(Task).all()
-            return groups, variants, tasks
-
     def get_by_prefix(self, prefix: str) -> list[Group]:
         with self.db.create_session() as session:
             groups = session.query(Group) \
