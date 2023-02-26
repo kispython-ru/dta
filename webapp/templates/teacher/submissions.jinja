@@ -40,7 +40,7 @@
                             группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary"
                                       style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>,
                             студент <span class="badge alert-secondary"
-                                          style="font-size: inherit">{{ submission.student.email }}</span>,
+                                          style="font-size: inherit">{{ submission.student.email | hide }}</span>,
                             id <span class="badge alert-secondary"
                                      style="font-size: inherit">{{ submission.student.id }}</span>
                         </h6>
