@@ -31,7 +31,6 @@ from webapp.repositories import (
     TeacherRepository,
     VariantRepository
 )
-from itertools import groupby
 
 
 class AppConfigManager:
