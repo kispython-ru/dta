@@ -3,7 +3,6 @@ import io
 import json
 import os
 import random
-from itertools import groupby
 from typing import Callable
 
 import bcrypt
@@ -31,6 +30,7 @@ from webapp.repositories import (
     TeacherRepository,
     VariantRepository
 )
+from itertools import groupby
 
 
 class AppConfigManager:
@@ -189,23 +189,6 @@ class StatusManager:
             places[earned].append(StudentInRatingDto(group, status.variant, earned))
         ordered = sorted(places.items(), reverse=True)
         return dict(ordered[0:self.config.config.places_in_rating])
-
-        # def kf(d): return d[0].id, d[1].variant
-        # data = sorted(self.statuses.get_with_groups(), key=kf)
-        # ls: [StudentInRatingDto] = list()
-        # for key, info in groupby(data, key=kf):
-        #     info = list(info)
-        #     ls.append(
-        #         StudentInRatingDto(info[0][0], info[0][1].variant, sum(len(item[1].achievements) for item in info)))
-        # ls = sorted(ls, key=lambda x: x.earned, reverse=True)
-        # result: dict[int, list[StudentInRatingDto]] = {}
-        # n = 0
-        # for place in ls:
-        #     result.setdefault(place.earned, []).append(place)
-        #     n += 1
-        #     if n >= self.config.config.places_in_rating:
-        #         break
-        # return result
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
