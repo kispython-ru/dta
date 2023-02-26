@@ -157,6 +157,9 @@ class TaskStatusRepository:
         with self.db.create_session() as session:
             statuses = session.query(Group, TaskStatus) \
                 .join(TaskStatus, TaskStatus.group == Group.id) \
+                .filter((TaskStatus.status == Status.Checked) |
+                        (TaskStatus.status == Status.CheckedFailed) |
+                        (TaskStatus.status == Status.CheckedSubmitted)) \
                 .all()
             return statuses
 
