@@ -8,8 +8,8 @@ from flask import make_response, redirect, render_template, request
 
 from webapp.forms import TeacherLoginForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
-from webapp.models import Message, Status, Teacher
-from webapp.repositories import AppDatabase
+from webapp.models import Group, Message, Status, Task, Teacher, Variant
+from webapp.repositories import AppDatabase, DbContextManager
 from webapp.utils import get_exception_info, teacher_jwt_required
 
 
@@ -22,11 +22,35 @@ exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks,
 teachers = TeacherManager(db.teachers)
 
 
+@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"], defaults={'page': 0})
+@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>/<int:page>", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: int):
+    size = 5
+    submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, page * size, size)
+    if not submissions_statuses and page > 0:
+        return redirect(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}/{page - 1}")
+    return render_template("teacher/submissions.jinja", submissions=submissions_statuses,
+                           highlight=config.config.highlight_syntax, page=page, info=(gid, vid, tid))
+
+
+@blueprint.route("/teacher/submissions", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def select_submissions(teacher: Teacher):
+    gid = request.args.get('gid')
+    vid = request.args.get('vid')
+    tid = request.args.get('tid')
+    return redirect(f'/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}')
+
+
 @blueprint.route("/teacher", methods=["GET"])
 @teacher_jwt_required(db.teachers)
 def dashboard(teacher: Teacher):
     groups = db.groups.get_all() if config.config.no_background_worker else None
-    return render_template("teacher/dashboard.jinja", groups=groups)
+    glist = db.groups.get_all()
+    vlist = db.variants.get_all()
+    tlist = db.tasks.get_all()
+    return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])

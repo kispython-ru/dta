@@ -195,6 +195,7 @@ class TaskStatusRepository:
             if existing and existing.status in [Status.Checked, Status.CheckedFailed, Status.CheckedSubmitted]:
                 return Status.Checked if ok else Status.CheckedFailed
             return Status.Checked if ok else Status.Failed
+
         return self.create_or_update(task, variant, group, code, status(), output, ip)
 
     def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> TaskStatus:
@@ -324,6 +325,17 @@ class MessageCheckRepository:
             return session.query(MessageCheck, Message) \
                 .join(Message, Message.id == MessageCheck.message) \
                 .filter(Message.student == student.id) \
+                .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
+                .all()
+
+    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message, Student) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .join(Student, Student.id == Message.student) \
+                .filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
                 .order_by(desc(Message.time)) \
                 .offset(skip) \
                 .limit(take) \
