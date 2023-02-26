@@ -3,6 +3,7 @@ import io
 import json
 import os
 import random
+from itertools import groupby
 from typing import Callable
 
 import bcrypt
@@ -30,7 +31,6 @@ from webapp.repositories import (
     TeacherRepository,
     VariantRepository
 )
-from itertools import groupby
 
 
 class AppConfigManager:
@@ -175,22 +175,37 @@ class StatusManager:
         return GroupDto(group, tasks, dtos)
 
     def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
-        def kf(d): return d[0].id, d[1].variant
-        data = sorted(self.statuses.get_with_groups(), key=kf)
-        ls: [StudentInRatingDto] = list()
-        for key, info in groupby(data, key=kf):
-            info = list(info)
-            ls.append(
-                StudentInRatingDto(info[0][0], info[0][1].variant, sum(len(item[1].achievements) for item in info)))
-        ls = sorted(ls, key=lambda x: x.earned, reverse=True)
-        result: dict[int, list[StudentInRatingDto]] = {}
-        n = 0
-        for place in ls:
-            result.setdefault(place.earned, []).append(place)
-            n += 1
-            if n >= self.config.config.places_in_rating:
-                break
-        return result
+        def key(info: tuple[Group, TaskStatus]):
+            _, status = info
+            return status.group, status.variant
+
+        statuses = self.statuses.get_with_groups()
+        places: dict[int, list[StudentInRatingDto]] = dict()
+        for _, pairs in groupby(sorted(statuses, key=key), key):
+            pairs = list(pairs)
+            group, status = pairs[0]
+            earned = sum(len(status.achievements or [0]) for _, status in pairs)
+            places.setdefault(earned, [])
+            places[earned].append(StudentInRatingDto(group, status.variant, earned))
+        ordered = sorted(places.items(), reverse=True)
+        return dict(ordered[0:self.config.config.places_in_rating])
+
+        # def kf(d): return d[0].id, d[1].variant
+        # data = sorted(self.statuses.get_with_groups(), key=kf)
+        # ls: [StudentInRatingDto] = list()
+        # for key, info in groupby(data, key=kf):
+        #     info = list(info)
+        #     ls.append(
+        #         StudentInRatingDto(info[0][0], info[0][1].variant, sum(len(item[1].achievements) for item in info)))
+        # ls = sorted(ls, key=lambda x: x.earned, reverse=True)
+        # result: dict[int, list[StudentInRatingDto]] = {}
+        # n = 0
+        # for place in ls:
+        #     result.setdefault(place.earned, []).append(place)
+        #     n += 1
+        #     if n >= self.config.config.places_in_rating:
+        #         break
+        # return result
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
