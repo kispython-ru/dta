@@ -205,23 +205,37 @@ class StatusManager:
         achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
+    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id, skip, take)
+        submissions = []
+        for check, message, student in checks_and_messages:
+            submissions.append(self.__get_submissions(check, message, student))
+        return submissions
+
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
         checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
         submissions = []
         for check, message in checks_and_messages:
-            status = self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
-                task=message.task,
-                variant=message.variant,
-                group=message.group,
-                time=check.time,
-                code=message.code,
-                ip=message.ip,
-                output=check.output,
-                status=check.status,
-                achievements=[]
-            ), [])
-            submissions.append(SubmissionDto(status, message.code, check.time, message.time))
+            submissions.append(self.__get_submissions(check, message, None))
         return submissions
+
+    def __get_submissions(
+        self,
+        check: MessageCheck,
+        message: Message,
+        student: Student | None
+    ):
+        return SubmissionDto(self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
+            task=message.task,
+            variant=message.variant,
+            group=message.group,
+            time=check.time,
+            code=message.code,
+            ip=message.ip,
+            output=check.output,
+            status=check.status,
+            achievements=[]
+        ), []), message.code, check.time, message.time, student)
 
     def __get_task_status_dto(
         self,
