@@ -1,0 +1,51 @@
+{% extends 'layout.jinja' %}
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse container">
+            <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+                <li>
+                    <a class="logo-container text-decoration-none" href="/">
+                        <div class="logo">
+                            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}"/>
+                        </div>
+                    </a>
+                </li>
+                {% block header %} {% endblock %}
+            </ol>
+            {% if registration %}
+                {% if student is not none %}
+                    <div class="d-flex gap-3 mt-2 mt-md-0">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" id="dLabel" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ student.email | hide }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
+                                <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+                                <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/logout">Выйти</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="d-flex gap-3 mt-2 mt-md-0">
+                        <div>
+                            <a class="breadcrumb-item text-decoration-none" href="/rating">
+                                Рейтинг
+                            </a>
+                        </div>
+                        <a class="text-decoration-none" href="/login">
+                            Войти
+                        </a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container mt-3">
+        {% block main %} {% endblock %}
+    </div>
+{% endblock %}

@@ -1,46 +1,22 @@
-{% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/group/{{ status.group }}">
+{% extends 'student/student_layout.jinja' %}
+
+{% block header %}
+    <li class="breadcrumb-item">
+      <a class="text-decoration-none" href="/group/{{ status.group }}">
           {{ status.group_title }}
-        </a>
-      </li>
-      <li class="breadcrumb-item">
+      </a>
+    </li>
+    <li class="breadcrumb-item">
         <a class="text-decoration-none" href="{{ status.submission_url }}">
           №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
         </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Уведомление
-      </li>
-    </ol>
-    {% if registration %}
-      {% if student is not none %}
-        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
-          <span class="text-muted">{{ student.email | hide }}</span>
-          <a class="breadcrumb-item text-decoration-none" href="/logout">
-            Выйти
-          </a>
-        </span>
-      {% else %}
-        <a class="breadcrumb-item text-decoration-none" href="/login">
-          Войти
-        </a>
-      {% endif %}
-    {% endif %}
-  </div>
-</nav>
-<div class="container mt-3">
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      Уведомление
+    </li>
+{% endblock %}
+
+{% block main %}
   <h6 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
@@ -52,5 +28,4 @@
   <a class="btn btn-outline btn-primary" href="{{ status.submission_url }}">
     Вернуться на страницу задания
   </a>
-</div>
 {% endblock %}

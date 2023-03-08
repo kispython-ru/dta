@@ -5,6 +5,7 @@ config.local.json
 
 # LocalDB
 *.db
+*.db.journal
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

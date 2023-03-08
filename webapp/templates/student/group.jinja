@@ -1,36 +1,12 @@
-{% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        {{ group.title }}
-      </li>
-    </ol>
-    {% if registration %}
-      {% if student is not none %}
-        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
-          <span class="text-muted">{{ student.email | hide }}</span>
-          <a class="breadcrumb-item text-decoration-none" href="/logout">
-            Выйти
-          </a>
-        </span>
-      {% else %}
-        <a class="breadcrumb-item text-decoration-none" href="/login">
-          Войти
-        </a>
-      {% endif %}
-    {% endif %}
-  </div>
-</nav>
-<div class="container mt-3">
+{% extends 'student/student_layout.jinja' %}
+
+{% block header %}
+    <li class="breadcrumb-item active" aria-current="page">
+         {{ group.title }}
+    </li>
+{% endblock %}
+
+{% block main %}
   {% if blocked %}
     <h5 class="card-title fw-bold">
       Зачёт ещё не начат
@@ -76,10 +52,15 @@
               </td>
               {% for status in variant.statuses %}
                 <td scope="col" style="border-bottom: 0; padding: 0">
-                  <a class="d-block text-center text-decoration-none p-1"
+                  <a class="d-block text-center text-decoration-none p-1 position-relative"
                     style="background-color:{{ status.cell_background }}"
                     href="{{ status.submission_url }}">
                     {{ status.code }}
+                    {% if status.earned > 1 %}
+                      <span class="achievements-counter">
+                        {{ status.earned }}
+                      </span>
+                    {% endif %}
                   </a>
                 </td>
               {% endfor %}
@@ -89,5 +70,4 @@
       </table>
     </div>
   {% endif %}
-</div>
 {% endblock %}

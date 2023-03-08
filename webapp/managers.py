@@ -3,18 +3,27 @@ import io
 import json
 import os
 import random
+from itertools import groupby
 from typing import Callable
 
 import bcrypt
 
-from flask import Config
-
-from webapp.dto import AppConfig, ExternalTaskDto, GroupDto, TaskDto, TaskStatusDto, VariantDto
-from webapp.models import FinalSeed, Group, Message, Student, Task, TaskStatus, Teacher, Variant
+from webapp.dto import (
+    AppConfig,
+    ExternalTaskDto,
+    GroupDto,
+    StudentInRatingDto,
+    SubmissionDto,
+    TaskDto,
+    TaskStatusDto,
+    VariantDto
+)
+from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
     MailerRepository,
+    MessageCheckRepository,
     MessageRepository,
     StudentRepository,
     TaskRepository,
@@ -141,6 +150,7 @@ class StatusManager:
         statuses: TaskStatusRepository,
         config: AppConfigManager,
         seeds: FinalSeedRepository,
+        checks: MessageCheckRepository
     ):
         self.tasks = tasks
         self.groups = groups
@@ -148,6 +158,7 @@ class StatusManager:
         self.statuses = statuses
         self.config = config
         self.seeds = seeds
+        self.checks = checks
         self.achievements = None
 
     def get_group_statuses(self, group_id: int) -> GroupDto:
@@ -163,6 +174,25 @@ class StatusManager:
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 
+    def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
+        def key(info: tuple[Group, TaskStatus]):
+            _, status = info
+            return status.group, status.variant
+
+        achievements = self.__read_achievements()
+        statuses = self.statuses.get_with_groups()
+        places: dict[int, list[StudentInRatingDto]] = dict()
+        for _, pairs in groupby(sorted(statuses, key=key), key):
+            pairs = list(pairs)
+            group, status = pairs[0]
+            active = sum(len(status.achievements or [0]) for _, status in pairs if str(status.task) in achievements)
+            inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
+            earned = active + inactive
+            places.setdefault(earned, [])
+            places[earned].append(StudentInRatingDto(group, status.variant, earned))
+        ordered = sorted(places.items(), reverse=True)
+        return dict(ordered[0:self.config.config.places_in_rating])
+
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
         group = self.groups.get_by_id(gid)
@@ -174,18 +204,62 @@ class StatusManager:
         return dto
 
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
+        status = self.statuses.get_task_status(tid, vid, gid)
+        achievements = self.__get_task_achievements(tid)
+        return self.__get_task_status_dto(gid, vid, tid, status, achievements)
+
+    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id, skip, take)
+        submissions = []
+        for check, message, student in checks_and_messages:
+            submissions.append(self.__get_submissions(check, message, student))
+        return submissions
+
+    def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
+        checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
+        submissions = []
+        for check, message in checks_and_messages:
+            submissions.append(self.__get_submissions(check, message, None))
+        return submissions
+
+    def __get_submissions(
+        self,
+        check: MessageCheck,
+        message: Message,
+        student: Student | None
+    ):
+        return SubmissionDto(self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
+            task=message.task,
+            variant=message.variant,
+            group=message.group,
+            time=check.time,
+            code=message.code,
+            ip=message.ip,
+            output=check.output,
+            status=check.status,
+            achievements=[]
+        ), []), message.code, check.time, message.time, student)
+
+    def __get_task_status_dto(
+        self,
+        gid: int, vid: int, tid: int,
+        status: TaskStatus | None,
+        achievements: list[int]
+    ) -> TaskStatusDto:
         config = self.config.config
         group = self.groups.get_by_id(gid)
         variant = self.variants.get_by_id(vid)
         task = self.tasks.get_by_id(tid)
-        status = self.statuses.get_task_status(tid, vid, gid)
         e = self.__get_external_task_manager(group)
         ext = e.get_external_task(task.id, variant.id)
         task_dto = TaskDto(group, task, config, e.random_active)
-        achievements = self.__read_achievements()
-        stid = str(task.id)
-        achievements = achievements[stid] if stid in achievements else []
         return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+
+    def __get_task_achievements(self, task: int) -> list[int]:
+        achievements = self.__read_achievements()
+        stid = str(task)
+        achievements = achievements[stid] if stid in achievements else []
+        return achievements
 
     def __read_achievements(self) -> dict[str, list[int]]:
         if self.achievements is not None:
@@ -226,7 +300,8 @@ class StatusManager:
             composite_key: tuple[int, int] = (variant.id, task.id)
             status = statuses.get(composite_key)
             e = external.get_external_task(task.id, variant.id)
-            dto = TaskStatusDto(group, variant, task, status, e, config, [])
+            achievements = self.__get_task_achievements(task.id)
+            dto = TaskStatusDto(group, variant, task, status, e, config, achievements)
             dtos.append(dto)
         return VariantDto(variant, dtos)
 

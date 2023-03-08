@@ -1,6 +1,6 @@
 from flask import Config
 
-from webapp.models import Group, Status, Task, TaskStatus, Variant
+from webapp.models import Group, Status, Student, Task, TaskStatus, Variant
 
 
 class AppConfig:
@@ -17,6 +17,11 @@ class AppConfig:
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]
         self.imap_login: bool = config["IMAP_LOGIN"]
         self.imap_password: bool = config["IMAP_PASSWORD"]
+        self.enable_lks_oauth: bool = config["ENABLE_LKS_OAUTH"]
+        self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
+        self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
+        self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
+        self.places_in_rating: int = config["PLACES_IN_RATING"]
 
     @property
     def exam(self) -> bool:
@@ -86,6 +91,7 @@ class TaskStatusDto:
         achievements: list[int],
     ):
         self.task = task.id
+        self.earned = sum(1 for a in range(len(achievements)) if status and a in status.achievements)
         self.formulation = task.formulation
         self.ip = status.ip if status is not None else "-"
         self.variant = variant.id
@@ -174,10 +180,6 @@ class TaskStatusDto:
             Status.CheckedFailed: True,
         })
 
-    @property
-    def earned(self) -> int:
-        return len(list(filter(lambda a: a.active, self.achievements)))
-
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
         for order, count in enumerate(achievements):
@@ -207,3 +209,31 @@ class GroupDto:
         self.id = int(group.id)
         self.tasks = tasks
         self.variants = variants
+
+
+class StudentInRatingDto:
+    def __init__(
+        self,
+        group: Group,
+        variant: int,
+        earned: int = 0
+    ):
+        self.group = group
+        self.variant = variant
+        self.earned = earned
+
+
+class SubmissionDto:
+    def __init__(
+        self,
+        status: TaskStatusDto,
+        code: str,
+        checked: str,
+        sent: str,
+        student: Student | None
+    ):
+        self.status = status
+        self.code = code
+        self.checked = checked
+        self.sent = sent
+        self.student = student

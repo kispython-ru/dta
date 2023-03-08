@@ -12,7 +12,7 @@ blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
 
 

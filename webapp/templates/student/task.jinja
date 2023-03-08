@@ -1,41 +1,17 @@
-{% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/group/{{ status.group }}">
-          {{ status.group_title }}
-        </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
+{% extends 'student/student_layout.jinja' %}
+
+{% block header %}
+    <li class="breadcrumb-item">
+      <a class="text-decoration-none" href="/group/{{ status.group }}">
+        {{ status.group_title }}
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
         №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
-      </li>
-    </ol>
-    {% if registration %}
-      {% if student is not none %}
-        <span class="breadcrumb-item text-decoration-none mt-2 mt-md-0">
-          <span class="text-muted">{{ student.email | hide }}</span>
-          <a class="breadcrumb-item text-decoration-none" href="/logout">
-            Выйти
-          </a>
-        </span>
-      {% else %}
-        <a class="breadcrumb-item text-decoration-none" href="/login">
-          Войти
-        </a>
-      {% endif %}
-    {% endif %}
-  </div>
-</nav>
-<div class="container mt-3">
+    </li>
+{% endblock %}
+
+{% block main %}
   <h6 class="card-title fw-bold">
     Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
@@ -81,7 +57,7 @@
   {% if status.show_achievements %}
     <div>
       <h6 class="card-title fw-bold">
-        Разблокированные достижения 
+        Разблокированные достижения
         <small class="text-muted">
           {{ status.earned }} из {{ status.achievements | length }}
         </small>
@@ -125,7 +101,7 @@
             style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
           <small class="form-text text-muted">
             <div>
-              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция 
+              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция
               <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
               использование модулей только из стандартной библиотеки Python.
             </div>
@@ -137,19 +113,6 @@
               <li class="text-danger">{{ error }}</li>
             {% endfor %}
           </ul>
-        {% endif %}
-        {% if registration and not status.disabled %}
-          <div class="form-group mb-2">
-            <input name="password" type="password" class="form-control" placeholder="Пароль от учётной записи">
-            <small class="form-text text-muted">Для подтверждения отправки текста программы необходимо ввести Ваш пароль.</small>
-          </div>
-          {% if form.password.errors %}
-            <ul class="errors">
-              {% for error in form.password.errors %}
-                <li class="text-danger">{{ error }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
         {% endif %}
         {{ form.csrf_token }}
         <div class="row">
@@ -165,12 +128,11 @@
       {% endif %}
     </form>
   </div>
-</div>
 
 {% if highlight and not (status.disabled or registration and not student) %}
   <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
-  <script type="text/javascript"> 
+  <script type="text/javascript">
     CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true, indentUnit: 4 })
   </script>
 {% endif %}

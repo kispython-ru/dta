@@ -2,6 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
+from sqlalchemy import desc
 import bcrypt
 from numpy import var
 from sqlalchemy.orm import Session
@@ -151,6 +152,16 @@ class TaskStatusRepository:
         with self.db.create_session() as session:
             statuses = session.query(TaskStatus) \
                 .filter_by(group=group) \
+                .all()
+            return statuses
+
+    def get_with_groups(self) -> list[tuple[Group, TaskStatus]]:
+        with self.db.create_session() as session:
+            statuses = session.query(Group, TaskStatus) \
+                .join(TaskStatus, TaskStatus.group == Group.id) \
+                .filter((TaskStatus.status == Status.Checked) |
+                        (TaskStatus.status == Status.CheckedFailed) |
+                        (TaskStatus.status == Status.CheckedSubmitted)) \
                 .all()
             return statuses
 
@@ -314,6 +325,27 @@ class MessageCheckRepository:
                 .filter_by(status=Status.Checked) \
                 .all()
 
+    def get_by_student(self, student: Student, skip: int, take: int) -> list[tuple[MessageCheck, Message]]:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .filter(Message.student == student.id) \
+                .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
+                .all()
+
+    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message, Student) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .join(Student, Student.id == Message.student) \
+                .filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
+                .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
+                .all()
+
     def record_check(
         self,
         message: int,
@@ -399,6 +431,14 @@ class StudentRepository:
             student = session.query(Student).get(id)
             return student
 
+    def get_by_external(self, external_id: str, provider: str) -> Student | None:
+        with self.db.create_session() as session:
+            return (
+                session.query(Student)
+                .filter_by(external_id=external_id, provider=provider)
+                .first()
+            )
+
     def find_by_email(self, email: str) -> Student | None:
         email = email.lower()
         with self.db.create_session() as session:
@@ -433,6 +473,28 @@ class StudentRepository:
             student = Student(email=email, unconfirmed_hash=password, blocked=False)
             session.add(student)
             return student
+
+    def create_external(
+        self,
+        email: str,
+        external_id: int,
+        group: str | None,
+        provider: str,
+    ) -> Student:
+        with self.db.create_session() as session:
+            student = Student(
+                email=email,
+                external_id=external_id,
+                group=group,
+                provider=provider,
+                blocked=False,
+            )
+            session.add(student)
+            return student
+
+    def update_group(self, student: Student, group: str | None):
+        with self.db.create_session() as session:
+            session.query(Student).filter_by(id=student.id).update(dict(group=group))
 
 
 class MailerRepository:

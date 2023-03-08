@@ -8,6 +8,7 @@
   <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}"/>
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/codemirror.min.css') }}">
   <style>
   .logo {
@@ -51,7 +52,15 @@
     color: #28a745;
     font-weight: bold;
   }
+  .achievements-counter {
+    position: absolute;
+    font-size: 12px;
+    opacity: 0.7;
+    padding-left: 8px;
+    padding-top: 4px;
+  }
   </style>
+    {% block head %}{% endblock %}
 </head>
 <body>
 {% block content %}{% endblock %}

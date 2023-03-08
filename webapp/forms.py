@@ -8,17 +8,10 @@ class CodeLength:
     max = 10000
 
 
-class AnonMessageForm(FlaskForm):
+class StudentMessageForm(FlaskForm):
     code = StringField("code", [
         DataRequired(message="Данное поле не может быть пустым!"),
         Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать как минимум 10 символов!"),
-    ])
-
-
-class StudentMessageForm(AnonMessageForm):
-    password = PasswordField('password', [
-        DataRequired(message="Данное поле не может быть пустым!"),
-        Length(min=8, message="Пароль содержит как минимум 8 символов."),
     ])
 
 
@@ -31,6 +24,10 @@ class TeacherLoginForm(FlaskForm):
 
 
 class StudentLoginForm(FlaskForm):
+    def __init__(self, lks_oauth_enabled: bool = False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lks_oauth_enabled = lks_oauth_enabled
+
     login = StringField('email', [
         DataRequired(message="Данное поле не может быть пустым!"),
         Regexp(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", message=(
