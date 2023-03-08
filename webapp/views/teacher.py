@@ -46,7 +46,7 @@ def select_submissions(teacher: Teacher):
 @blueprint.route("/teacher", methods=["GET"])
 @teacher_jwt_required(db.teachers)
 def dashboard(teacher: Teacher):
-    groups = db.groups.get_all() if config.config.no_background_worker else None
+    groups = db.groups.get_all() if config.config.no_background_worker or config.config.final_tasks else None
     glist = db.groups.get_all()
     vlist = db.variants.get_all()
     tlist = db.tasks.get_all()
