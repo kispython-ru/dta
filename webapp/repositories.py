@@ -2,6 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
+import bcrypt
 from numpy import var
 from sqlalchemy.orm import Session
 
@@ -188,6 +189,7 @@ class TaskStatusRepository:
             if existing and existing.status in [Status.Checked, Status.CheckedFailed, Status.CheckedSubmitted]:
                 return Status.Checked if ok else Status.CheckedFailed
             return Status.Checked if ok else Status.Failed
+
         return self.create_or_update(task, variant, group, code, status(), output, ip)
 
     def submit_task(self, task: int, variant: int, group: int, code: str, ip: str) -> TaskStatus:
@@ -377,6 +379,14 @@ class TeacherRepository:
             teacher = session.query(Teacher) \
                 .filter_by(login=login) \
                 .first()
+            return teacher
+
+    def create(self, login: str, password: str):
+        hashpw = str(bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'))
+        with self.db.create_session() as session:
+            teacher = Teacher(login=login,
+                              password_hash=hashpw)
+            session.add(teacher)
             return teacher
 
 
