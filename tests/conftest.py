@@ -15,6 +15,7 @@ def app(request) -> Flask:
     src = os.getcwd()
     tests = os.path.join(src, "tests")
     app = configure_app(tests)
+    app.config.update({"WTF_CSRF_ENABLED": False})
     enable_worker = hasattr(request, 'param') and request.param is True
     if enable_worker:
         app.config["DISABLE_BACKGROUND_WORKER"] = False
