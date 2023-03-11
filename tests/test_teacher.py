@@ -26,20 +26,59 @@ def test_login_logout(db: AppDatabase, client: FlaskClient):
     assert "login" in response.request.path
 
 
-def test_message_claim(db: AppDatabase, client: FlaskClient):
+def test_message_download(db: AppDatabase, client: FlaskClient):
     login(client, TEST_LOGIN, TEST_PASSWORD)
-
-    response = client.get("teacher/messages", data={
-        "separator": ",",
-        "count": 10
-    })
+    separator = ","
+    count = 10
+    response = client.get(f"teacher/messages?separator={separator}&count={count}")
 
     assert response.headers['Content-Disposition'] == 'attachment; filename=messages.csv'
     assert response.headers["Content-type"] == 'text/csv'
 
     file = list(filter(bool, response.get_data(as_text=True).splitlines()))
     assert file[0][1::] == 'ID,Время,Группа,Задача,Вариант,IP,Отправитель,Код'
-    assert len(file)-1 == len(db.messages.get_latest(None))
+    assert len(file) - 1 == count
+
+
+def test_group_select(db: AppDatabase, client: FlaskClient):
+    login(client, TEST_LOGIN, TEST_PASSWORD)
+
+    for group in range(1, 10):
+        response = client.get(f"teacher/group/select?group={group}", follow_redirects=True)
+        assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+
+
+# With final tasks
+def test_exam_redirect(db: AppDatabase, client: FlaskClient):
+    login(client, TEST_LOGIN, TEST_PASSWORD)
+
+    assert client.application.config.get("FINAL_TASKS") is not None
+
+    for group in range(1, 10):
+        response = client.get(f"teacher/group/select?group={group}", follow_redirects=True)
+        assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+        assert "Зачёт" in response.get_data(as_text=True)
+
+
+# With final tasks
+def test_exam_toggle(db: AppDatabase, client: FlaskClient):
+    login(client, TEST_LOGIN, TEST_PASSWORD)
+
+    for group in range(1, 10):
+
+        seed = db.seeds.get_final_seed(group)
+        if seed is None or not seed.active:
+            response = client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
+            assert response.status_code == 200
+            assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+            assert "Завершить" in response.get_data(as_text=True)
+            assert db.seeds.get_final_seed(group).active
+
+        response = client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
+        assert response.status_code == 200
+        assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+        assert "Продолжить зачёт" in response.get_data(as_text=True)
+        assert not db.seeds.get_final_seed(group).active
 
 
 def login(client: FlaskClient, login: str, password: str):
