@@ -12,9 +12,9 @@
                 </li>
                 {% block header %} {% endblock %}
             </ol>
-            <div class="d-flex gap-3">
+            <div class="d-block gap-3 col-12 col-md-2 mt-2 mt-md-0">
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" id="dLabel" type="button"
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" id="dLabel" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         {% if student is not none %}
                             {{ student.email | hide }}
