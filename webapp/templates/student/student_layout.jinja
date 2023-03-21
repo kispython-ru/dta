@@ -12,37 +12,40 @@
                 </li>
                 {% block header %} {% endblock %}
             </ol>
-            {% if registration %}
-                {% if student is not none %}
-                    <div class="d-flex gap-3 mt-2 mt-md-0">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" id="dLabel" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ student.email | hide }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
-                                <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
-                                <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="/logout">Выйти</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="d-flex gap-3 mt-2 mt-md-0">
-                        <div>
-                            <a class="breadcrumb-item text-decoration-none" href="/rating">
-                                Рейтинг
-                            </a>
-                        </div>
-                        <a class="text-decoration-none" href="/login">
+            <div class="d-block gap-3 col-12 col-md-2 mt-2 mt-md-0">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" id="dLabel" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if student is not none %}
+                            {{ student.email | hide }}
+                        {% else %}
                             Войти
-                        </a>
-                    </div>
-                {% endif %}
-            {% endif %}
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
+                        <li>
+                            <a class="dropdown-item d-block" target="__blank" href="https://github.com/true-grue/kispython">
+                                <div>Материалы курса 📖</div>
+                                <small class="opacity-50">
+                                    Программирование на языке Python
+                                </small>
+                            </a>
+                        </li>
+                        <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
+                        {% if registration %}
+                            {% if student is not none %}
+                                <li><a class="dropdown-item" target="__blank" href="https://t.me/kispython">Telegram для оповещений</a></li>
+                                <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/logout">Выйти</a></li>
+                            {% else %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/login">Войти</a></li>
+                            {% endif %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
         </div>
     </nav>
     <div class="container mt-3">

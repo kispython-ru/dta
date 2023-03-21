@@ -36,7 +36,7 @@ def check_solution(
 def load_tests(core_path: str):
     if core_path not in sys.path:
         sys.path.insert(1, core_path)
-    from loaded_tests import GROUPS, TASKS
+    from check_solution import GROUPS, TASKS
     return GROUPS, TASKS
 
 

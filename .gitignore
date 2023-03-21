@@ -2,6 +2,7 @@
 .vscode
 .idea
 config.local.json
+dta.json
 
 # LocalDB
 *.db
