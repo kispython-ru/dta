@@ -33,3 +33,26 @@ def db(app: Flask) -> AppDatabase:
 @pytest.fixture()
 def client(app: Flask) -> FlaskClient:
     return app.test_client()
+
+
+@pytest.fixture()
+def exam_app() -> Flask:
+    src = os.getcwd()
+    tests = os.path.join(src, "tests")
+    app = configure_app(tests)
+    app.config.update({"WTF_CSRF_ENABLED": False})
+    app.config["FINAL_TASKS"] = {
+        "0": [0, 1, 2, 3, 4],
+        "1": [5, 6, 7, 8]
+    }
+    yield app
+
+
+@pytest.fixture()
+def exam_client(exam_app: Flask):
+    return exam_app.test_client()
+
+
+@pytest.fixture()
+def exam_db(exam_app: Flask) -> AppDatabase:
+    return AppDatabase(lambda: exam_app.config["CONNECTION_STRING"])
