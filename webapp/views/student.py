@@ -221,7 +221,7 @@ def hide_email(value: str):
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/teacher")
+    return render_template("error.jinja", redirect="/")
 
 
 @blueprint.errorhandler(JWTExtendedException)
