@@ -55,4 +55,4 @@ def exam_client(exam_app: Flask):
 
 @pytest.fixture()
 def exam_db(exam_app: Flask) -> AppDatabase:
-    return AppDatabase(lambda: exam_app.config["CONNECTION_STRING"])
+    return AppDatabase(lambda: exam_app.config["EXAM_CONNECTION_STRING"])
