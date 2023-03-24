@@ -2,6 +2,7 @@ from flask.testing import FlaskClient
 
 import pytest
 
+from tests.utils import arrange_task
 from webapp.models import Status, Teacher
 from webapp.repositories import AppDatabase
 
@@ -16,6 +17,8 @@ TEST_PASSWORD = "testtest"
 def test_login_logout(exam_db: AppDatabase, exam_client: FlaskClient):
     if not exam_db.teachers.find_by_login(TEST_LOGIN):
         exam_db.teachers.create(TEST_LOGIN, TEST_PASSWORD)
+
+    exam_db.students.confirm("test@test.ru")
 
     response = login(exam_client, TEST_LOGIN, TEST_PASSWORD)
 
@@ -85,45 +88,38 @@ def test_exam_toggle(exam_db: AppDatabase, exam_client: FlaskClient):
         assert "Продолжить зачёт" in response.get_data(as_text=True)
         assert not exam_db.seeds.get_final_seed(group).active
 
-"""
-# TODO
+
+"""# TODO
 
 def test_submission(db: AppDatabase, client: FlaskClient):
     login(client, TEST_LOGIN, TEST_PASSWORD)
 
-    statuses = db.statuses.get_all()[:10]
-    for status in statuses:
-        if status.status == 2:
-            continue
-        group = status.group
-        variant = status.variant
-        task = status.task
-        response = client.get(f"/teacher/submissions?gid={group}&vid={variant}&tid={task}",
-                                   follow_redirects=True)
-        assert response.status_code == 200
-        assert str(group) in response.get_data(as_text=True)
-        assert str(variant) in response.get_data(as_text=True)
-        assert str(variant) in response.get_data(as_text=True)
-        assert status.code in response.get_data(as_text=True)
+    gid, vid, tid = arrange_task(db)
 
-#TODO
+    db.statuses.submit_task(tid, vid, gid, "test", "0.0.0.0")
+    response = client.get(f"/teacher/submissions?god={gid}&tid={tid}&vid={vid}", follow_redirects=True)
 
+    assert response.status_code == 200
+    assert str(gid) in response.get_data(as_text=True)
+
+
+# TODO
 
 
 def test_exam_download(exam_db: AppDatabase, exam_client: FlaskClient):
     login(exam_client, TEST_LOGIN, TEST_PASSWORD)
-    separator = ","
     count = 10
-    gid = 1
-    response = exam_client.get(f"/teacher/group/{gid}/exam/csv")
+    gid = 8
+    response = exam_client.get(f"/teacher/group/{gid}/exam/csv?delimiter=semicolon")
 
+    assert response.status_code == 200
     assert response.headers['Content-Disposition'] == f'attachment; filename={gid}.csv'
     assert response.headers["Content-type"] == 'text/csv'
 
     file = list(filter(bool, response.get_data(as_text=True).splitlines()))
     assert file[0][1::] == 'ID,Время,Группа,Задача,Вариант,IP,Отправитель,Код'
-    assert len(file) - 1 == count
-"""
+    assert len(file) - 1 == count"""
+
 
 def login(client: FlaskClient, login: str, password: str):
     return client.post("/teacher/login", data={
