@@ -449,6 +449,12 @@ class TeacherManager:
             if bcrypt.checkpw(given, actual):
                 return teacher
 
+    def create(self, login: str, password: str):
+        given = password.encode('utf8')
+        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+        teacher = self.teachers.create(login, hashed.decode('utf8'))
+        return teacher.id
+
 
 class StudentManager:
     def __init__(self, config: AppConfigManager, students: StudentRepository, mailers: MailerRepository):

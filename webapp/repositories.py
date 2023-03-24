@@ -413,10 +413,10 @@ class TeacherRepository:
             return teacher
 
     def create(self, login: str, password: str):
-        hashpw = str(bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'))
+
         with self.db.create_session() as session:
             teacher = Teacher(login=login,
-                              password_hash=hashpw)
+                              password_hash=password)
             session.add(teacher)
             return teacher
 

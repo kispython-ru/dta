@@ -16,9 +16,8 @@ TEST_PASSWORD = "testtest"
 
 def test_login_logout(exam_db: AppDatabase, exam_client: FlaskClient):
     if not exam_db.teachers.find_by_login(TEST_LOGIN):
-        exam_db.teachers.create(TEST_LOGIN, TEST_PASSWORD)
-
-    exam_db.students.confirm("test@test.ru")
+        tm = TeacherManager(exam_db.teachers)
+        tm.create(TEST_LOGIN, TEST_PASSWORD)
 
     response = login(exam_client, TEST_LOGIN, TEST_PASSWORD)
 
