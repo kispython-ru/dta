@@ -4,7 +4,6 @@ from typing import Callable
 
 from sqlalchemy import desc
 import bcrypt
-from numpy import var
 from sqlalchemy.orm import Session
 
 from webapp.models import (
