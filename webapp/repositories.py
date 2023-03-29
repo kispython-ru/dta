@@ -333,12 +333,16 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
-    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
+    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int, registration: bool):
         with self.db.create_session() as session:
-            return session.query(MessageCheck, Message, Student) \
-                .join(Message, Message.id == MessageCheck.message) \
-                .join(Student, Student.id == Message.student) \
-                .filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
+            if not registration:
+                data = session.query(MessageCheck, Message) \
+                    .join(Message, Message.id == MessageCheck.message)
+            else:
+                data = session.query(MessageCheck, Message, Student) \
+                    .join(Message, Message.id == MessageCheck.message) \
+                    .join(Student, Student.id == Message.student)
+            return data.filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
                 .order_by(desc(Message.time)) \
                 .offset(skip) \
                 .limit(take) \
