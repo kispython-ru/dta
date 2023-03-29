@@ -20,8 +20,8 @@ flask:
 
 .PHONY: seed
 seed:
-	rm webapp.db
-	python -m webapp.app --seed
+	rm web-app.db web-app-exam.db
+	python -m webapp.app --seed --create_exam_db
 
 .PHONY: flask-win
 flask-win:

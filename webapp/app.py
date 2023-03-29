@@ -12,7 +12,7 @@ import webapp.views.api as api
 import webapp.views.student as student
 import webapp.views.teacher as teacher
 import webapp.worker as worker
-from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate
+from webapp.commands import AnalyzeCmd, CmdManager, SeedCmd, migrate, CreateExamDb
 from webapp.lks import lks_oauth_helper
 from webapp.utils import load_config_files
 
@@ -75,5 +75,5 @@ def create_app() -> Flask:
 
 
 if __name__ == "__main__":
-    cmd = CmdManager(config(), [SeedCmd, AnalyzeCmd])
+    cmd = CmdManager(config(), [SeedCmd, AnalyzeCmd, CreateExamDb])
     cmd.run()
