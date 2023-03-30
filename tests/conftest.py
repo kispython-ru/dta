@@ -41,6 +41,7 @@ def exam_app() -> Flask:
     tests = os.path.join(src, "tests")
     app = configure_app(tests)
     app.config.update({"WTF_CSRF_ENABLED": False})
+    app.config.update({"CONNECTION_STRING" : app.config.get("EXAM_CONNECTION_STRING")})
     app.config["FINAL_TASKS"] = {
         "0": [0, 1, 2, 3, 4],
         "1": [5, 6, 7, 8]

@@ -25,18 +25,17 @@ def test_exam_toggle(exam_db: AppDatabase, exam_client: FlaskClient):
     login(exam_db, exam_client, TEST_LOGIN, TEST_PASSWORD)
 
     group = 1
-
     seed = exam_db.seeds.get_final_seed(group)
-    if seed is None or not seed.active:
+    if (seed is None) or not seed.active:
         response = exam_client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
         assert response.status_code == 200
-        assert "ИНБО-01-20" in response.get_data(as_text=True)
+        assert exam_db.groups.get_by_id(group).title in response.get_data(as_text=True)
         assert "Завершить" in response.get_data(as_text=True)
         assert exam_db.seeds.get_final_seed(group).active
 
     response = exam_client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
     assert response.status_code == 200
-    assert "ИНБО-01-20" in response.get_data(as_text=True)
+    assert exam_db.groups.get_by_id(group).title in response.get_data(as_text=True)
     assert "Продолжить зачёт" in response.get_data(as_text=True)
     assert not exam_db.seeds.get_final_seed(group).active
 
@@ -44,11 +43,8 @@ def test_exam_toggle(exam_db: AppDatabase, exam_client: FlaskClient):
 def test_exam_download(exam_db: AppDatabase, exam_client: FlaskClient):
     login(exam_db, exam_client, TEST_LOGIN, TEST_PASSWORD)
 
-    exam_db.variants.create_by_ids([1])
-    exam_db.groups.create("TEST")
-    exam_db.tasks.create_by_ids([1])
 
-    gid, vid, tid = 21, 1, 1
+    gid, vid, tid = 1, 1, 1
     student_email = "test@gmail.com"
     if not exam_db.students.find_by_email(student_email):
         exam_db.students.create(student_email, "123123123")
@@ -57,9 +53,7 @@ def test_exam_download(exam_db: AppDatabase, exam_client: FlaskClient):
                                       .students
                                       .find_by_email(student_email), gid)
 
-    exam_db.statuses.submit_task(tid, vid, gid, "main = lambda: 42", "0.0.0.0")
-
-    response = exam_client.get(f"/teacher/group/{str(gid)}/exam/csv", follow_redirects=True)
+    response = exam_client.get(f"/teacher/group/{gid}/exam/csv", follow_redirects=True)
 
     assert response.status_code == 200
     assert response.headers['Content-Disposition'] == f'attachment; filename={gid}.csv'
