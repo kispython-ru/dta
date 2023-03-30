@@ -1,6 +1,6 @@
 from flask.testing import FlaskClient
 
-from tests.utils import arrange_task
+from tests.utils import arrange_task, teacher_login
 from webapp.managers import TeacherManager
 from webapp.repositories import AppDatabase
 
@@ -9,7 +9,7 @@ TEST_PASSWORD = "testtest"
 
 
 def test_exam_redirect(exam_db: AppDatabase, exam_client: FlaskClient):
-    login(exam_db, exam_client, TEST_LOGIN, TEST_PASSWORD)
+    teacher_login(exam_db, exam_client)
 
     assert exam_client.application.config.get("FINAL_TASKS") is not None
 
@@ -22,7 +22,7 @@ def test_exam_redirect(exam_db: AppDatabase, exam_client: FlaskClient):
 
 
 def test_exam_toggle(exam_db: AppDatabase, exam_client: FlaskClient):
-    login(exam_db, exam_client, TEST_LOGIN, TEST_PASSWORD)
+    teacher_login(exam_db, exam_client)
 
     group = 1
     seed = exam_db.seeds.get_final_seed(group)
@@ -41,7 +41,7 @@ def test_exam_toggle(exam_db: AppDatabase, exam_client: FlaskClient):
 
 
 def test_exam_download(exam_db: AppDatabase, exam_client: FlaskClient):
-    login(exam_db, exam_client, TEST_LOGIN, TEST_PASSWORD)
+    teacher_login(exam_db, exam_client)
 
 
     gid, vid, tid = 1, 1, 1
@@ -58,13 +58,3 @@ def test_exam_download(exam_db: AppDatabase, exam_client: FlaskClient):
     assert response.status_code == 200
     assert response.headers['Content-Disposition'] == f'attachment; filename={gid}.csv'
     assert response.headers["Content-type"] == 'text/csv'
-
-
-def login(db: AppDatabase, client: FlaskClient, login: str, password: str):
-    if not db.teachers.find_by_login(login):
-        tm = TeacherManager(db.teachers)
-        tm.create(login, password)
-    return client.post("/teacher/login", data={
-        "login": login,
-        "password": password
-    }, follow_redirects=True)

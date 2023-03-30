@@ -5,7 +5,9 @@ from typing import Callable
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+from flask.testing import FlaskClient
 
+from webapp.managers import TeacherManager
 from webapp.repositories import AppDatabase
 
 
@@ -50,3 +52,14 @@ def get_tags(
 ) -> ResultSet[Tag]:
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all(name, class_=class_)
+
+
+def teacher_login(db: AppDatabase, client: FlaskClient):
+    login = unique_str()
+    password = unique_str()
+    tm = TeacherManager(db.teachers)
+    tm.create(login, password)
+    return client.post("/teacher/login", data={
+        "login": login,
+        "password": password
+    }, follow_redirects=True)
