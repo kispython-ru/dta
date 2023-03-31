@@ -4,9 +4,6 @@ from tests.utils import arrange_task, teacher_login
 from webapp.managers import TeacherManager
 from webapp.repositories import AppDatabase
 
-TEST_LOGIN = "test"
-TEST_PASSWORD = "testtest"
-
 
 def test_exam_redirect(exam_db: AppDatabase, exam_client: FlaskClient):
     teacher_login(exam_db, exam_client)
