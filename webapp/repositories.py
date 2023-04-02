@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
-from sqlalchemy import desc
+from sqlalchemy import desc, null
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -333,16 +333,15 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
-    def get_by_task(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int, registration: bool):
+    def get_by_task(self, group: int, variant: int, task: int, skip: int, take: int, registration: bool):
         with self.db.create_session() as session:
-            if not registration:
-                data = session.query(MessageCheck, Message) \
-                    .join(Message, Message.id == MessageCheck.message)
-            else:
-                data = session.query(MessageCheck, Message, Student) \
-                    .join(Message, Message.id == MessageCheck.message) \
-                    .join(Student, Student.id == Message.student)
-            return data.filter(Message.group == group_id, Message.variant == variant_id, Message.task == task_id) \
+            query = session \
+                .query(MessageCheck, Message, Student if registration else null()) \
+                .join(Message, Message.id == MessageCheck.message)
+            if registration:
+                query = query.join(Student, Student.id == Message.student)
+            return query \
+                .filter(Message.group == group, Message.variant == variant, Message.task == task) \
                 .order_by(desc(Message.time)) \
                 .offset(skip) \
                 .limit(take) \
