@@ -1,20 +1,19 @@
 from flask.testing import FlaskClient
 
-from tests.utils import arrange_task, teacher_login
+from tests.utils import arrange_task, teacher_login, unique_int, unique_str
 from webapp.managers import TeacherManager
 from webapp.repositories import AppDatabase
 
 
 def test_exam_redirect(exam_db: AppDatabase, exam_client: FlaskClient):
     teacher_login(exam_db, exam_client)
+    name = unique_str()
+    group = exam_db.groups.create(name)
 
-    assert exam_client.application.config.get("FINAL_TASKS") is not None
+    response = exam_client.get(f"teacher/group/select?group={group.id}", follow_redirects=True)
 
-    group = 1
-
-    response = exam_client.get(f"teacher/group/select?group={group}", follow_redirects=True)
     assert "exam" in response.request.path
-    assert exam_db.groups.get_by_id(group).title in response.get_data(as_text=True)
+    assert name in response.get_data(as_text=True)
     assert "Зачёт" in response.get_data(as_text=True)
 
 
