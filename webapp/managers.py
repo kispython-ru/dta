@@ -208,10 +208,11 @@ class StatusManager:
         achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
-    def get_submissions_statuses_by_info(self, group_id: int, variant_id: int, task_id: int, skip: int, take: int):
-        checks_and_messages = self.checks.get_by_task(group_id, variant_id, task_id, skip, take)
+    def get_submissions_statuses_by_info(self, group: int, variant: int, task: int, skip: int, take: int):
+        registration = self.config.config.enable_registration
         submissions = []
-        for check, message, student in checks_and_messages:
+        checks = self.checks.get_by_task(group, variant, task, skip, take, registration)
+        for check, message, student in checks:
             submissions.append(self.__get_submissions(check, message, student))
         return submissions
 
