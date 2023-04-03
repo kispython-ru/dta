@@ -40,13 +40,11 @@ class DbContext:
 class DbContextManager:
     def __init__(self, get_connection: Callable[[], str]):
         self.get_connection = get_connection
-        self.session_maker = None
 
     def create_session(self) -> DbContext:
-        if self.session_maker is None:
-            connection_string = self.get_connection()
-            self.session_maker = create_session_maker(connection_string)
-        session = self.session_maker(expire_on_commit=False)
+        connection_string = self.get_connection()
+        maker = create_session_maker(connection_string)
+        session = maker(expire_on_commit=False)
         context = DbContext(session)
         return context
 
