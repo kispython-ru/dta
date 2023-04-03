@@ -5,6 +5,7 @@ from typing import Callable
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
+
 from flask.testing import FlaskClient
 
 from webapp.managers import TeacherManager

@@ -9,7 +9,7 @@ from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
-@pytest.mark.parametrize('app', ([True]), indirect=True)
+@pytest.mark.parametrize('app', (['enable-worker']), indirect=True)
 def test_background_task_check(db: AppDatabase, client: FlaskClient):
     def post_code(url: str, code: str):
         return client.post(

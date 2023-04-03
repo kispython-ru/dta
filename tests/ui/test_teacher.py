@@ -1,5 +1,7 @@
-from flask.testing import FlaskClient
 from tests.utils import arrange_task, teacher_login
+
+from flask.testing import FlaskClient
+
 from webapp.repositories import AppDatabase
 
 
