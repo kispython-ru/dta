@@ -12,6 +12,7 @@ from webapp.dto import (
     AppConfig,
     ExternalTaskDto,
     GroupDto,
+    GroupInRatingDto,
     StudentInRatingDto,
     SubmissionDto,
     TaskDto,
@@ -174,22 +175,26 @@ class StatusManager:
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 
-    def get_rating_data(self) -> dict[int, list[StudentInRatingDto]]:
-        def key(info: tuple[Group, TaskStatus]):
+    def get_rating_data(self, is_group: bool = False) -> dict[int, list[StudentInRatingDto | GroupInRatingDto]]:
+        def key(info):
             _, status = info
-            return status.group, status.variant
+            return status.group if is_group else (status.group, status.variant)
 
         achievements = self.__read_achievements()
         statuses = self.statuses.get_with_groups()
-        places: dict[int, list[StudentInRatingDto]] = dict()
+        places: dict[int, list[StudentInRatingDto | GroupInRatingDto]] = dict()
         for _, pairs in groupby(sorted(statuses, key=key), key):
             pairs = list(pairs)
             group, status = pairs[0]
-            active = sum(len(status.achievements or [0]) for _, status in pairs if str(status.task) in achievements)
+            active = sum(len(status.achievements or [0])
+                         for _, status in pairs if str(status.task) in achievements)
             inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
             earned = active + inactive
             places.setdefault(earned, [])
-            places[earned].append(StudentInRatingDto(group, status.variant, earned))
+            if is_group:
+                places[earned].append(GroupInRatingDto(group, earned))
+            else:
+                places[earned].append(StudentInRatingDto(group, status.variant, earned))
         ordered = sorted(places.items(), reverse=True)
         return dict(ordered[0:self.config.config.places_in_rating])
 

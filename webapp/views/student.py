@@ -73,6 +73,18 @@ def group(student: Student | None, group_id: int):
     )
 
 
+@blueprint.route("/rating/groups", methods=["GET"])
+@student_jwt_optional(db.students)
+def rating_groups(student: Student | None):
+    groupings = statuses.get_rating_data(is_group=True)
+    return render_template(
+        "student/groups_rating.jinja",
+        groupings=groupings,
+        registration=config.config.registration,
+        student=student,
+    )
+
+
 @blueprint.route("/rating", methods=["GET"])
 @student_jwt_optional(db.students)
 def rating(student: Student | None):

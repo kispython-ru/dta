@@ -237,3 +237,13 @@ class SubmissionDto:
         self.checked = checked
         self.sent = sent
         self.student = student
+
+
+class GroupInRatingDto:
+    def __init__(
+        self,
+        group: Group,
+        earned: int = 0
+    ):
+        self.group = group
+        self.earned = earned
