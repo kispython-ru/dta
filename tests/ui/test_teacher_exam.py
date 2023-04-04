@@ -1,12 +1,12 @@
 import pytest
-from tests.utils import teacher_login, unique_str
+from tests.utils import teacher_login, unique_str, mode
 
 from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
 
 
-@pytest.mark.parametrize('app', (['enable-exam']), indirect=True)
+@mode("exam")
 def test_exam_redirect(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
     name = unique_str()
@@ -19,7 +19,7 @@ def test_exam_redirect(db: AppDatabase, client: FlaskClient):
     assert "Зачёт" in response.get_data(as_text=True)
 
 
-@pytest.mark.parametrize('app', (['enable-exam']), indirect=True)
+@mode("exam")
 def test_exam_toggle(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
@@ -39,12 +39,12 @@ def test_exam_toggle(db: AppDatabase, client: FlaskClient):
     assert not db.seeds.get_final_seed(group).active
 
 
-@pytest.mark.parametrize('app', (['enable-exam']), indirect=True)
+@mode("exam")
 def test_exam_download(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
     gid, vid, tid = 1, 1, 1
-    student_email = "test@gmail.com"
+    student_email = unique_str()
     if not db.students.find_by_email(student_email):
         db.students.create(student_email, "123123123")
         db.students.confirm(student_email)

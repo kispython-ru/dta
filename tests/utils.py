@@ -3,6 +3,7 @@ import time
 import uuid
 from typing import Callable
 
+import pytest
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
 
@@ -64,3 +65,7 @@ def teacher_login(db: AppDatabase, client: FlaskClient):
         "login": login,
         "password": password
     }, follow_redirects=True)
+
+
+def mode(mode_name):
+    return pytest.mark.parametrize('app', ([f'enable-{mode_name}']), indirect=True)
