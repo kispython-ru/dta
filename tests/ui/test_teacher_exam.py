@@ -22,20 +22,20 @@ def test_exam_redirect(db: AppDatabase, client: FlaskClient):
 def test_exam_toggle(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
-    group = 1
-    seed = db.seeds.get_final_seed(group)
+    group = db.groups.create(unique_str())
+    seed = db.seeds.get_final_seed(group.id)
     if (seed is None) or not seed.active:
-        response = client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
+        response = client.get(f"/teacher/group/{group.id}/exam/toggle", follow_redirects=True)
         assert response.status_code == 200
-        assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+        assert group.title in response.get_data(as_text=True)
         assert "Завершить" in response.get_data(as_text=True)
-        assert db.seeds.get_final_seed(group).active
+        assert db.seeds.get_final_seed(group.id).active
 
-    response = client.get(f"/teacher/group/{group}/exam/toggle", follow_redirects=True)
+    response = client.get(f"/teacher/group/{group.id}/exam/toggle", follow_redirects=True)
     assert response.status_code == 200
-    assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+    assert group.title in response.get_data(as_text=True)
     assert "Продолжить зачёт" in response.get_data(as_text=True)
-    assert not db.seeds.get_final_seed(group).active
+    assert not db.seeds.get_final_seed(group.id).active
 
 
 @mode("exam")

@@ -11,14 +11,6 @@ from webapp.commands import migrate
 from webapp.repositories import AppDatabase
 
 
-def clear_exam_db(connection: str):
-    migrate(connection)
-    db = AppDatabase(lambda: connection)
-    db.groups.delete_all()
-    db.tasks.delete_all()
-    db.variants.delete_all()
-
-
 @pytest.fixture()
 def app(request) -> Flask:
     param = request.param if hasattr(request, 'param') else None

@@ -43,9 +43,10 @@ def test_message_download(db: AppDatabase, client: FlaskClient):
 def test_group_select(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
-    group = 1
-    response = client.get(f"teacher/group/select?group={group}", follow_redirects=True)
-    assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
+    group = db.groups.create(unique_str())
+
+    response = client.get(f"teacher/group/select?group={group.id}", follow_redirects=True)
+    assert group.title in response.get_data(as_text=True)
 
 
 @mode('registration')
