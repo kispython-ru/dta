@@ -65,20 +65,6 @@ class SeedCmd:
         print(f'Done seeding db {config.connection_string} using core {config.core_path}!')
 
 
-class CreateExamDb:
-    def __init__(self):
-        self.command = "--create_exam_db"
-        self.help = "migrates empty database file to use in exam tests"
-
-    def run(self, dir: str):
-        print(f'Seeding db "sqlite:///web-app-exam.db" ...')
-        migrate("sqlite:///web-app-exam.db")
-        db = AppDatabase(lambda: "sqlite:///web-app-exam.db")
-        db.groups.delete_all()
-        db.tasks.delete_all()
-        db.variants.delete_all()
-        print(f'Done seeding db "sqlite:///web-app-exam.db"!')
-
 
 class AnalyzeCmd:
     def __init__(self):
