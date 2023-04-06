@@ -1,5 +1,5 @@
 import pytest
-from tests.utils import teacher_login, unique_str, mode
+from tests.utils import teacher_login, unique_str, mode, arrange_task
 
 from flask.testing import FlaskClient
 
@@ -43,15 +43,18 @@ def test_exam_toggle(db: AppDatabase, client: FlaskClient):
 def test_exam_download(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
-    gid, vid, tid = 1, 1, 1
+    gid, vid, tid = arrange_task(db)
     student_email = unique_str()
-    if not db.students.find_by_email(student_email):
-        db.students.create(student_email, "123123123")
-        db.students.confirm(student_email)
-        db.students.update_group(db.students.find_by_email(student_email), gid)
+
+    db.students.create(student_email, unique_str())
+    db.students.confirm(student_email)
+    db.students.update_group(db.students.find_by_email(student_email), gid)
 
     response = client.get(f"/teacher/group/{gid}/exam/csv", follow_redirects=True)
 
     assert response.status_code == 200
     assert response.headers['Content-Disposition'] == f'attachment; filename={gid}.csv'
     assert response.headers["Content-type"] == 'text/csv'
+
+    # file = list(filter(bool, response.get_data(as_text=True).splitlines()))
+    # assert file[0][1::] == 'ID,Время,Группа,Задача,Вариант,IP,Отправитель,Код'

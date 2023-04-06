@@ -1,8 +1,11 @@
-from tests.utils import arrange_task, teacher_login
+import time
+
+from tests.utils import arrange_task, teacher_login, unique_str, mode
 
 from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
+from webapp.views.student import hide_email
 
 
 def test_login_logout(db: AppDatabase, client: FlaskClient):
@@ -46,14 +49,49 @@ def test_group_select(db: AppDatabase, client: FlaskClient):
     response = client.get(f"teacher/group/select?group={group}", follow_redirects=True)
     assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
 
-
+@mode('registration')
 def test_submission(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
     gid, vid, tid = arrange_task(db)
 
-    db.statuses.submit_task(tid, vid, gid, "test", "0.0.0.0")
-    response = client.get(f"/teacher/submissions?gid={gid}&tid={tid}&vid={vid}", follow_redirects=True)
+    student_email = f"{unique_str()}@lol.ru"
 
-    assert response.status_code == 200
-    assert str(gid) in response.get_data(as_text=True)
+    student = db.students.create(student_email, unique_str())
+    db.students.confirm(student_email)
+    db.students.update_group(db.students.find_by_email(student_email), gid)
+
+    code = "main = lambda: 42"
+    ip = "0.0.0.0"
+
+    mes = db.messages.submit_task(tid, vid, gid, code, ip, student.id)
+    stat = db.statuses.submit_task(tid, vid, gid, code, ip)
+    db.checks.record_check(mes.id, stat.status, "lol")
+
+    response = client.get(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}")
+
+    assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
+    assert code in response.get_data(as_text=True)
+    assert hide_email(student_email) in response.get_data(as_text=True)
+    assert str(student.id) in response.get_data(as_text=True)
+
+
+def test_anonymous_submission(db: AppDatabase, client: FlaskClient):
+    teacher_login(db, client)
+    gid, vid, tid = arrange_task(db)
+    code = "main = lambda: 42"
+    ip = "0.0.0.0"
+
+    mes = db.messages.submit_task(tid, vid, gid, code, ip, None)
+    stat = db.statuses.submit_task(tid, vid, gid, code, ip)
+
+    check = unique_str()
+
+    db.checks.record_check(mes.id, stat.status, check)
+
+    response = client.get(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}")
+
+    assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
+    assert code in response.get_data(as_text=True)
+    assert "студент" not in response.get_data(as_text=True)
+
