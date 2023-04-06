@@ -7,7 +7,16 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from webapp.app import configure_app
+from webapp.commands import migrate
 from webapp.repositories import AppDatabase
+
+
+def clear_exam_db(connection: str):
+    migrate(connection)
+    db = AppDatabase(lambda: connection)
+    db.groups.delete_all()
+    db.tasks.delete_all()
+    db.variants.delete_all()
 
 
 @pytest.fixture()
@@ -19,8 +28,11 @@ def app(request) -> Flask:
     app.config.update({'WTF_CSRF_ENABLED': False})
     if param == 'enable-worker':
         app.config['DISABLE_BACKGROUND_WORKER'] = False
+    if param == 'enable-registration':
+        app.config["ENABLE_REGISTRATION"] = True
     if param == 'enable-exam':
         app.config['CONNECTION_STRING'] = app.config['EXAM_CONNECTION_STRING']
+        migrate(app.config['CONNECTION_STRING'])
         app.config['ENABLE_REGISTRATION'] = False
         app.config['FINAL_TASKS'] = {
             "0": list(range(0, 5)),
