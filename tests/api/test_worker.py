@@ -1,7 +1,6 @@
 import json
 
-import pytest
-from tests.utils import arrange_task, timeout_assert, mode
+from tests.utils import arrange_task, mode, timeout_assert
 
 from flask.testing import FlaskClient
 

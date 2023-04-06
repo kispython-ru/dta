@@ -1,5 +1,4 @@
-import pytest
-from tests.utils import teacher_login, unique_str, mode, arrange_task
+from tests.utils import arrange_task, mode, teacher_login, unique_str
 
 from flask.testing import FlaskClient
 
@@ -55,6 +54,3 @@ def test_exam_download(db: AppDatabase, client: FlaskClient):
     assert response.status_code == 200
     assert response.headers['Content-Disposition'] == f'attachment; filename={gid}.csv'
     assert response.headers["Content-type"] == 'text/csv'
-
-    # file = list(filter(bool, response.get_data(as_text=True).splitlines()))
-    # assert file[0][1::] == 'ID,Время,Группа,Задача,Вариант,IP,Отправитель,Код'

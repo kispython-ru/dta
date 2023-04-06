@@ -1,6 +1,4 @@
-import time
-
-from tests.utils import arrange_task, teacher_login, unique_str, mode
+from tests.utils import arrange_task, mode, teacher_login, unique_str
 
 from flask.testing import FlaskClient
 
@@ -49,6 +47,7 @@ def test_group_select(db: AppDatabase, client: FlaskClient):
     response = client.get(f"teacher/group/select?group={group}", follow_redirects=True)
     assert db.groups.get_by_id(group).title in response.get_data(as_text=True)
 
+
 @mode('registration')
 def test_submission(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
@@ -94,4 +93,3 @@ def test_anonymous_submission(db: AppDatabase, client: FlaskClient):
     assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
     assert code in response.get_data(as_text=True)
     assert "студент" not in response.get_data(as_text=True)
-

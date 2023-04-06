@@ -65,7 +65,6 @@ class SeedCmd:
         print(f'Done seeding db {config.connection_string} using core {config.core_path}!')
 
 
-
 class AnalyzeCmd:
     def __init__(self):
         self.command = "--analyze"
