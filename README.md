@@ -77,7 +77,7 @@ The Digital Teaching Assistant system is described in the following papers:
 
 1. Sovietov P.N. [**Automatic Generation of Programming Exercises**](https://arxiv.org/abs/2205.11304) // In Proceedings of the 1st International Conference on Technology Enhanced Learning in Higher Education (TELE), 2021, pp. 111-114.
 
-2. Andrianova E.G., Demidova L.A., Sovetov P.N. [**Pedagogical design of a digital teaching assistant in massive professional training for the digital economy**](https://www.rtj-mirea.ru/jour/article/view/518/355) // *Russian Technological Journal*. **2022**, 10 (3), pp. 7-23.
+2. Andrianova E.G., Demidova L.A., Sovetov P.N. [**Pedagogical Design of a Digital Teaching Assistant in Massive Professional Training for the Digital Economy**](https://www.rtj-mirea.ru/jour/article/view/518/355) // *Russian Technological Journal*. **2022**, 10 (3), pp. 7-23.
 
 3. Sovietov P.N., Gorchakov A.V. [**Digital Teaching Assistant for the Python Programming Course**](https://ieeexplore.ieee.org/document/9801060) // In Proceedings of the 2nd International Conference on Technology Enhanced Learning in Higher Education (TELE), 2022, pp. 272-276.
 
@@ -86,3 +86,5 @@ The Digital Teaching Assistant system is described in the following papers:
 5. Demidova L.A., Gorchakov A.V. [**Classification of Program Texts Represented as Markov Chains with Biology-Inspired Algorithms-Enhanced Extreme Learning Machines**](https://www.mdpi.com/1999-4893/15/9/329) // *Algorithms*. **2022**, 15 (9), p. 329.
 
 6. Gorchakov A.V., Demidova L.A., Sovietov P.N. [**Automated program text analysis using representations based on Markov chains and Extreme Learning Machines**](http://vestnik.rsreu.ru/ru/archive/2022/vypusk-82/1299-1995-4565-2022-82-89-103) // *Vestnik of Ryazan State Radio Engineering University*. **2022**, 82, pp. 89-103.
+
+7. Gorchakov A.V., Demidova L.A., Sovietov P.N. [**Intelligent Accounting of Educational Achievements in the "Digital Teaching Assistant" System**](https://www.researchgate.net/publication/369692306_Intelligent_Accounting_of_Educational_Achievements_in_the_Digital_Teaching_Assistant_System) // *International Journal of Open Information Technologies*. **2023**, 11 (4), pp. 106-115.
