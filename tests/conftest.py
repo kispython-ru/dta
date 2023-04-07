@@ -7,21 +7,36 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from webapp.app import configure_app
+from webapp.commands import migrate
 from webapp.repositories import AppDatabase
 
 
 @pytest.fixture()
 def app(request) -> Flask:
+    param = request.param if hasattr(request, 'param') else None
     src = os.getcwd()
     tests = os.path.join(src, "tests")
     app = configure_app(tests)
-    enable_worker = hasattr(request, 'param') and request.param is True
-    if enable_worker:
-        app.config["DISABLE_BACKGROUND_WORKER"] = False
+    app.config.update({'WTF_CSRF_ENABLED': False})
+    if param == 'enable-worker':
+        app.config['DISABLE_BACKGROUND_WORKER'] = False
+    if param == 'enable-registration':
+        app.config["ENABLE_REGISTRATION"] = True
+    if param == 'enable-exam':
+        app.config['CONNECTION_STRING'] = app.config['EXAM_CONNECTION_STRING']
+        migrate(app.config['CONNECTION_STRING'])
+        app.config['ENABLE_REGISTRATION'] = False
+        app.config['FINAL_TASKS'] = {
+            "0": list(range(0, 5)),
+            "1": list(range(5, 9))
+        }
     yield app
-    if enable_worker:
-        worker_pid = app.config["WORKER_PID"]
-        os.kill(worker_pid, signal.SIGTERM)
+    if param == 'enable-worker':
+        wpid = app.config["WORKER_PID"]
+        os.kill(wpid, signal.SIGTERM)
+    if param == 'enable-registration':
+        mpid = app.config["MAILBOX_PID"]
+        os.kill(mpid, signal.SIGTERM)
 
 
 @pytest.fixture()

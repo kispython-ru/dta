@@ -36,13 +36,12 @@ from webapp.repositories import (
 class AppConfigManager:
     def __init__(self, get_config: Callable[[], dict]):
         self.get_config = get_config
-        self.configuration = None
 
     @property
     def config(self) -> AppConfig:
-        if not self.configuration:
-            self.configuration = AppConfig(self.get_config())
-        return self.configuration
+        configuration = self.get_config()
+        typed = AppConfig(configuration)
+        return typed
 
 
 class GroupManager:
@@ -449,6 +448,12 @@ class TeacherManager:
             actual = teacher.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
                 return teacher
+
+    def create(self, login: str, password: str):
+        given = password.encode('utf8')
+        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+        teacher = self.teachers.create(login, hashed.decode('utf8'))
+        return teacher.id
 
 
 class StudentManager:

@@ -1,7 +1,6 @@
 import json
 
-import pytest
-from tests.utils import arrange_task, timeout_assert
+from tests.utils import arrange_task, mode, timeout_assert
 
 from flask.testing import FlaskClient
 
@@ -9,7 +8,7 @@ from webapp.models import Status
 from webapp.repositories import AppDatabase
 
 
-@pytest.mark.parametrize('app', ([True]), indirect=True)
+@mode("worker")
 def test_background_task_check(db: AppDatabase, client: FlaskClient):
     def post_code(url: str, code: str):
         return client.post(

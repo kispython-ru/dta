@@ -1,4 +1,5 @@
 {
+    "EXAM_CONNECTION_STRING": "sqlite:///web-app-exam.db",
     "CONNECTION_STRING": "sqlite:///web-app.db",
     "CORE_PATH": "./mocks",
     "ANALYTICS_PATH": "./mocks",
