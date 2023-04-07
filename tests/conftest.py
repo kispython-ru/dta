@@ -34,6 +34,9 @@ def app(request) -> Flask:
     if param == 'enable-worker':
         wpid = app.config["WORKER_PID"]
         os.kill(wpid, signal.SIGTERM)
+    if param == 'enable-registration':
+        mpid = app.config["MAILBOX_PID"]
+        os.kill(mpid, signal.SIGTERM)
 
 
 @pytest.fixture()

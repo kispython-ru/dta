@@ -80,6 +80,7 @@ def start_background_worker():
     ))
     try:
         process.start()
+        app.config["MAILBOX_PID"] = process.pid
     except BaseException:
         exception = get_exception_info()
         print(f"Error occured while starting process: {exception}")
