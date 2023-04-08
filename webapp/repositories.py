@@ -151,7 +151,7 @@ class TaskStatusRepository:
                 .all()
             return statuses
 
-    def get_with_groups(self) -> list[tuple[Group, TaskStatus]]:
+    def get_rating(self) -> list[tuple[Group, TaskStatus]]:
         with self.db.create_session() as session:
             statuses = session.query(Group, TaskStatus) \
                 .join(TaskStatus, TaskStatus.group == Group.id) \
