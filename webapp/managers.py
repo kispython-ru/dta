@@ -96,11 +96,12 @@ class ExternalTaskManager:
 
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
         if self.seed is None:
+            not_exam_mode = not self.config.final_tasks
             return ExternalTaskDto(
                 group_title=self.group.title,
                 task=task,
                 variant=variant,
-                active=True
+                active=not_exam_mode
             )
         unique = f'{task}{variant}'
         task: Task = self.sample_task(str(variant), task)

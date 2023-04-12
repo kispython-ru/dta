@@ -68,5 +68,10 @@
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Завершить</button>
     </form>
   {% endif %}
+  {% if seed == None or seed.active == false %}
+  <form action="/teacher/group/{{ group.id }}/exam/delete" method="GET" class="w-100">
+    <button class="btn btn-outline-danger w-100 d-block" type="submit">Очистить таблицу</button>
+  </form>
+  {% endif %}
 </div>
 {% endblock %}
