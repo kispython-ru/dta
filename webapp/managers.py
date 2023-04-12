@@ -190,6 +190,11 @@ class StatusManager:
                          for _, status in pairs if str(status.task) in achievements)
             inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
             earned = active + inactive
+            if is_group:
+                if group.title == self.config.config.groups.keys():
+                    earned = int(float(earned) / self.config.config.groups[group.title] * 100)
+                else:
+                    earned = int(float(earned) / self.config.config.places_in_group * 100)
             places.setdefault(earned, [])
             if is_group:
                 places[earned].append(GroupInRatingDto(group, earned))

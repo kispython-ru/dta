@@ -22,6 +22,8 @@ class AppConfig:
         self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
         self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
         self.places_in_rating: int = config["PLACES_IN_RATING"]
+        self.places_in_group: int = config["PLACES_IN_GROUP"]
+        self.groups: dict = config["GROUPS"]
 
     @property
     def exam(self) -> bool:
