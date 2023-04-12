@@ -1,4 +1,5 @@
 import bcrypt
+import pytest
 from flask.testing import FlaskClient
 
 from tests.utils import unique_str, mode
@@ -125,6 +126,49 @@ def test_login_off_get(client: FlaskClient, db: AppDatabase):
 
     response = client.get("/login")
     assert response.status_code == 302
+
+
+@mode('registration')
+@pytest.mark.parametrize("password, message", [
+    ("1234", "Пароль содержит как минимум 8 символов."),
+    ("", "Данное поле не может быть пустым!"),
+    ("12345678", "Не используйте такие пароли, как 12345678 и password."),
+    ("password", "Не используйте такие пароли, как 12345678 и password.")
+])
+def test_register_password_validation(db: AppDatabase, client: FlaskClient, password: str, message: str):
+    domain = 'example.com'
+    email = f"{unique_str()}@{domain}"
+    db.mailers.create(domain=domain)
+
+    response = client.post("/register", data={
+        "login": email,
+        "password": password,
+        "confirm": password
+    })
+    assert response.status_code == 200
+    assert response.content_type == 'text/html; charset=utf-8'
+    assert message in response.get_data(as_text=True)
+
+
+@mode('registration')
+@pytest.mark.parametrize("email, message", [
+    ("какая-то строка", "Должен быть введён корректный адрес электронной почты."),
+    ("", "Данное поле не может быть пустым!"),
+    ("email@ gmail.com", "Убедитесь, что строка не включает пробелы."),
+])
+def test_register_email_validation(db: AppDatabase, client: FlaskClient, email: str, message: str):
+    domain = 'example.com'
+    db.mailers.create(domain=domain)
+    password = "super-secret-password"
+
+    response = client.post("/register", data={
+        "login": email,
+        "password": password,
+        "confirm": password
+    })
+    assert response.status_code == 200
+    assert response.content_type == 'text/html; charset=utf-8'
+    assert message in response.get_data(as_text=True)
 
 
 def create_student(db):
