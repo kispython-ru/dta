@@ -86,6 +86,8 @@ def exam_toggle(teacher: Teacher, group_id: int):
 @blueprint.route("/teacher/group/<group_id>/exam/delete", methods=["GET"])
 @teacher_jwt_required(db.teachers)
 def exam_delete(teacher: Teacher, group_id: int):
+    if not config.config.final_tasks or not config.config.clearable_database:
+        return redirect(f'/teacher/group/{group_id}/exam')
     db.statuses.delete_group_task_statuses(group_id)
     db.seeds.delete_final_seed(group_id)
     return redirect(f'/teacher/group/{group_id}/exam')
