@@ -91,7 +91,7 @@ def test_login_with_incorrect_email(client: FlaskClient, db: AppDatabase):
     assert 'Такой адрес почты не зарегистрирован!' in response.get_data(as_text=True)
 
 
-def test_register_off(db: AppDatabase, client: FlaskClient):
+def test_register_off_post(db: AppDatabase, client: FlaskClient):
     email, password = db_test_mailers_create(db)
 
     response = client.post("/register", data={
@@ -102,10 +102,28 @@ def test_register_off(db: AppDatabase, client: FlaskClient):
     assert response.status_code == 302
 
 
-def test_login_off(client: FlaskClient, db: AppDatabase):
+def test_register_off_get(db: AppDatabase, client: FlaskClient):
+    email, password = db_test_mailers_create(db)
+
+    response = client.get("/register", data={
+        "login": email,
+        "password": password,
+        "confirm": password
+    })
+    assert response.status_code == 302
+
+
+def test_login_off_post(client: FlaskClient, db: AppDatabase):
     create_student(db)
 
     response = client.post("/login")
+    assert response.status_code == 302
+
+
+def test_login_off_get(client: FlaskClient, db: AppDatabase):
+    create_student(db)
+
+    response = client.get("/login")
     assert response.status_code == 302
 
 
