@@ -25,5 +25,6 @@
     "GROUPS": {
       "ИКБО-01-21": 30,
       "ИКБО-02-21": 10
-    }
+    },
+    "CLEARABLE_DATABASE": true
 }

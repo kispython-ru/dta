@@ -37,13 +37,12 @@ from webapp.repositories import (
 class AppConfigManager:
     def __init__(self, get_config: Callable[[], dict]):
         self.get_config = get_config
-        self.configuration = None
 
     @property
     def config(self) -> AppConfig:
-        if not self.configuration:
-            self.configuration = AppConfig(self.get_config())
-        return self.configuration
+        configuration = self.get_config()
+        typed = AppConfig(configuration)
+        return typed
 
 
 class GroupManager:
@@ -98,11 +97,12 @@ class ExternalTaskManager:
 
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
         if self.seed is None:
+            not_exam_mode = not self.config.final_tasks
             return ExternalTaskDto(
                 group_title=self.group.title,
                 task=task,
                 variant=variant,
-                active=True
+                active=not_exam_mode
             )
         unique = f'{task}{variant}'
         task: Task = self.sample_task(str(variant), task)
@@ -181,13 +181,16 @@ class StatusManager:
             return status.group if is_group else (status.group, status.variant)
 
         achievements = self.__read_achievements()
-        statuses = self.statuses.get_with_groups()
-        places: dict[int, list[StudentInRatingDto | GroupInRatingDto]] = dict()
+        statuses = self.statuses.get_rating()
+        tasks = self.tasks.get_all()
+        places: dict[int, list[StudentInRatingDto]] = dict()
         for _, pairs in groupby(sorted(statuses, key=key), key):
             pairs = list(pairs)
             group, status = pairs[0]
-            active = sum(len(status.achievements or [0])
-                         for _, status in pairs if str(status.task) in achievements)
+            tids = [status.task for _, status in pairs]
+            if any(task.id not in tids for task in tasks):
+                continue
+            active = sum(len(status.achievements or [0]) for _, status in pairs if str(status.task) in achievements)
             inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
             earned = active + inactive
             if is_group:
@@ -459,6 +462,12 @@ class TeacherManager:
             actual = teacher.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
                 return teacher
+
+    def create(self, login: str, password: str):
+        given = password.encode('utf8')
+        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+        teacher = self.teachers.create(login, hashed.decode('utf8'))
+        return teacher.id
 
 
 class StudentManager:

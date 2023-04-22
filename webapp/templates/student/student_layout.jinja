@@ -18,8 +18,10 @@
                             data-bs-toggle="dropdown" aria-expanded="false">
                         {% if student is not none %}
                             {{ student.email | hide }}
-                        {% else %}
+                        {% elif registration %}
                             Войти
+                        {% else %}
+                            Меню
                         {% endif %}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
