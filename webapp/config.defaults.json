@@ -23,8 +23,8 @@
     "PLACES_IN_RATING": 8,
     "PLACES_IN_GROUP": 30,
     "GROUPS": {
-      "ИКБО-01-21": 30,
-      "ИКБО-02-21": 10
+        "ИКБО-01-21": 30,
+        "ИКБО-02-21": 10
     },
     "CLEARABLE_DATABASE": true
 }
