@@ -134,7 +134,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
             "student/success.jinja",
             status=status,
             registration=config.config.registration,
-        group_rating=config.config.groups,
+            group_rating=config.config.groups,
             student=student,
         )
     return render_template(
