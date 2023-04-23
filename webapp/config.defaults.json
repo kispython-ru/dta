@@ -21,5 +21,7 @@
     "LKS_API_BASE_URL": "https://auth-app.mirea.ru",
     "LKS_REDIRECT_URL": "https://kispython.ru/login/lks/callback",
     "PLACES_IN_RATING": 8,
+    "PLACES_IN_GROUP": 30,
+    "GROUPS": {},
     "CLEARABLE_DATABASE": true
 }

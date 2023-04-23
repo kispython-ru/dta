@@ -33,6 +33,7 @@ def dashboard(student: Student | None):
         "student/dashboard.jinja",
         groupings=groupings,
         registration=config.config.registration,
+        group_rating=config.config.groups,
         exam=config.config.exam,
         student=student,
     )
@@ -52,6 +53,7 @@ def submissions(student: Student | None, page: int):
         "student/submissions.jinja",
         submissions=submissions_statuses,
         registration=config.config.registration,
+        group_rating=config.config.groups,
         student=student,
         highlight=config.config.highlight_syntax,
         page=page,
@@ -69,6 +71,20 @@ def group(student: Student | None, group_id: int):
         group=group,
         blocked=blocked,
         registration=config.config.registration,
+        group_rating=config.config.groups,
+        student=student,
+    )
+
+
+@blueprint.route("/rating/groups", methods=["GET"])
+@student_jwt_optional(db.students)
+def rating_groups(student: Student | None):
+    groupings = statuses.get_rating_data(is_group=True)
+    return render_template(
+        "student/groups_rating.jinja",
+        groupings=groupings,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
         student=student,
     )
 
@@ -81,6 +97,7 @@ def rating(student: Student | None):
         "student/rating.jinja",
         groupings=groupings,
         registration=config.config.registration,
+        group_rating=config.config.groups,
         student=student,
     )
 
@@ -94,6 +111,7 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
+        group_rating=config.config.groups,
         status=status,
         form=form,
         student=student,
@@ -116,12 +134,14 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
             "student/success.jinja",
             status=status,
             registration=config.config.registration,
+            group_rating=config.config.groups,
             student=student,
         )
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
+        group_rating=config.config.groups,
         status=status,
         form=form,
         student=student,
