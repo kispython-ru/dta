@@ -180,12 +180,13 @@ class StatusManager:
             _, status = info
             return status.group if is_group else (status.group, status.variant)
 
+        config = self.config.config.groups
         achievements = self.__read_achievements()
         statuses = self.statuses.get_rating()
         tasks = self.tasks.get_all()
         places: dict[int, list[StudentInRatingDto]] = dict()
         for _, pairs in groupby(sorted(statuses, key=key), key):
-            pairs = list(pairs)
+            pairs = [(g, s) for (g, s) in pairs if not is_group or s.variant <= config.get(g.title, 40)]
             group, status = pairs[0]
             tids = [status.task for _, status in pairs]
             if any(task.id not in tids for task in tasks):
@@ -193,16 +194,9 @@ class StatusManager:
             active = sum(len(status.achievements or [0]) for _, status in pairs if str(status.task) in achievements)
             inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
             earned = active + inactive
-            if is_group:
-                if group.title == self.config.config.groups.keys():
-                    earned = int(float(earned) / self.config.config.groups[group.title] * 100)
-                else:
-                    earned = int(float(earned) / self.config.config.places_in_group * 100)
             places.setdefault(earned, [])
-            if is_group:
-                places[earned].append(GroupInRatingDto(group, earned))
-            else:
-                places[earned].append(StudentInRatingDto(group, status.variant, earned))
+            dto = GroupInRatingDto(group, earned) if is_group else StudentInRatingDto(group, status.variant, earned)
+            places[earned].append(dto)
         ordered = sorted(places.items(), reverse=True)
         return dict(ordered[0:self.config.config.places_in_rating])
 
