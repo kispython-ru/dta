@@ -34,7 +34,9 @@
                             </a>
                         </li>
                         <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
-                        <li><a class="dropdown-item" href="/rating/groups">Рейтинг групп</a></li>
+                        {% if group_rating %}
+                            <li><a class="dropdown-item" href="/rating/groups">Рейтинг групп</a></li>
+                        {% endif %}
                         {% if registration %}
                             {% if student is not none %}
                                 <li><a class="dropdown-item" target="__blank" href="https://t.me/kispython">Telegram для оповещений</a></li>
