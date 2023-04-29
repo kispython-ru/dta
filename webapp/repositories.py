@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
-from sqlalchemy import desc, null
+from sqlalchemy import desc, func, null
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -150,6 +150,21 @@ class TaskStatusRepository:
                 .filter_by(group=group) \
                 .all()
             return statuses
+
+    def get_group_rating(self) -> list[tuple[Group, int]]:
+        with self.db.create_session() as session:
+            tasks = session.query(Task).count()
+            variants = session \
+                .query(TaskStatus.group) \
+                .group_by(TaskStatus.variant, TaskStatus.group) \
+                .having(func.count() >= tasks) \
+                .subquery()
+            scores = session \
+                .query(Group, func.count()) \
+                .join(variants, Group.id == variants.c.group, isouter=True) \
+                .group_by(Group.id) \
+                .order_by(func.count().desc())
+            return scores
 
     def get_rating(self) -> list[tuple[Group, TaskStatus]]:
         with self.db.create_session() as session:

@@ -175,18 +175,25 @@ class StatusManager:
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 
-    def get_rating_data(self, is_group: bool = False) -> dict[int, list[StudentInRatingDto | GroupInRatingDto]]:
-        def key(info):
-            _, status = info
-            return status.group if is_group else (status.group, status.variant)
+    def get_group_rating(self) -> dict[int, list[GroupInRatingDto]]:
+        rating = self.statuses.get_group_rating()
+        places: dict[int, list[GroupInRatingDto]] = dict()
+        for group, earned in rating:
+            places.setdefault(earned, [])
+            places[earned].append(GroupInRatingDto(group, earned))
+        return places
 
-        config = self.config.config.groups
+    def get_rating(self) -> dict[int, list[StudentInRatingDto]]:
+        def key(info: tuple[Group, TaskStatus]):
+            _, status = info
+            return status.group, status.variant
+
         achievements = self.__read_achievements()
         statuses = self.statuses.get_rating()
         tasks = self.tasks.get_all()
         places: dict[int, list[StudentInRatingDto]] = dict()
         for _, pairs in groupby(sorted(statuses, key=key), key):
-            pairs = [(g, s) for (g, s) in pairs if not is_group or s.variant <= config.get(g.title, 40)]
+            pairs = list(pairs)
             group, status = pairs[0]
             tids = [status.task for _, status in pairs]
             if any(task.id not in tids for task in tasks):
@@ -195,8 +202,7 @@ class StatusManager:
             inactive = sum(1 for _, status in pairs if str(status.task) not in achievements)
             earned = active + inactive
             places.setdefault(earned, [])
-            dto = GroupInRatingDto(group, earned) if is_group else StudentInRatingDto(group, status.variant, earned)
-            places[earned].append(dto)
+            places[earned].append(StudentInRatingDto(group, status.variant, earned))
         ordered = sorted(places.items(), reverse=True)
         return dict(ordered[0:self.config.config.places_in_rating])
 
