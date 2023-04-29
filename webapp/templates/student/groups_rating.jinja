@@ -15,7 +15,7 @@
             Рейтинг групп
         </h5>
         <h6 class="card-subtitle mb-3 text-muted">
-            Рейтинг групп на основании количества решенных разными способами задач студентами группы.
+            Рейтинг групп на основании количества полученных допусков студентами группы.
         </h6>
         <div class="container">
             {% for score, groups in groupings.items() %}
@@ -33,7 +33,7 @@
                     </small>
                     <div class="row">
                         {% for group in groups %}
-                            <div class="col-sm-12 col-md-6 col-xl-4 p-1">
+                            <div class="col-sm-12 col-md-4 col-xl-2 p-1">
                                 <div class="border rounded p-2 d-flex justify-content-between align-items-start">
                                     <a class="text-decoration-none w-100 text-start"
                                        href="/group/{{ group.group.id }}">
