@@ -186,7 +186,7 @@ class StatusManager:
         for _, pairs in groupby(sorted(rating, key=key), key):
             pairs = list(pairs)
             group, _ = pairs[0]
-            earned = sum(1 for group, var in pairs if var is not None and var <= config.get(group.title, 40))
+            earned = sum(1 for group, var in pairs if var is not None and var < config.get(group.title, 40))
             places.setdefault(earned, [])
             places[earned].append(GroupInRatingDto(group, earned))
         return dict(sorted(places.items(), reverse=True))
