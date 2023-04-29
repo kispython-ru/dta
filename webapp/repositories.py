@@ -155,15 +155,17 @@ class TaskStatusRepository:
         with self.db.create_session() as session:
             tasks = session.query(Task).count()
             variants = session \
-                .query(TaskStatus.group) \
+                .query(TaskStatus.group, TaskStatus.variant) \
+                .filter((TaskStatus.status == Status.Checked) |
+                        (TaskStatus.status == Status.CheckedFailed) |
+                        (TaskStatus.status == Status.CheckedSubmitted)) \
                 .group_by(TaskStatus.variant, TaskStatus.group) \
                 .having(func.count() >= tasks) \
                 .subquery()
             scores = session \
-                .query(Group, func.count()) \
+                .query(Group, variants.c.variant) \
                 .join(variants, Group.id == variants.c.group, isouter=True) \
-                .group_by(Group.id) \
-                .order_by(func.count().desc())
+                .all()
             return scores
 
     def get_rating(self) -> list[tuple[Group, TaskStatus]]:
