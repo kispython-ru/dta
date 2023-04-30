@@ -19,33 +19,20 @@
         </h6>
         <div class="container">
             {% for score, groups in groupings.items() %}
-                <div>
-                    <small class="mt-2 text-muted d-block">
-                        {% if loop.index == 1 %}
-                            🥇 Топ 1
-                        {% elif loop.index == 2 %}
-                            🥈 Топ 2
-                        {% elif loop.index == 3 %}
-                            🥉 Топ 3
-                        {% else %}
-                            Топ {{ loop.index }}
-                        {% endif %}
-                    </small>
-                    <div class="row">
-                        {% for group in groups %}
-                            <div class="col-sm-12 col-md-4 col-xl-2 p-1">
-                                <div class="border rounded p-2 d-flex justify-content-between align-items-start">
-                                    <a class="text-decoration-none w-100 text-start"
-                                       href="/group/{{ group.group.id }}">
-                                        <div class="ms-2 me-auto">
-                                            {{ group.group.title }}
-                                        </div>
-                                    </a>
-                                    <span class="badge bg-primary rounded-pill ">{{ group.earned }}</span>
-                                </div>
+                <div class="row">
+                    {% for group in groups %}
+                        <div class="col-sm-12 col-md-4 col-xl-2 p-1">
+                            <div class="border rounded p-2 d-flex justify-content-between align-items-start">
+                                <a class="text-decoration-none w-100 text-start"
+                                    href="/group/{{ group.group.id }}">
+                                    <div class="ms-2 me-auto">
+                                        {{ group.group.title }}
+                                    </div>
+                                </a>
+                                <span class="badge bg-primary rounded-pill ">{{ group.earned }}</span>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
             {% endfor %}
         </div>
