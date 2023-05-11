@@ -48,7 +48,9 @@
           {% for variant in group.variants %}
             <tr>
               <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
-                <span class="p-1 d-block">{{ variant.id + 1 }}</span>
+                <span class="p-1 d-block" title="{{ variant.earned }}">
+                  {{ variant.id + 1 }}
+                </span>
               </td>
               {% for status in variant.statuses %}
                 <td scope="col" style="border-bottom: 0; padding: 0">

@@ -199,6 +199,7 @@ class VariantDto:
     def __init__(self, variant: Variant, statuses: list[TaskStatusDto]):
         self.id = int(variant.id)
         self.statuses = statuses
+        self.earned = sum(s.earned for s in statuses if s.earned > 1)
 
 
 class GroupDto:
