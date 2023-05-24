@@ -13,6 +13,7 @@ class AppConfig:
         self.task_base_url: str = config["TASK_BASE_URL"]
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
+        self.clearable_database: bool = config["CLEARABLE_DATABASE"]
         self.readonly: bool = config["READONLY"]
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]
         self.imap_login: bool = config["IMAP_LOGIN"]
@@ -22,6 +23,8 @@ class AppConfig:
         self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
         self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
         self.places_in_rating: int = config["PLACES_IN_RATING"]
+        self.places_in_group: int = config["PLACES_IN_GROUP"]
+        self.groups: dict = config["GROUPS"]
 
     @property
     def exam(self) -> bool:
@@ -196,6 +199,7 @@ class VariantDto:
     def __init__(self, variant: Variant, statuses: list[TaskStatusDto]):
         self.id = int(variant.id)
         self.statuses = statuses
+        self.earned = sum(s.earned for s in statuses if s.earned > 1)
 
 
 class GroupDto:
@@ -237,3 +241,13 @@ class SubmissionDto:
         self.checked = checked
         self.sent = sent
         self.student = student
+
+
+class GroupInRatingDto:
+    def __init__(
+        self,
+        group: Group,
+        earned: int = 0
+    ):
+        self.group = group
+        self.earned = earned

@@ -12,7 +12,7 @@
                 </li>
                 {% block header %} {% endblock %}
             </ol>
-            <div class="d-block gap-3 col-12 col-md-2 mt-2 mt-md-0">
+            <div class="d-block gap-3 col-12 col-lg-3 col-md-5 mt-2 mt-md-0">
                 <div class="dropdown">
                     <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" id="dLabel" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -33,8 +33,11 @@
                                 </small>
                             </a>
                         </li>
-                        <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
                         {% if registration %}
+                            <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
+                            {% if group_rating %}
+                                <li><a class="dropdown-item" href="/rating/groups">Рейтинг групп</a></li>
+                            {% endif %}
                             {% if student is not none %}
                                 <li><a class="dropdown-item" target="__blank" href="https://t.me/kispython">Telegram для оповещений</a></li>
                                 <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
