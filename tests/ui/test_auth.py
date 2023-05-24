@@ -1,9 +1,10 @@
 import pytest
+from tests.utils import mode, unique_str
+
 from flask import current_app as app
 from flask.testing import FlaskClient
 
-from tests.utils import unique_str, mode
-from webapp.managers import StudentManager, AppConfigManager
+from webapp.managers import AppConfigManager, StudentManager
 from webapp.repositories import AppDatabase
 
 

@@ -1,6 +1,7 @@
+from tests.utils import get_tags, unique_int, unique_str
+
 from flask.testing import FlaskClient
 
-from tests.utils import get_tags, unique_int, unique_str
 from webapp.repositories import AppDatabase
 
 
