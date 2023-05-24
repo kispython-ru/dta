@@ -47,8 +47,6 @@ def create_groups_and_tasks(db):
     return group_id, group_title, tasks, variant_id
 
 
-
-
 def create_test_tasks(db):
     tasks_id = unique_int()
     db.tasks.create_by_ids([tasks_id])
