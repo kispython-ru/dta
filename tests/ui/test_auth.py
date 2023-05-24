@@ -1,14 +1,15 @@
-import bcrypt
 import pytest
 from flask.testing import FlaskClient
 
 from tests.utils import unique_str, mode
+from flask import current_app as app
+from webapp.managers import StudentManager, AppConfigManager
 from webapp.repositories import AppDatabase
 
 
 @mode('registration')
 def test_register_adds_user_to_db(db: AppDatabase, client: FlaskClient):
-    email, password = db_test_mailers_create(db)
+    email, password = arrange_student(db)
     response = client.post("/register", data={
         "login": email,
         "password": password,
@@ -32,7 +33,7 @@ def test_register_adds_user_to_db(db: AppDatabase, client: FlaskClient):
     assert user.password_hash != password
 
 
-def db_test_mailers_create(db):
+def arrange_student(db):
     domain = 'example.com'
     email = f"{unique_str()}@{domain}"
     password = unique_str()
@@ -93,7 +94,7 @@ def test_login_with_incorrect_email(client: FlaskClient, db: AppDatabase):
 
 
 def test_register_off_post(db: AppDatabase, client: FlaskClient):
-    email, password = db_test_mailers_create(db)
+    email, password = arrange_student(db)
 
     response = client.post("/register", data={
         "login": email,
@@ -104,7 +105,7 @@ def test_register_off_post(db: AppDatabase, client: FlaskClient):
 
 
 def test_register_off_get(db: AppDatabase, client: FlaskClient):
-    email, password = db_test_mailers_create(db)
+    email, password = arrange_student(db)
 
     response = client.get("/register", data={
         "login": email,
@@ -172,8 +173,8 @@ def test_register_email_validation(db: AppDatabase, client: FlaskClient, email: 
 
 
 def create_student(db):
-    email = f"{unique_str().replace('-', '')[:10]}@example.com"
+    email = f"{unique_str()}@example.com"
     password = unique_str()
-    hashed = bcrypt.hashpw(password.encode('UTF-8'), bcrypt.gensalt()).decode('UTF-8')
-    db.students.create(email, hashed)
+    students = StudentManager(AppConfigManager(lambda: app.config), db.students, db.mailers)
+    students.create(email, password)
     return email, password
