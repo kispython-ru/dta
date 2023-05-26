@@ -430,7 +430,6 @@ class TeacherRepository:
             return teacher
 
     def create(self, login: str, password: str):
-
         with self.db.create_session() as session:
             teacher = Teacher(login=login,
                               password_hash=password)
@@ -528,6 +527,13 @@ class MailerRepository:
         with self.db.create_session() as session:
             mailers: list[Mailer] = session.query(Mailer).all()
             return [mailer.domain for mailer in mailers]
+
+    def create(self, domain: str) -> Mailer:
+        domain = domain.lower()
+        with self.db.create_session() as session:
+            mailer = Mailer(domain=domain)
+            session.add(mailer)
+            return mailer
 
 
 class AppDatabase:
