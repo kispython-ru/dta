@@ -31,10 +31,14 @@
 
 {% block footer %}
 <div class="container mt-4 mb-4">
-  <div class="department-description opacity-75">
-    <img class="department-img" src="{{ url_for('static', filename='department.svg') }}"/>
-    <div class="text-muted">
-      Разработано на кафедре Корпоративных информационных систем РТУ МИРЭА
+  <div class="row opacity-75">
+    <div class="col-3">
+      <img class="department-img" src="{{ url_for('static', filename='department.svg') }}"/>
+      <div class="text-muted">
+        <a class="text-decoration-none" href="https://github.com/true-grue/kispython">
+          Программирование на языке Python.
+        </a> Кафедра корпоративных систем, РТУ МИРЭА
+      </div>
     </div>
   </div>
 </div>
