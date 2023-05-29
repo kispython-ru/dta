@@ -28,3 +28,14 @@
     {% endfor %}
   </div>
 {% endblock %}
+
+{% block footer %}
+<div class="container mt-4 mb-4">
+  <div class="department-description opacity-75">
+    <img class="department-img" src="{{ url_for('static', filename='department.svg') }}"/>
+    <div class="text-muted">
+      Разработано на кафедре Корпоративных информационных систем РТУ МИРЭА
+    </div>
+  </div>
+</div>
+{% endblock %}
