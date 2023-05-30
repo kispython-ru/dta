@@ -89,4 +89,4 @@ The Digital Teaching Assistant system is described in the following papers:
 
 7. Gorchakov A.V., Demidova L.A., Sovietov P.N. [**Intelligent Accounting of Educational Achievements in the "Digital Teaching Assistant" System**](https://www.researchgate.net/publication/369692306_Intelligent_Accounting_of_Educational_Achievements_in_the_Digital_Teaching_Assistant_System) // *International Journal of Open Information Technologies*. **2023**, 11 (4), pp. 106-115.
 
-8. Gorchakov A.V. [**A Study of the Approach to Conversion of Program Texts into Vector Representations Based on Markov Chains**](http://itstd-journal.ru/wp-content/uploads/2023/05/A-STUDY-OF-THE-APPROACH-TO-CONVERSION-OF-PROGRAM-.pdf) // **Electronic Scientific Journal "IT-Standard"**. **2023**, 2, pp. 40-50.
+8. Gorchakov A.V. [**A Study of the Approach to Conversion of Program Texts into Vector Representations Based on Markov Chains**](http://itstd-journal.ru/wp-content/uploads/2023/05/A-STUDY-OF-THE-APPROACH-TO-CONVERSION-OF-PROGRAM-.pdf) // *Electronic Scientific Journal "IT-Standard"*. **2023**, 2, pp. 40-50.
