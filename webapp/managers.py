@@ -399,7 +399,7 @@ class ExportManager:
             ip = message.ip
             id = message.id
             sid = message.student
-            email = self.students.get_by_id(sid).email if sid else None
+            email = hide_email(self.students.get_by_id(sid).email) if sid else None
             rows.append([id, time, gt, task, variant, ip, email, code])
         return rows
 
@@ -483,6 +483,16 @@ class StudentManager:
         self.students = students
         self.mailers = mailers
         self.config = config
+
+    def hide_email(self, value: str):
+        if '@' not in value:
+            return value
+        username, domain = value.split('@')
+        length = len(username)
+        if length == 1:
+            return f'*@{domain}'
+        repeat = min((length - 1), 10) * '*'
+        return f'{username[0]}{repeat}@{domain}'
 
     def register(self, email: str, password: str) -> str:
         if self.exists(email):
