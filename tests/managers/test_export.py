@@ -1,13 +1,14 @@
 from tests.utils import arrange_task
 
-from webapp.managers import AppConfigManager, ExportManager, StatusManager
+from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
 from webapp.repositories import AppDatabase
 
 
 def test_export(db: AppDatabase):
     c = AppConfigManager(lambda: dict())
     s = StatusManager(db.tasks, db.groups, db.variants, db.statuses, c, db.seeds, db.checks)
-    e = ExportManager(db.groups, db.messages, s, db.variants, db.tasks, db.students)
+    m = StudentManager(c, db.students, db.mailers)
+    e = ExportManager(db.groups, db.messages, s, db.variants, db.tasks, db.students, m)
     (group, variant, task) = arrange_task(db)
 
     code = "main = lambda x: x**42"

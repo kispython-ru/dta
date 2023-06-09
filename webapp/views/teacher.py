@@ -7,7 +7,7 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request
 
 from webapp.forms import TeacherLoginForm
-from webapp.managers import AppConfigManager, ExportManager, StatusManager, TeacherManager
+from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager, TeacherManager
 from webapp.models import Group, Message, Status, Task, Teacher, Variant
 from webapp.repositories import AppDatabase, DbContextManager
 from webapp.utils import get_exception_info, teacher_jwt_required
@@ -17,8 +17,9 @@ blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
+students = StudentManager(config, db.students, db.mailers)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
-exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students)
+exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 teachers = TeacherManager(db.teachers)
 
 

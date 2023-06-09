@@ -349,135 +349,6 @@ class StatusManager:
         return dictionary
 
 
-class ExportManager:
-    def __init__(
-        self,
-        groups: GroupRepository,
-        messages: MessageRepository,
-        statuses: StatusManager,
-        variants: VariantRepository,
-        tasks: TaskRepository,
-        students: StudentRepository,
-    ):
-        self.groups = groups
-        self.messages = messages
-        self.statuses = statuses
-        self.variants = variants
-        self.tasks = tasks
-        self.students = students
-
-    def export_messages(self, count: int | None, separator: str) -> str:
-        messages = self.__get_latest_messages(count)
-        group_titles = self.__get_group_titles()
-        table = self.__create_messages_table(messages, group_titles)
-        delimiter = ";" if separator == "semicolon" else ","
-        output = self.__create_csv(table, delimiter)
-        return output
-
-    def export_exam_results(
-        self,
-        group_id: int,
-        separator: str
-    ) -> str:
-        table = self.__create_exam_table(group_id)
-        delimiter = ";" if separator == "semicolon" else ","
-        output = self.__create_csv(table, delimiter)
-        return output
-
-    def __create_messages_table(
-        self,
-        messages: list[Message],
-        group_titles: dict[int, str]
-    ) -> list[list[str]]:
-        rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Отправитель", "Код"]]
-        for message in messages:
-            gt = group_titles[message.group]
-            time = message.time.strftime("%Y-%m-%d %H:%M:%S")
-            task = message.task + 1
-            variant = message.variant + 1
-            code = message.code
-            ip = message.ip
-            id = message.id
-            sid = message.student
-            email = hide_email(self.students.get_by_id(sid).email) if sid else None
-            rows.append([id, time, gt, task, variant, ip, email, code])
-        return rows
-
-    def __create_exam_table(self, group_id: int) -> list[list[str]]:
-        header = ['Сдающая группа', 'Вариант']
-        tasks = self.tasks.get_all()
-        for task in tasks:
-            id = task.id + 1
-            header += [
-                f'№{id} Статус',
-                f'№{id} Группа',
-                f'№{id} Вариант',
-                f'№{id} Задача',
-                f'№{id} IP адрес'
-            ]
-        header.append('Решено задач')
-        rows = []
-        for variant in self.variants.get_all():
-            group_title = self.groups.get_by_id(group_id).title
-            row = [group_title, variant.id + 1]
-            score = 0
-            for task in tasks:
-                info = self.statuses.get_task_status(
-                    group_id,
-                    variant.id,
-                    task.id
-                )
-                status = 1 if info.status.value == 2 else 0
-                row.append(status)
-                row.append(info.external.group_title)
-                row.append(info.external.variant + 1)
-                row.append(info.external.task + 1)
-                row.append(info.ip)
-                score += status
-            row.append(score)
-            rows.append(row)
-        return [header] + rows
-
-    def __get_group_titles(self) -> dict[int, str]:
-        groups = self.groups.get_all()
-        group_titles: dict[int, str] = {}
-        for group in groups:
-            group_titles[group.id] = group.title
-        return group_titles
-
-    def __get_latest_messages(self, count: int | None) -> list[Message]:
-        if count is None:
-            return self.messages.get_all()
-        return self.messages.get_latest(count)
-
-    def __create_csv(self, table: list[list[str]], delimiter: str):
-        si = io.StringIO()
-        cw = csv.writer(si, delimiter=delimiter)
-        cw.writerows(table)
-        bom = u"\uFEFF"
-        value = bom + si.getvalue()
-        return value
-
-
-class TeacherManager:
-    def __init__(self, teachers: TeacherRepository):
-        self.teachers = teachers
-
-    def check_password(self, login: str, password: str) -> Teacher | None:
-        teacher = self.teachers.find_by_login(login)
-        if teacher:
-            given = password.encode('utf8')
-            actual = teacher.password_hash.encode('utf8')
-            if bcrypt.checkpw(given, actual):
-                return teacher
-
-    def create(self, login: str, password: str):
-        given = password.encode('utf8')
-        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
-        teacher = self.teachers.create(login, hashed.decode('utf8'))
-        return teacher.id
-
-
 class StudentManager:
     def __init__(self, config: AppConfigManager, students: StudentRepository, mailers: MailerRepository):
         self.students = students
@@ -585,3 +456,134 @@ class StudentManager:
         hashed = bcrypt.hashpw(given, bcrypt.gensalt())
         student = self.students.create(email, hashed.decode('utf8'))
         return student.id
+
+
+class ExportManager:
+    def __init__(
+        self,
+        groups: GroupRepository,
+        messages: MessageRepository,
+        statuses: StatusManager,
+        variants: VariantRepository,
+        tasks: TaskRepository,
+        students: StudentRepository,
+        manager: StudentManager,
+    ):
+        self.groups = groups
+        self.messages = messages
+        self.statuses = statuses
+        self.variants = variants
+        self.tasks = tasks
+        self.students = students
+        self.manager = manager
+
+    def export_messages(self, count: int | None, separator: str) -> str:
+        messages = self.__get_latest_messages(count)
+        group_titles = self.__get_group_titles()
+        table = self.__create_messages_table(messages, group_titles)
+        delimiter = ";" if separator == "semicolon" else ","
+        output = self.__create_csv(table, delimiter)
+        return output
+
+    def export_exam_results(
+        self,
+        group_id: int,
+        separator: str
+    ) -> str:
+        table = self.__create_exam_table(group_id)
+        delimiter = ";" if separator == "semicolon" else ","
+        output = self.__create_csv(table, delimiter)
+        return output
+
+    def __create_messages_table(
+        self,
+        messages: list[Message],
+        group_titles: dict[int, str]
+    ) -> list[list[str]]:
+        rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Отправитель", "Код"]]
+        for message in messages:
+            gt = group_titles[message.group]
+            time = message.time.strftime("%Y-%m-%d %H:%M:%S")
+            task = message.task + 1
+            variant = message.variant + 1
+            code = message.code
+            ip = message.ip
+            id = message.id
+            sid = message.student
+            email = self.manager.hide_email(self.students.get_by_id(sid).email) if sid else None
+            rows.append([id, time, gt, task, variant, ip, email, code])
+        return rows
+
+    def __create_exam_table(self, group_id: int) -> list[list[str]]:
+        header = ['Сдающая группа', 'Вариант']
+        tasks = self.tasks.get_all()
+        for task in tasks:
+            id = task.id + 1
+            header += [
+                f'№{id} Статус',
+                f'№{id} Группа',
+                f'№{id} Вариант',
+                f'№{id} Задача',
+                f'№{id} IP адрес'
+            ]
+        header.append('Решено задач')
+        rows = []
+        for variant in self.variants.get_all():
+            group_title = self.groups.get_by_id(group_id).title
+            row = [group_title, variant.id + 1]
+            score = 0
+            for task in tasks:
+                info = self.statuses.get_task_status(
+                    group_id,
+                    variant.id,
+                    task.id
+                )
+                status = 1 if info.status.value == 2 else 0
+                row.append(status)
+                row.append(info.external.group_title)
+                row.append(info.external.variant + 1)
+                row.append(info.external.task + 1)
+                row.append(info.ip)
+                score += status
+            row.append(score)
+            rows.append(row)
+        return [header] + rows
+
+    def __get_group_titles(self) -> dict[int, str]:
+        groups = self.groups.get_all()
+        group_titles: dict[int, str] = {}
+        for group in groups:
+            group_titles[group.id] = group.title
+        return group_titles
+
+    def __get_latest_messages(self, count: int | None) -> list[Message]:
+        if count is None:
+            return self.messages.get_all()
+        return self.messages.get_latest(count)
+
+    def __create_csv(self, table: list[list[str]], delimiter: str):
+        si = io.StringIO()
+        cw = csv.writer(si, delimiter=delimiter)
+        cw.writerows(table)
+        bom = u"\uFEFF"
+        value = bom + si.getvalue()
+        return value
+
+
+class TeacherManager:
+    def __init__(self, teachers: TeacherRepository):
+        self.teachers = teachers
+
+    def check_password(self, login: str, password: str) -> Teacher | None:
+        teacher = self.teachers.find_by_login(login)
+        if teacher:
+            given = password.encode('utf8')
+            actual = teacher.password_hash.encode('utf8')
+            if bcrypt.checkpw(given, actual):
+                return teacher
+
+    def create(self, login: str, password: str):
+        given = password.encode('utf8')
+        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
+        teacher = self.teachers.create(login, hashed.decode('utf8'))
+        return teacher.id
