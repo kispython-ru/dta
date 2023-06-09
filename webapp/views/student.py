@@ -125,8 +125,9 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm()
     valid = form.validate_on_submit()
-    if valid and allowed and not status.disabled:
-        ip = get_real_ip(request)
+    ip = get_real_ip(request)
+    allow_ip = config.config.allow_ip or ""
+    if valid and allowed and not status.disabled and allow_ip in ip:
         sid = student.id if student else None
         db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
         db.statuses.submit_task(tid, vid, gid, form.code.data, ip)

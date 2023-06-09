@@ -23,5 +23,6 @@
     "PLACES_IN_RATING": 8,
     "PLACES_IN_GROUP": 30,
     "GROUPS": {},
-    "CLEARABLE_DATABASE": true
+    "CLEARABLE_DATABASE": true,
+    "ALLOW_IP": null
 }

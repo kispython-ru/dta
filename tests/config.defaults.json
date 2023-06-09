@@ -24,5 +24,6 @@
         "ИКБО-01-21": 30,
         "ИКБО-02-21": 10
     },
-    "CLEARABLE_DATABASE": false
+    "CLEARABLE_DATABASE": false,
+    "ALLOW_IP": null
 }
