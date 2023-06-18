@@ -110,6 +110,7 @@ class MessageCheck(Base):
     time = sa.Column('time', sa.DateTime, nullable=False)
     status = sa.Column('status', sa.Integer, nullable=False)
     output = sa.Column('output', sa.String, nullable=True)
+    achievement = sa.Column('achievement', sa.Integer, nullable=True)
 
 
 class FinalSeed(Base):

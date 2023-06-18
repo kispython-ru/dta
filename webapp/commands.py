@@ -76,19 +76,23 @@ class AnalyzeCmd:
         db.statuses.clear_achievements()
         checked = db.checks.checked()
         print(f'Cleared achievements, analyzing {len(checked)} checked programs...')
-        for status in checked:
-            message = db.messages.get_by_id(status.message)
-            analyzed, achievement = worker.analyze_solution(
+        for check in checked:
+            message = db.messages.get_by_id(check.message)
+            analyzed, order = worker.analyze_solution(
                 analytics_path=config.analytics_path,
                 code=message.code,
                 task=message.task,
             )
             if not analyzed:
                 continue
+            db.checks.record_achievement(
+                check=check.id,
+                achievement=order
+            )
             db.statuses.record_achievement(
                 task=message.task,
                 variant=message.variant,
                 group=message.group,
-                achievement=achievement,
+                achievement=order,
             )
         print(f'Done analyzing {len(checked)} programs.')

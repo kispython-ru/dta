@@ -362,6 +362,12 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
+    def record_achievement(self, check: int, achievement: int):
+        with self.db.create_session() as session:
+            session.query(MessageCheck) \
+                .filter_by(id=check) \
+                .update(dict(achievement=achievement))
+
     def record_check(
         self,
         message: int,
