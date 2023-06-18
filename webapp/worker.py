@@ -89,7 +89,7 @@ def process_pending_messages(config: AppConfig, db: AppDatabase):
                 ip=message.ip,
             )
             db.messages.mark_as_processed(message.id)
-            db.checks.record_check(message.id, status.status, error)
+            check = db.checks.record_check(message.id, status.status, error)
             if not ok:
                 continue
             analyzed, order = analyze_solution(
@@ -100,6 +100,10 @@ def process_pending_messages(config: AppConfig, db: AppDatabase):
             print(f'Analysis result: {analyzed}, {order}')
             if not analyzed:
                 continue
+            db.checks.record_achievement(
+                check=check,
+                achievement=order
+            )
             db.statuses.record_achievement(
                 task=message.task,
                 variant=message.variant,
