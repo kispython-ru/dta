@@ -110,7 +110,7 @@ class ExternalTaskManager:
         variant: Variant = self.sample(unique, self.all_variants, variant)
         return ExternalTaskDto(
             task=task.id,
-            group_title=group.title,
+            group_title=group.external if group.external else group.title,
             variant=variant.id,
             active=bool(self.seed.active),
         )

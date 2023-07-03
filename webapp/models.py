@@ -64,6 +64,7 @@ class Group(Base):
     __tablename__ = "groups"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
     title = sa.Column("title", sa.String, unique=True, nullable=False)
+    external = sa.Column("external", sa.String, unique=False, nullable=True)
 
 
 class Task(Base):
