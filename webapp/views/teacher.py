@@ -51,7 +51,15 @@ def dashboard(teacher: Teacher):
     glist = db.groups.get_all()
     vlist = db.variants.get_all()
     tlist = db.tasks.get_all()
-    return render_template("teacher/dashboard.jinja", groups=groups, glist=glist, vlist=vlist, tlist=tlist)
+    return render_template(
+        "teacher/dashboard.jinja",
+        clearable=config.config.clearable_database,
+        exam=config.config.exam,
+        groups=groups,
+        glist=glist,
+        vlist=vlist,
+        tlist=tlist
+    )
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])
@@ -82,6 +90,40 @@ def exam_toggle(teacher: Teacher, group_id: int):
     elif seed is not None:
         db.seeds.continue_final_test(group_id)
     return redirect(f'/teacher/group/{group_id}/exam')
+
+
+@blueprint.route("/teacher/exam/start", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def exam_startall(teacher: Teacher):
+    groups = db.groups.get_all()
+    for group in groups:
+        seed = db.seeds.get_final_seed(group.id)
+        if seed is None and config.config.final_tasks:
+            db.seeds.begin_final_test(group.id)
+        elif seed is not None:
+            db.seeds.continue_final_test(group.id)
+    return redirect('/teacher')
+
+
+@blueprint.route("/teacher/exam/end", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def exam_endall(teacher: Teacher):
+    groups = db.groups.get_all()
+    for group in groups:
+        db.seeds.end_final_test(group.id)
+    return redirect('/teacher')
+
+
+@blueprint.route("/teacher/exam/delete", methods=["GET"])
+@teacher_jwt_required(db.teachers)
+def exam_deleteall(teacher: Teacher):
+    if not config.config.final_tasks or not config.config.clearable_database:
+        return redirect('/teacher')
+    groups = db.groups.get_all()
+    for group in groups:
+        db.statuses.delete_group_task_statuses(group.id)
+        db.seeds.delete_final_seed(group.id)
+    return redirect('/teacher')
 
 
 @blueprint.route("/teacher/group/<group_id>/exam/delete", methods=["GET"])
