@@ -2,7 +2,7 @@
 name = "app"
 version = "0.1.0"
 description = "DTA web app."
-authors = ["Artyom <worldbeater-dev@yandex.ru> and Contributors"]
+authors = ["Artyom <worldbeater-dev@yandex.ru>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
