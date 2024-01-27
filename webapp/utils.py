@@ -79,7 +79,7 @@ def get_exception_info() -> str:
 
 def load_config_files(directory_name: str):
     merged = {}
-    for config_file in os.listdir(directory_name):
+    for config_file in sorted(os.listdir(directory_name)):
         if config_file.endswith(".json"):
             path = os.path.join(directory_name, config_file)
             print(f"Merging {path}")
