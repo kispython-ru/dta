@@ -101,7 +101,7 @@ def process_pending_messages(config: AppConfig, db: AppDatabase):
             if not analyzed:
                 continue
             db.checks.record_achievement(
-                check=check,
+                check=check.id,
                 achievement=order
             )
             db.statuses.record_achievement(
