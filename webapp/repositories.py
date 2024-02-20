@@ -348,6 +348,13 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
+    def get_quantity_by_student(self, student: Student) -> int:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .filter(Message.student == student.id) \
+                .count()
+
     def get_by_task(self, group: int, variant: int, task: int, skip: int, take: int, registration: bool):
         with self.db.create_session() as session:
             query = session \
