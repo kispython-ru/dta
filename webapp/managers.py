@@ -245,7 +245,7 @@ class StatusManager:
         return submissions
 
     def get_submissions_count(self, student: Student) -> int:
-        return self.checks.get_quantity_by_student(student)
+        return self.checks.count_student_submissions(student)
 
     def __get_submissions(
         self,

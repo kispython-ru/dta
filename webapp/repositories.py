@@ -348,7 +348,7 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
-    def get_quantity_by_student(self, student: Student) -> int:
+    def count_student_submissions(self, student: Student) -> int:
         with self.db.create_session() as session:
             return session.query(MessageCheck, Message) \
                 .join(Message, Message.id == MessageCheck.message) \

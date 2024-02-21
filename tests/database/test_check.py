@@ -20,6 +20,6 @@ def test_get_quantity_by_student(db: AppDatabase):
     stat = db.statuses.submit_task(task_id, variant_id, group_id, code, ip)
     db.checks.record_check(message.id, stat.status, "test")
 
-    result = db.checks.get_quantity_by_student(student)
+    result = db.checks.count_student_submissions(student)
 
     assert result == 1
