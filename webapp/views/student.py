@@ -3,10 +3,11 @@ from flask_jwt_extended import create_access_token, set_access_cookies, unset_jw
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
+from secrets import token_hex
 
 from flask import Blueprint, abort
 from flask import current_app as app
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, Response
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.lks import lks_oauth_helper
@@ -24,6 +25,15 @@ statuses = StatusManager(db.tasks, db.groups, db.variants,
                          db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
+
+
+def set_anonymous_identifier(response: Response) -> Response:
+    if not request.cookies.get("anonymous_identifier"):
+        response.set_cookie("anonymous_identifier", value=token_hex(16))
+    return response
+
+
+blueprint.after_request(set_anonymous_identifier)
 
 
 @blueprint.route("/", methods=["GET"])
@@ -44,14 +54,22 @@ def dashboard(student: Student | None):
 @blueprint.route("/submissions/<int:page>", methods=["GET"])
 @student_jwt_optional(db.students)
 def submissions(student: Student | None, page: int):
-    if student is None:
+    if student is None and not config.config.exam:
         abort(401)
     size = 5
-    submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
+    session_id = request.cookies.get("anonymous_identifier")
+    if not config.config.exam:
+        submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
+        submissions_count = statuses.count_student_submissions(student)
+    elif session_id:
+        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
+        submissions_count = statuses.count_session_id_submissions(session_id)
+    else:
+        submissions_statuses = []
+        submissions_count = 0
+
     if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
-
-    submissions_count = statuses.count_student_submissions(student)
 
     pagination = Pagination(
         page=page,
@@ -70,6 +88,7 @@ def submissions(student: Student | None, page: int):
         submissions=submissions_statuses,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         student=student,
         highlight=config.config.highlight_syntax,
         page=page,
@@ -89,6 +108,7 @@ def group(student: Student | None, group_id: int):
         blocked=blocked,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         student=student,
     )
 
@@ -102,6 +122,7 @@ def rating_groups(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         student=student,
     )
 
@@ -115,6 +136,7 @@ def rating(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         student=student,
     )
 
@@ -129,6 +151,7 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         status=status,
         form=form,
         student=student,
@@ -146,13 +169,15 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     allow_ip = config.config.allow_ip or ""
     if valid and allowed and not status.disabled and allow_ip in ip:
         sid = student.id if student else None
-        db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid)
+        session_id = request.cookies.get("anonymous_identifier")
+        db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)
         db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
         return render_template(
             "student/success.jinja",
             status=status,
             registration=config.config.registration,
             group_rating=config.config.groups,
+            exam=config.config.exam,
             student=student,
         )
     return render_template(
@@ -160,6 +185,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
         group_rating=config.config.groups,
+        exam=config.config.exam,
         status=status,
         form=form,
         student=student,

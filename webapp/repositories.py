@@ -255,6 +255,7 @@ class MessageRepository:
         code: str,
         ip: str,
         student: int | None,
+        session_id: str | None = None
     ) -> Message:
         with self.db.create_session() as session:
             message = Message(
@@ -266,6 +267,7 @@ class MessageRepository:
                 code=code,
                 ip=ip,
                 student=student,
+                session_id=session_id
             )
             session.add(message)
             return message
@@ -348,11 +350,28 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
+    def get_by_session_id(self, session_id: str, skip: int, take: int) -> list[tuple[MessageCheck, Message]]:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .filter(Message.session_id == session_id) \
+                .order_by(desc(Message.time)) \
+                .offset(skip) \
+                .limit(take) \
+                .all()
+
     def count_student_submissions(self, student: Student) -> int:
         with self.db.create_session() as session:
             return session.query(MessageCheck, Message) \
                 .join(Message, Message.id == MessageCheck.message) \
                 .filter(Message.student == student.id) \
+                .count()
+
+    def count_session_id_submissions(self, session_id: str) -> int:
+        with self.db.create_session() as session:
+            return session.query(MessageCheck, Message) \
+                .join(Message, Message.id == MessageCheck.message) \
+                .filter(Message.session_id == session_id) \
                 .count()
 
     def get_by_task(self, group: int, variant: int, task: int, skip: int, take: int, registration: bool):

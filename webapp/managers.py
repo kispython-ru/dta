@@ -256,8 +256,18 @@ class StatusManager:
             submissions.append(self.__get_submissions(check, message, None))
         return submissions
 
+    def get_anonymous_submissions_statuses(self, session_id: str, skip: int, take: int) -> list[SubmissionDto]:
+        checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_session_id(session_id, skip, take)
+        submissions = []
+        for check, message in checks_and_messages:
+            submissions.append(self.__get_submissions(check, message, None))
+        return submissions
+
     def count_student_submissions(self, student: Student) -> int:
         return self.checks.count_student_submissions(student)
+
+    def count_session_id_submissions(self, session_id: str) -> int:
+        return self.checks.count_session_id_submissions(session_id)
 
     def __get_submissions(
         self,
