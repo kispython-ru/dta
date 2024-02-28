@@ -369,6 +369,18 @@ class MessageCheckRepository:
                 .limit(take) \
                 .all()
 
+    def count_submissions_by_info(self, group: int, variant: int, task: int, registration: bool):
+        with self.db.create_session() as session:
+            query = session \
+                .query(MessageCheck, Message, Student if registration else null()) \
+                .join(Message, Message.id == MessageCheck.message)
+            if registration:
+                query = query.join(Student, Student.id == Message.student)
+            return query \
+                .filter(Message.group == group, Message.variant == variant, Message.task == task) \
+                .order_by(desc(Message.time)) \
+                .count()
+
     def record_achievement(self, check: int, achievement: int):
         with self.db.create_session() as session:
             session.query(MessageCheck) \

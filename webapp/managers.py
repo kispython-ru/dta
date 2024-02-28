@@ -229,13 +229,25 @@ class StatusManager:
         achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
-    def get_submissions_statuses_by_info(self, group: int, variant: int, task: int, skip: int, take: int):
+    def get_submissions_statuses_by_info(
+        self,
+        group: int,
+        variant: int,
+        task: int,
+        skip: int,
+        take: int,
+    ) -> list[SubmissionDto]:
         registration = self.config.config.enable_registration
         submissions = []
         checks = self.checks.get_by_task(group, variant, task, skip, take, registration)
         for check, message, student in checks:
             submissions.append(self.__get_submissions(check, message, student))
         return submissions
+
+    def count_submissions_by_info(self, group: int, variant: int, task: int) -> int:
+        registration = self.config.config.enable_registration
+
+        return self.checks.count_submissions_by_info(group, variant, task, registration)
 
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
         checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
