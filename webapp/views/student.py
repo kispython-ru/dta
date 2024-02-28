@@ -1,6 +1,7 @@
 from authlib.integrations.requests_client import OAuth2Auth
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
+from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
 
 from flask import Blueprint, abort
@@ -46,9 +47,24 @@ def submissions(student: Student | None, page: int):
     if student is None:
         abort(401)
     size = 5
-    submissions_statuses = statuses.get_submissions_statuses(student, page * size, size)
+    submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
     if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
+
+    submissions_count = statuses.count_student_submissions(student)
+
+    pagination = Pagination(
+        page=page,
+        per_page=size,
+        total=submissions_count,
+        search=False,
+        prev_label="<",
+        next_label=">",
+        inner_window=2,
+        outer_window=0,
+        css_framework="bootstrap5",
+    )
+
     return render_template(
         "student/submissions.jinja",
         submissions=submissions_statuses,
@@ -57,6 +73,7 @@ def submissions(student: Student | None, page: int):
         student=student,
         highlight=config.config.highlight_syntax,
         page=page,
+        pagination=pagination,
     )
 
 

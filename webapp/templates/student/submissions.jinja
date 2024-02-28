@@ -57,20 +57,8 @@
                         style="font-family: monospace;">{{ submission.code }}</textarea>
             </article>
         {% endfor %}
-        <ul class="pagination">
-            {% if page %}
-                <li class="page-item">
-                    <a class="page-link" href="/submissions/{{ page - 1 }}">
-                        Предыдущая страница
-                    </a>
-                </li>
-            {% endif %}
-            <li class="page-item">
-                <a class="page-link" href="/submissions/{{ page + 1 }}">
-                    Следующая страница
-                </a>
-            </li>
-        </ul>
+
+        {{ pagination.links }}
     {% else %}
         Список отправленных решений пуст
     {% endif %}

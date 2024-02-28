@@ -1,5 +1,6 @@
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
 from flask_jwt_extended.exceptions import JWTExtendedException
+from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
@@ -28,11 +29,32 @@ teachers = TeacherManager(db.teachers)
 @teacher_jwt_required(db.teachers)
 def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: int):
     size = 5
-    submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, page * size, size)
+    submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, (page - 1) * size, size)
     if not submissions_statuses and page > 0:
         return redirect(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}/{page - 1}")
-    return render_template("teacher/submissions.jinja", submissions=submissions_statuses,
-                           highlight=config.config.highlight_syntax, page=page, info=(gid, vid, tid))
+
+    submissions_count = statuses.count_submissions_by_info(gid, vid, tid)
+
+    pagination = Pagination(
+        page=page,
+        per_page=size,
+        total=submissions_count,
+        search=False,
+        prev_label="<",
+        next_label=">",
+        inner_window=2,
+        outer_window=0,
+        css_framework="bootstrap5",
+    )
+
+    return render_template(
+        "teacher/submissions.jinja",
+        submissions=submissions_statuses,
+        highlight=config.config.highlight_syntax,
+        page=page,
+        info=(gid, vid, tid),
+        pagination=pagination,
+    )
 
 
 @blueprint.route("/teacher/submissions", methods=["GET"])
