@@ -51,7 +51,7 @@ def submissions(student: Student | None, page: int):
     if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
 
-    submissions_count = statuses.get_submissions_count(student)
+    submissions_count = statuses.count_student_submissions(student)
 
     pagination = Pagination(
         page=page,
