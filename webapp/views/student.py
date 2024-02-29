@@ -58,10 +58,10 @@ def submissions(student: Student | None, page: int):
     size = 5
     session_id = request.cookies.get("anonymous_identifier")
     if config.config.exam or not config.config.enable_registration:
-        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size) \
-            if session_id else []
-        submissions_count = statuses.count_session_id_submissions(session_id) \
-            if session_id else 0
+        if not session_id:
+            return redirect('/')
+        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
+        submissions_count = statuses.count_session_id_submissions(session_id)
     elif student is not None:
         submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
         submissions_count = statuses.count_student_submissions(student)
