@@ -47,7 +47,8 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="/login">Войти</a></li>
                             {% endif %}
-                        {% elif exam %}
+                        {% endif %}
+                        {% if exam or not registration %}
                             <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
                         {% endif %}
                     </ul>

@@ -55,19 +55,18 @@ def dashboard(student: Student | None):
 @blueprint.route("/submissions/<int:page>", methods=["GET"])
 @student_jwt_optional(db.students)
 def submissions(student: Student | None, page: int):
-    if student is None and not config.config.exam:
-        abort(401)
     size = 5
     session_id = request.cookies.get("anonymous_identifier")
-    if not config.config.exam:
+    if config.config.exam or not config.config.enable_registration:
+        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size) \
+            if session_id else []
+        submissions_count = statuses.count_session_id_submissions(session_id) \
+            if session_id else 0
+    elif student is not None:
         submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
         submissions_count = statuses.count_student_submissions(student)
-    elif session_id:
-        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
-        submissions_count = statuses.count_session_id_submissions(session_id)
     else:
-        submissions_statuses = []
-        submissions_count = 0
+        abort(401)
 
     if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
@@ -279,7 +278,7 @@ def hide_email_filter(value: str):
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/")
+    return render_template("error.jinja", redirect="/", error_message=str(e))
 
 
 @blueprint.errorhandler(JWTExtendedException)
