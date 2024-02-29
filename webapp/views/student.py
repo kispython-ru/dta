@@ -1,13 +1,14 @@
+from secrets import token_hex
+
 from authlib.integrations.requests_client import OAuth2Auth
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
-from secrets import token_hex
 
-from flask import Blueprint, abort
+from flask import Blueprint, Response, abort
 from flask import current_app as app
-from flask import redirect, render_template, request, Response
+from flask import redirect, render_template, request
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.lks import lks_oauth_helper

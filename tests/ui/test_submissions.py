@@ -1,13 +1,11 @@
-from tests.utils import get_tags, unique_int, unique_str
-
 from secrets import token_hex
+
+from tests.database.test_check import arrange_task
+from tests.utils import mode, unique_str
 
 from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
-
-from ..database.test_check import arrange_task
-from ..utils import mode
 
 
 @mode("exam")
