@@ -18,6 +18,8 @@ def test_unauthorized_submissions(db: AppDatabase, client: FlaskClient):
 
 @mode("exam")
 def test_empty_submissions(db: AppDatabase, client: FlaskClient):
+    session_id = token_hex(16)
+    client.set_cookie("localhost", "anonymous_identifier", session_id)
     response = client.get('/submissions')
     html = response.get_data(as_text=True)
 
