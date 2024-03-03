@@ -11,9 +11,16 @@ from webapp.repositories import AppDatabase
 @mode("registration")
 def test_unauthorized_submissions(db: AppDatabase, client: FlaskClient):
     response = client.get('/submissions')
-    html = response.get_data(as_text=True)
+    assert response.status_code == 302
 
-    assert "401 Unauthorized" in html
+
+@mode("registration")
+def test_reg_cookie_is_not_set(db: AppDatabase, client: FlaskClient):
+    response = client.get('/')
+    cookies = [cookie for cookie in client.cookie_jar]
+
+    assert response.status_code == 200
+    assert not len(cookies)
 
 
 @mode("exam")
@@ -30,9 +37,7 @@ def test_empty_submissions(db: AppDatabase, client: FlaskClient):
 @mode("exam")
 def test_exam_anonymous_submissions(db: AppDatabase, client: FlaskClient):
     group_id, variant_id, task_id = arrange_task(db)
-
     session_id = token_hex(16)
-
     code = "main = lambda: 42" + unique_str()
     ip = "0.0.0.0"
 
@@ -48,11 +53,18 @@ def test_exam_anonymous_submissions(db: AppDatabase, client: FlaskClient):
     assert code in html
 
 
+def test_no_reg_cookie_is_set(db: AppDatabase, client: FlaskClient):
+    response = client.get('/')
+    cookies = [cookie for cookie in client.cookie_jar]
+
+    assert response.status_code == 200
+    assert len(cookies) == 1
+    assert cookies[0].name == 'anonymous_identifier'
+
+
 def test_no_reg_anonymous_submissions(db: AppDatabase, client: FlaskClient):
     group_id, variant_id, task_id = arrange_task(db)
-
     session_id = token_hex(16)
-
     code = "main = lambda: 42" + unique_str()
     ip = "0.0.0.0"
 

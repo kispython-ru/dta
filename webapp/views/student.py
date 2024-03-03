@@ -6,7 +6,7 @@ from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
 
-from flask import Blueprint, Response, abort
+from flask import Blueprint, Response
 from flask import current_app as app
 from flask import redirect, render_template, request
 
@@ -28,13 +28,11 @@ groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
 
+@blueprint.after_request
 def set_anonymous_identifier(response: Response) -> Response:
-    if not request.cookies.get("anonymous_identifier"):
+    if not config.config.registration and not request.cookies.get("anonymous_identifier"):
         response.set_cookie("anonymous_identifier", value=token_hex(16))
     return response
-
-
-blueprint.after_request(set_anonymous_identifier)
 
 
 @blueprint.route("/", methods=["GET"])
@@ -66,11 +64,9 @@ def submissions(student: Student | None, page: int):
         submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
         submissions_count = statuses.count_student_submissions(student)
     else:
-        abort(401)
-
+        return redirect('/')
     if not submissions_statuses and page > 0:
         return redirect(f"/submissions/{page - 1}")
-
     pagination = Pagination(
         page=page,
         per_page=size,
@@ -82,7 +78,6 @@ def submissions(student: Student | None, page: int):
         outer_window=0,
         css_framework="bootstrap5",
     )
-
     return render_template(
         "student/submissions.jinja",
         submissions=submissions_statuses,
@@ -278,7 +273,7 @@ def hide_email_filter(value: str):
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/", error_message=str(e))
+    return render_template("error.jinja", redirect="/")
 
 
 @blueprint.errorhandler(JWTExtendedException)

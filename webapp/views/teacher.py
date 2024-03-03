@@ -32,9 +32,7 @@ def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: in
     submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, (page - 1) * size, size)
     if not submissions_statuses and page > 0:
         return redirect(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}/{page - 1}")
-
     submissions_count = statuses.count_submissions_by_info(gid, vid, tid)
-
     pagination = Pagination(
         page=page,
         per_page=size,
@@ -46,7 +44,6 @@ def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: in
         outer_window=0,
         css_framework="bootstrap5",
     )
-
     return render_template(
         "teacher/submissions.jinja",
         submissions=submissions_statuses,
