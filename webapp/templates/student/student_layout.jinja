@@ -48,6 +48,9 @@
                                 <li><a class="dropdown-item" href="/login">Войти</a></li>
                             {% endif %}
                         {% endif %}
+                        {% if exam or not registration %}
+                            <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>

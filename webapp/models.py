@@ -100,6 +100,7 @@ class Message(Base):
     time = sa.Column("time", sa.DateTime, nullable=False)
     code = sa.Column("code", sa.String, nullable=False)
     ip = sa.Column("ip", sa.String, nullable=False)
+    session_id = sa.Column("session_id", sa.String, nullable=True)
     processed = sa.Column("processed", sa.Boolean, nullable=False)
     student = sa.Column("student", sa.Integer, sa.ForeignKey("students.id"), nullable=True)
 
