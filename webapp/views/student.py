@@ -231,7 +231,7 @@ def login_with_lks_callback():
     response = oauth.fetch_token(token_ep, authorization_response=request.url)
     access_token = response['access_token']
     info = requests.get(userinfo_ep, headers={'Authorization': f'Bearer {access_token}'}).json()
-    email = info['email']
+    email = info['username']
     if not email:
         return redirect("/")
     student = db.students.get_by_external_email(email, 'lks')
