@@ -490,13 +490,11 @@ class StudentRepository:
             student = session.query(Student).get(id)
             return student
 
-    def get_by_external(self, external_id: str, provider: str) -> Student | None:
+    def get_by_external_email(self, email: str, provider: str) -> Student | None:
         with self.db.create_session() as session:
-            return (
-                session.query(Student)
-                .filter_by(external_id=external_id, provider=provider)
+            return session.query(Student) \
+                .filter_by(email=email, provider=provider) \
                 .first()
-            )
 
     def find_by_email(self, email: str) -> Student | None:
         email = email.lower()
@@ -533,18 +531,10 @@ class StudentRepository:
             session.add(student)
             return student
 
-    def create_external(
-        self,
-        email: str,
-        external_id: int,
-        group: str | None,
-        provider: str,
-    ) -> Student:
+    def create_external(self, email: str, provider: str) -> Student:
         with self.db.create_session() as session:
             student = Student(
                 email=email,
-                external_id=external_id,
-                group=group,
                 provider=provider,
                 blocked=False,
             )

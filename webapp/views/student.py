@@ -1,6 +1,7 @@
 from secrets import token_hex
 
-from authlib.integrations.requests_client import OAuth2Auth
+import requests
+from authlib.integrations.requests_client import OAuth2Session
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
@@ -11,7 +12,6 @@ from flask import current_app as app
 from flask import redirect, render_template, request
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.lks import lks_oauth_helper
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -208,9 +208,13 @@ def login():
 def login_with_lks():
     if not config.config.enable_lks_oauth:
         return redirect("/")
-    client = lks_oauth_helper.oauth.create_client("lks")
-    redirect_url = config.config.lks_redirect_url
-    return client.authorize_redirect(redirect_url)
+    auth_ep = f'{config.config.lks_api_base_url}/oauth2/v1/authorize'
+    oauth = OAuth2Session(
+        config.config.lks_oauth_client_id,
+        config.config.lks_oauth_client_secret,
+        scope='basic')
+    uri, _ = oauth.create_authorization_url(auth_ep)
+    return redirect(uri)
 
 
 @blueprint.route("/login/lks/callback", methods=["GET", "POST"])
@@ -218,23 +222,21 @@ def login_with_lks():
 def login_with_lks_callback():
     if not config.config.enable_lks_oauth:
         return redirect("/")
-    client = lks_oauth_helper.oauth.create_client(lks_oauth_helper.name)
-    token = client.authorize_access_token()
-    auth = OAuth2Auth(token)
-    user = lks_oauth_helper.get_me(auth)
-    student = db.students.get_by_external(user.id, lks_oauth_helper.name)
-    if student:
-        db.students.update_group(student, user.academic_group)
-    else:
-        email = user.login
+    token_ep = f'{config.config.lks_api_base_url}/oauth2/v1/token/'
+    userinfo_ep = f'{config.config.lks_api_base_url}/resources/v1/userinfo'
+    oauth = OAuth2Session(
+        config.config.lks_oauth_client_id,
+        config.config.lks_oauth_client_secret,
+        scope='basic')
+    response = oauth.fetch_token(token_ep, authorization_response=request.url)
+    access_token = response['access_token']
+    info = requests.get(userinfo_ep, headers={'Authorization': f'Bearer {access_token}'})
+    email = info['login']
+    student = db.students.get_by_external_email(email, 'lks')
+    if not student:
         student = db.students.find_by_email(email)
         if not student:
-            student = db.students.create_external(
-                email,
-                user.id,
-                user.academic_group,
-                lks_oauth_helper.name,
-            )
+            student = db.students.create_external(email, 'lks')
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response

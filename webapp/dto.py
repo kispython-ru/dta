@@ -21,6 +21,7 @@ class AppConfig:
         self.enable_lks_oauth: bool = config["ENABLE_LKS_OAUTH"]
         self.lks_oauth_client_id: str = config["LKS_OAUTH_CLIENT_ID"]
         self.lks_oauth_client_secret: str = config["LKS_OAUTH_CLIENT_SECRET"]
+        self.lks_api_base_url: str = config["LKS_API_BASE_URL"]
         self.lks_redirect_url: str = config["LKS_REDIRECT_URL"]
         self.places_in_rating: int = config["PLACES_IN_RATING"]
         self.places_in_group: int = config["PLACES_IN_GROUP"]
