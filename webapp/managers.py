@@ -246,7 +246,6 @@ class StatusManager:
 
     def count_submissions_by_info(self, group: int, variant: int, task: int) -> int:
         registration = self.config.config.enable_registration
-
         return self.checks.count_submissions_by_info(group, variant, task, registration)
 
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
@@ -396,6 +395,9 @@ class StudentManager:
                 return "Данный адрес электронной почты заблокирован."
             if self.confirmed(email):
                 return "Такой адрес почты уже зарегистрирован! Нажмите кнопку 'Войти'."
+            student = self.students.find_by_email(email)
+            if student and student.provider:
+                return "Воспользуйтесь кнопкой 'Сменить пароль', если хотите выполнить вход по паролю."
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
                     "для подтверждения. В течение 5 минут после отправки письма Ваш аккаунт "
@@ -416,7 +418,8 @@ class StudentManager:
             return "Такой адрес почты не зарегистрирован!"
         if self.blocked(email):
             return "Данный адрес электронной почты заблокирован."
-        if not self.confirmed(email):
+        student = self.students.find_by_email(email)
+        if not self.confirmed(email) and not student.provider:
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
                     "для подтверждения. В течение 5 минут после отправки письма Ваш аккаунт "
@@ -434,6 +437,9 @@ class StudentManager:
         if self.blocked(email):
             return "Данный адрес электронной почты заблокирован."
         if not self.confirmed(email):
+            student = self.students.find_by_email(email)
+            if student and student.provider:
+                return "Воспользуйтесь кнопкой 'Сменить пароль', если хотите выполнить вход по паролю."
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
                     "для подтверждения Вашего аккаунта. В течение 5 минут после отправки "
@@ -452,7 +458,7 @@ class StudentManager:
 
     def update_password(self, email: str, password: str) -> bool:
         student = self.students.find_by_email(email)
-        if student and student.password_hash:
+        if student and (student.password_hash or student.provider):
             given = password.encode('utf8')
             hashed = bcrypt.hashpw(given, bcrypt.gensalt())
             self.students.change_password(email, hashed.decode('utf8'))
