@@ -31,15 +31,11 @@
             <th scope="col" style="width:100px">Вариант</th>
             {% for task in group.tasks %}
               <td scope="col" class="text-center">
-                {% if task.formulation is none %}
-                  <a class="text-decoration-none"
-                    target="__blank"
-                    href="{{ task.url }}">
-                    №{{ task.id + 1 }}
-                  </a>
-                {% else %}
-                  №{{ task.id + 1 }}
-                {% endif %}
+                <a class="text-decoration-none"
+                  target="__blank"
+                  href="{{ task.url }}">
+                  №{{ task.formulation if task.formulation else task.id + 1 }}
+                </a>
               </td>
             {% endfor %}
           </tr>

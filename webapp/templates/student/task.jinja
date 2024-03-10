@@ -7,31 +7,25 @@
       </a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">
-        №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
+        №{{ status.formulation if status.formulation else status.task + 1 }}, вариант №{{ status.variant + 1 }}
     </li>
 {% endblock %}
 
 {% block main %}
   <h6 class="card-title fw-bold">
-    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
+    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.formulation if status.formulation else status.task + 1 }}</span>,
     вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
     группа <a href="/group/{{ status.group }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
   </h6>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для варианта №{{ status.variant + 1 }}.
+    Здесь Вы можете отправить ответ на задание №{{ status.formulation if status.formulation else status.task + 1 }} для варианта №{{ status.variant + 1 }}.
   </h6>
   <div class="card-subtitle mb-4 mt-2">
-  {% if status.formulation is none %}
-    <a class="text-decoration-none btn btn-primary"
-       target="__blank"
-       href="{{ status.formulation_url }}">
-      Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{ status.external.group_title }}
-    </a>
-  {% else %}
-    <div class="mt-3">
-      {{ status.formulation }}
-    </div>
-  {% endif %}
+  <a class="text-decoration-none btn btn-primary"
+     target="__blank"
+     href="{{ status.formulation_url }}">
+    Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{ status.external.group_title }}
+  </a>
   </div>
   <div>
     <h6 class="card-title fw-bold">
