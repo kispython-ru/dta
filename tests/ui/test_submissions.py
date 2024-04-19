@@ -1,6 +1,7 @@
 from secrets import token_hex
 
 from tests.database.test_check import arrange_task
+from tests.ui.test_auth import create_student
 from tests.utils import mode, unique_str
 
 from flask.testing import FlaskClient
@@ -21,6 +22,17 @@ def test_reg_cookie_is_not_set(db: AppDatabase, client: FlaskClient):
 
     assert response.status_code == 200
     assert not len(cookies)
+
+
+@mode("registration")
+def test_authorized_submissions(db: AppDatabase, client: FlaskClient):
+    email, password = create_student(db)
+    db.students.confirm(email)
+
+    client.post("/login", data={'login': email, 'password': password})
+    response = client.get('/submissions')
+
+    assert response.status_code == 200
 
 
 @mode("exam")

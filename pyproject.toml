@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "app"
+name = "webapp"
 version = "0.1.0"
 description = "DTA web app."
 authors = ["Gorchakov A.V. and Contributors <worldbeater-dev@yandex.ru>"]
