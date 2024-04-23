@@ -11,7 +11,7 @@ class CodeLength:
 class StudentMessageForm(FlaskForm):
     code = StringField("code", [
         DataRequired(message="Данное поле не может быть пустым!"),
-        Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать как минимум 10 символов!"),
+        Length(min=CodeLength.min, max=CodeLength.max, message="Код должен содержать не менее 10 и не более 10⁴ символов!"),
     ])
 
 
