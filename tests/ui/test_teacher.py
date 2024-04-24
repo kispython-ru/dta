@@ -94,3 +94,10 @@ def test_anonymous_submission(db: AppDatabase, client: FlaskClient):
     assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
     assert code in response.get_data(as_text=True)
     assert "студент" not in response.get_data(as_text=True)
+
+
+def test_invalid_page_redirect(db: AppDatabase, client: FlaskClient):
+    teacher_login(db, client)
+    gid, vid, tid = arrange_task(db)
+    response = client.get(f"/teacher/submissions/group/{gid}/variant/{vid}/task/{tid}/1")
+    assert response.status_code == 302

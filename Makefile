@@ -39,4 +39,8 @@ container:
 migration:
 	cd webapp && alembic revision -m "$(TITLE)"
 
+.PHONY: coverage
+coverage:
+	pytest --cov-report html --cov webapp ./tests
+
 .DEFAULT_GOAL :=

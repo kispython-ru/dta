@@ -90,3 +90,9 @@ def test_no_reg_anonymous_submissions(db: AppDatabase, client: FlaskClient):
 
     assert response.status_code == 200
     assert code in html
+
+
+@mode("exam")
+def test_empty_submission_redirect(db: AppDatabase, client: FlaskClient):
+    response = client.get('/submissions')
+    assert response.status_code == 302
