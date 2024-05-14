@@ -18,7 +18,7 @@ def test_login_logout(db: AppDatabase, client: FlaskClient):
 
 
 def test_false_login(db: AppDatabase, client: FlaskClient):
-    response = client.post("/teacher/login", data={
+    response = client.post("/login", data={
         "login": "badLogin",
         "password": "evenWorsePassword"
     }, follow_redirects=True)

@@ -217,7 +217,7 @@ def handle_view_errors(e):
 @blueprint.errorhandler(JWTExtendedException)
 @blueprint.errorhandler(PyJWTError)
 def handle_authorization_errors(e):
-    response = redirect('/teacher/login')
+    response = redirect('/login')
     unset_jwt_cookies(response)
     return response
 
