@@ -57,12 +57,13 @@ def get_tags(
 
 
 def teacher_login(db: AppDatabase, client: FlaskClient):
-    login = unique_str()
+    email = f'{unique_str()}@{unique_str()}.ru'
     password = unique_str()
-    sm = StudentManager(None, db.students, db.mailers)
-    sm.create(login, password, True)
+    students = StudentManager(None, db.students, db.mailers)
+    students.create(email, password, True)
+    db.students.confirm(email)
     return client.post("/login", data={
-        "login": login,
+        "login": email,
         "password": password
     }, follow_redirects=True)
 

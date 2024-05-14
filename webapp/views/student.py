@@ -189,7 +189,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/login", methods=['GET', 'POST'])
-@student_jwt_reset(config, "/login")
+@student_jwt_reset(config, "/login", False)
 def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
@@ -198,8 +198,8 @@ def login():
     if error:
         form.login.errors.append(error)
         return render_template("student/login.jinja", form=form)
-    response = redirect("/")
     student = db.students.find_by_email(form.login.data)
+    response = redirect("/teacher" if student.teacher else "/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
 

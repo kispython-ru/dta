@@ -13,12 +13,12 @@ from webapp.managers import AppConfigManager
 from webapp.repositories import StudentRepository
 
 
-def student_jwt_reset(config: AppConfigManager, path: str):
+def student_jwt_reset(config: AppConfigManager, path: str, auth_redirect=True):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):
-            if not config.config.registration:
-                return redirect('/')
+            if not config.config.registration and auth_redirect:
+                return redirect("/")
             if verify_jwt_in_request(True):
                 response = redirect(path)
                 unset_jwt_cookies(response)

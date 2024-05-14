@@ -12,9 +12,9 @@ def test_login_logout(db: AppDatabase, client: FlaskClient):
     assert "login" not in response.request.path
     assert "Выгрузка всех присланных сообщений" in response.get_data(as_text=True)
 
-    response = client.get("/teacher/logout", follow_redirects=True)
+    response = client.get("/logout", follow_redirects=True)
 
-    assert "login" in response.request.path
+    assert response.request.path == "/"
 
 
 def test_false_login(db: AppDatabase, client: FlaskClient):
