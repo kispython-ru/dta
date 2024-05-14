@@ -19,7 +19,7 @@ from webapp.dto import (
     TaskStatusDto,
     VariantDto
 )
-from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Teacher, Variant
+from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
@@ -29,7 +29,6 @@ from webapp.repositories import (
     StudentRepository,
     TaskRepository,
     TaskStatusRepository,
-    TeacherRepository,
     VariantRepository
 )
 
@@ -482,10 +481,10 @@ class StudentManager:
         exists = self.mailers.exists(domain)
         return exists
 
-    def create(self, email: str, password: str) -> int:
+    def create(self, email: str, password: str, teacher=False) -> int:
         given = password.encode('utf8')
         hashed = bcrypt.hashpw(given, bcrypt.gensalt())
-        student = self.students.create(email, hashed.decode('utf8'))
+        student = self.students.create(email, hashed.decode('utf8'), teacher)
         return student.id
 
 
@@ -599,22 +598,3 @@ class ExportManager:
         bom = u"\uFEFF"
         value = bom + si.getvalue()
         return value
-
-
-class TeacherManager:
-    def __init__(self, teachers: TeacherRepository):
-        self.teachers = teachers
-
-    def check_password(self, login: str, password: str) -> Teacher | None:
-        teacher = self.teachers.find_by_login(login)
-        if teacher:
-            given = password.encode('utf8')
-            actual = teacher.password_hash.encode('utf8')
-            if bcrypt.checkpw(given, actual):
-                return teacher
-
-    def create(self, login: str, password: str):
-        given = password.encode('utf8')
-        hashed = bcrypt.hashpw(given, bcrypt.gensalt())
-        teacher = self.teachers.create(login, hashed.decode('utf8'))
-        return teacher.id

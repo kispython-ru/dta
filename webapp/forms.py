@@ -15,14 +15,6 @@ class StudentMessageForm(FlaskForm):
     ])
 
 
-class TeacherLoginForm(FlaskForm):
-    login = StringField('login', [DataRequired(message="Данное поле не может быть пустым!")])
-    password = PasswordField('password', [
-        DataRequired(message="Данное поле не может быть пустым!"),
-        Length(min=8, message="Пароль содержит как минимум 8 символов."),
-    ])
-
-
 class StudentLoginForm(FlaskForm):
     def __init__(self, lks_oauth_enabled: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)

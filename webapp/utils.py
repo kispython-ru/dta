@@ -4,13 +4,13 @@ import sys
 import traceback
 from functools import wraps
 
-from flask_jwt_extended import get_jwt, get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
+from flask_jwt_extended import get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 from jwt import PyJWTError
 
 from flask import Request, redirect
 
 from webapp.managers import AppConfigManager
-from webapp.repositories import StudentRepository, TeacherRepository
+from webapp.repositories import StudentRepository
 
 
 def student_jwt_reset(config: AppConfigManager, path: str):
@@ -36,27 +36,21 @@ def student_jwt_optional(students: StudentRepository):
             identity = get_jwt_identity()
             if identity is None:
                 return function(None, *args, **kwargs)
-            claims = get_jwt()
-            if "teacher" in claims:
-                return function(None, *args, **kwargs)
             student = students.get_by_id(identity)
             return function(student, *args, **kwargs)
         return decorator
     return wrapper
 
 
-def teacher_jwt_required(teachers: TeacherRepository):
+def teacher_jwt_required(students: StudentRepository):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
-            claims = get_jwt()
-            if "teacher" in claims:
-                identity = get_jwt_identity()
-                teacher = teachers.get_by_id(identity)
-                if teacher:
-                    return function(teacher, *args, **kwargs)
-                raise PyJWTError()
+            identity = get_jwt_identity()
+            student = students.get_by_id(identity)
+            if student.teacher:
+                return function(student, *args, **kwargs)
             raise PyJWTError()
         return decorator
     return wrapper

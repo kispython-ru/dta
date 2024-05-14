@@ -7,10 +7,9 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import make_response, redirect, render_template, request
 
-from webapp.forms import TeacherLoginForm
-from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager, TeacherManager
-from webapp.models import Group, Message, Status, Task, Teacher, Variant
-from webapp.repositories import AppDatabase, DbContextManager
+from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
+from webapp.models import Message, Student
+from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, teacher_jwt_required
 
 
@@ -21,13 +20,12 @@ db = AppDatabase(lambda: config.config.connection_string)
 students = StudentManager(config, db.students, db.mailers)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
-teachers = TeacherManager(db.teachers)
 
 
 @blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"], defaults={'page': 0})
 @blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>/<int:page>", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: int):
+@teacher_jwt_required(db.students)
+def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: int):
     size = 5
     submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, (page - 1) * size, size)
     if not submissions_statuses and page > 0:
@@ -55,8 +53,8 @@ def teacher_submissions(teacher: Teacher, gid: int, vid: int, tid: int, page: in
 
 
 @blueprint.route("/teacher/submissions", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def select_submissions(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def select_submissions(teacher: Student):
     gid = request.args.get('gid')
     vid = request.args.get('vid')
     tid = request.args.get('tid')
@@ -64,8 +62,8 @@ def select_submissions(teacher: Teacher):
 
 
 @blueprint.route("/teacher", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def dashboard(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def dashboard(teacher: Student):
     groups = db.groups.get_all() if config.config.no_background_worker or config.config.final_tasks else None
     glist = db.groups.get_all()
     vlist = db.variants.get_all()
@@ -82,8 +80,8 @@ def dashboard(teacher: Teacher):
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def select_group(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def select_group(teacher: Student):
     group = request.args.get('group')
     if config.config.exam:
         return redirect(f'/teacher/group/{group}/exam')
@@ -91,16 +89,16 @@ def select_group(teacher: Teacher):
 
 
 @blueprint.route("/teacher/group/<group_id>/exam", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam(teacher: Teacher, group_id: int):
+@teacher_jwt_required(db.students)
+def exam(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
     return render_template("teacher/exam.jinja", group=group, seed=seed)
 
 
 @blueprint.route("/teacher/group/<group_id>/exam/toggle", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_toggle(teacher: Teacher, group_id: int):
+@teacher_jwt_required(db.students)
+def exam_toggle(teacher: Student, group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     if seed is None and config.config.final_tasks:
         db.seeds.begin_final_test(group_id)
@@ -112,8 +110,8 @@ def exam_toggle(teacher: Teacher, group_id: int):
 
 
 @blueprint.route("/teacher/exam/start", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_startall(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def exam_startall(teacher: Student):
     groups = db.groups.get_all()
     for group in groups:
         seed = db.seeds.get_final_seed(group.id)
@@ -125,8 +123,8 @@ def exam_startall(teacher: Teacher):
 
 
 @blueprint.route("/teacher/exam/end", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_endall(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def exam_endall(teacher: Student):
     groups = db.groups.get_all()
     for group in groups:
         db.seeds.end_final_test(group.id)
@@ -134,8 +132,8 @@ def exam_endall(teacher: Teacher):
 
 
 @blueprint.route("/teacher/exam/delete", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_deleteall(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def exam_deleteall(teacher: Student):
     if not config.config.final_tasks or not config.config.clearable_database:
         return redirect('/teacher')
     groups = db.groups.get_all()
@@ -146,8 +144,8 @@ def exam_deleteall(teacher: Teacher):
 
 
 @blueprint.route("/teacher/group/<group_id>/exam/delete", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_delete(teacher: Teacher, group_id: int):
+@teacher_jwt_required(db.students)
+def exam_delete(teacher: Student, group_id: int):
     if not config.config.final_tasks or not config.config.clearable_database:
         return redirect(f'/teacher/group/{group_id}/exam')
     db.statuses.delete_group_task_statuses(group_id)
@@ -156,8 +154,8 @@ def exam_delete(teacher: Teacher, group_id: int):
 
 
 @blueprint.route("/teacher/group/<group_id>/exam/csv", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def exam_csv(teacher: Teacher, group_id: int):
+@teacher_jwt_required(db.students)
+def exam_csv(teacher: Student, group_id: int):
     delimiter = request.args.get('delimiter')
     value = exports.export_exam_results(group_id, delimiter)
     output = make_response(value)
@@ -167,8 +165,8 @@ def exam_csv(teacher: Teacher, group_id: int):
 
 
 @blueprint.route("/teacher/messages", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def messages(teacher: Teacher):
+@teacher_jwt_required(db.students)
+def messages(teacher: Student):
     separator = request.args.get('separator')
     count = request.args.get('count')
     value = exports.export_messages(count, separator)
@@ -179,8 +177,8 @@ def messages(teacher: Teacher):
 
 
 @blueprint.route("/teacher/group/<group_id>", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def queue(teacher: Teacher, group_id: int):
+@teacher_jwt_required(db.students)
+def queue(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_next_pending_message()
     matches = message is None or group.id == message.group
@@ -190,8 +188,8 @@ def queue(teacher: Teacher, group_id: int):
 
 
 @blueprint.route("/teacher/group/<group_id>/queue/<message_id>/accept", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def accept(teacher: Teacher, group_id: int, message_id: int):
+@teacher_jwt_required(db.students)
+def accept(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
     if group.id == message.group and config.config.no_background_worker:
@@ -200,39 +198,14 @@ def accept(teacher: Teacher, group_id: int, message_id: int):
 
 
 @blueprint.route("/teacher/group/<group_id>/queue/<message_id>/reject", methods=["GET"])
-@teacher_jwt_required(db.teachers)
-def reject(teacher: Teacher, group_id: int, message_id: int):
+@teacher_jwt_required(db.students)
+def reject(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
     if group.id == message.group and config.config.no_background_worker:
         comment = request.args.get("comment")
         process_message(message, False, comment)
     return redirect(f"/teacher/group/{group_id}")
-
-
-@blueprint.route("/teacher/login", methods=['GET', 'POST'])
-def login():
-    if verify_jwt_in_request(True):
-        response = redirect('/teacher/login')
-        unset_jwt_cookies(response)
-        return response
-    form = TeacherLoginForm()
-    if not form.validate_on_submit():
-        return render_template("teacher/login.jinja", form=form)
-    teacher = teachers.check_password(form.login.data, form.password.data)
-    if teacher is None:
-        return render_template("teacher/login.jinja", form=form)
-    access = create_access_token(identity=teacher.id, additional_claims={"teacher": True})
-    response = redirect("/teacher")
-    set_access_cookies(response, access)
-    return response
-
-
-@blueprint.route("/teacher/logout", methods=['GET'])
-def logout():
-    response = redirect("/teacher/login")
-    unset_jwt_cookies(response)
-    return response
 
 
 @blueprint.errorhandler(Exception)
