@@ -101,6 +101,7 @@ def group(student: Student | None, group_id: int):
         "student/group.jinja",
         group=group,
         blocked=blocked,
+        hide_groups=config.config.hide_groups,
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
