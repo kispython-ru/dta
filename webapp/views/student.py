@@ -194,7 +194,7 @@ def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
         return render_template(
-            "student/login.jinja", 
+            "student/login.jinja",
             registration=config.config.registration,
             group_rating=config.config.groups,
             form=form

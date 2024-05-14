@@ -100,7 +100,7 @@ def exam(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
     return render_template(
-        "teacher/exam.jinja", 
+        "teacher/exam.jinja",
         registration=config.config.registration,
         group_rating=config.config.groups,
         group=group,
@@ -197,7 +197,7 @@ def queue(teacher: Student, group_id: int):
     matches = message is None or group.id == message.group
     if matches and config.config.no_background_worker:
         return render_template(
-            "teacher/queue.jinja", 
+            "teacher/queue.jinja",
             registration=config.config.registration,
             group_rating=config.config.groups,
             group=group,
