@@ -116,20 +116,6 @@ def test_register_off_get(db: AppDatabase, client: FlaskClient):
     assert response.status_code == 302
 
 
-def test_login_off_post(client: FlaskClient, db: AppDatabase):
-    create_student(db)
-
-    response = client.post("/login")
-    assert response.status_code == 302
-
-
-def test_login_off_get(client: FlaskClient, db: AppDatabase):
-    create_student(db)
-
-    response = client.get("/login")
-    assert response.status_code == 302
-
-
 @mode('registration')
 @pytest.mark.parametrize("password, message", [
     ("1234", "Пароль содержит как минимум 8 символов."),

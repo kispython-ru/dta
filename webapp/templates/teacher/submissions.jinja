@@ -1,101 +1,70 @@
 {% extends 'layout.jinja' %}
-{% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="collapse navbar-collapse container">
-            <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-                <li>
-                    <a class="logo-container text-decoration-none" href="/teacher">
-                        <div class="logo">
-                            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}"/>
-                        </div>
-                    </a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    Преподавательская
-                </li>
-            </ol>
-            <a class="breadcrumb-item text-decoration-none" href="/teacher/logout">
-                Выйти
-            </a>
-        </div>
-    </nav>
-    <div class="container">
-        <div class="row">
-            <div class="col-12 mt-3">
-                <h5 class="card-title fw-bold mb-2">
-                    Отправленные решения
-                </h5>
-                <h6 class="card-subtitle mb-3 text-muted">
-                    Новые решения показаны сверху. Страница {{ page + 1 }}.
-                </h6>
-            </div>
-            {% if submissions is defined and submissions|length > 0 %}
-                {% for submission in submissions %}
-                    <article class="mb-4">
-                        <h6 class="card-title fw-bold mb-1">
-                            Задача <a href="{{ submission.status.submission_url }}" class="badge alert-primary"
-                                      style="font-size: inherit; text-decoration: none">№{{ submission.status.task + 1 }}</a>,
-                            вариант <span class="badge alert-secondary"
-                                          style="font-size: inherit">№{{ submission.status.variant + 1 }}</span>,
-                            группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary"
-                                      style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>
-                            {% if submission.student %}
-                            ,
-                            студент <span class="badge alert-secondary"
-                                          style="font-size: inherit">{{ submission.student.email | hide }}</span>,
-                            id <span class="badge alert-secondary"
-                                     style="font-size: inherit">{{ submission.student.id }}</span>
+{% block header %}
+<li class="breadcrumb-item active" aria-current="page">
+  Преподавательская
+</li>
+{% endblock %}
 
-                            {% endif %}
-                        </h6>
-                        <div class="mb-2 text-uppercase">
-                            <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
-                            <span class="badge alert-light">Отправлено: {{ submission.sent.strftime('%d.%m.%Y %H:%M') }}</span>
-                            <span class="badge alert-light">Проверено: {{ submission.checked.strftime('%d.%m.%Y %H:%M') }}</span>
-                        </div>
-                        {% if submission.status.error_message is not none and submission.status.error_message %}
-                            <div>Подробные сведения об ошибке:</div>
-                            <div class="text-muted mb-2"
-                                 style="white-space: pre-wrap">{{ submission.status.error_message | e }}</div>
-                        {% else %}
-                            <div class="mb-2"></div>
-                        {% endif %}
-                        <textarea
-                                name="code"
-                                type="text"
-                                class="form-control"
-                                disabled
-                                rows="{{ submission.linesCount }}"
-                                placeholder="Ответ на задание"
-                                style="font-family: monospace;">{{ submission.code }}</textarea>
-                    </article>
-                {% endfor %}
-
-                {{ pagination.links }}
-            {% else %}
-                Список отправленных решений пуст
-            {% endif %}
-        </div>
-
-        {% if highlight %}
-            <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
-            <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
-            <script type="text/javascript">
-                codeElements = document.getElementsByName("code")
-                for (codeElement of codeElements) {
-                    const editor = CodeMirror.fromTextArea(
-                        codeElement,
-                        {
-                            mode: 'python',
-                            lineNumbers: true,
-                            indentUnit: 4,
-                            readOnly: true,
-                            height: 'auto',
-                            viewportMargin: Infinity
-                        }
-                    )
-                }
-            </script>
-        {% endif %}
+{% block main %}
+<div class="row">
+  <div class="col-12">
+    <h5 class="card-title fw-bold mb-2">
+      Отправленные решения
+    </h5>
+    <h6 class="card-subtitle mb-3 text-muted">
+      Новые решения показаны сверху. Страница {{ page + 1 }}.
+    </h6>
+  </div>
+  {% if submissions is defined and submissions|length > 0 %}
+  {% for submission in submissions %}
+  <article class="mb-4">
+    <h6 class="card-title fw-bold mb-1">
+      Задача <a href="{{ submission.status.submission_url }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">№{{ submission.status.task + 1 }}</a>,
+      вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ submission.status.variant + 1 }}</span>,
+      группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>
+      {% if submission.student %}
+      , студент <span class="badge alert-secondary" style="font-size: inherit">{{ submission.student.email | hide }}</span>,
+      id <span class="badge alert-secondary" style="font-size: inherit">{{ submission.student.id }}</span>
+      {% endif %}
+    </h6>
+    <div class="mb-2 text-uppercase">
+      <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
+      <span class="badge alert-light">Отправлено: {{ submission.sent.strftime('%d.%m.%Y %H:%M') }}</span>
+      <span class="badge alert-light">Проверено: {{ submission.checked.strftime('%d.%m.%Y %H:%M') }}</span>
     </div>
+    {% if submission.status.error_message is not none and submission.status.error_message %}
+    <div>Подробные сведения об ошибке:</div>
+    <div class="text-muted mb-2" style="white-space: pre-wrap">{{ submission.status.error_message | e }}</div>
+    {% else %}
+    <div class="mb-2"></div>
+    {% endif %}
+    <textarea name="code" type="text" class="form-control" disabled rows="{{ submission.linesCount }}" placeholder="Ответ на задание" style="font-family: monospace;">{{ submission.code }}</textarea>
+  </article>
+  {% endfor %}
+  {{ pagination.links }}
+  {% else %}
+  Список отправленных решений пуст
+  {% endif %}
+</div>
+
+{% if highlight %}
+<script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
+<script type="text/javascript">
+  codeElements = document.getElementsByName("code")
+  for (codeElement of codeElements) {
+    const editor = CodeMirror.fromTextArea(
+      codeElement,
+      {
+        mode: 'python',
+        lineNumbers: true,
+        indentUnit: 4,
+        readOnly: true,
+        height: 'auto',
+        viewportMargin: Infinity
+      }
+    )
+  }
+</script>
+{% endif %}
 {% endblock %}

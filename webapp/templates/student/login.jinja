@@ -1,86 +1,75 @@
 {% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+{% block header %}
+<li class="breadcrumb-item active" aria-current="page">
+  Цифровой ассистент преподавателя
+</li>
+{% endblock %}
+
+{% block main %}
+<div class="row mt-4">
+  <div class="col-12 col-md-9 col-lg-6">
+    <div class="card">
+      <form class="card-body" action="/login" method="POST">
+        <b class="card-title d-block">Авторизация</b>
+        <div class="form-group mb-2">
+          <label>Электронная почта</label>
+          <input name="login" type="text" class="form-control" placeholder="Адрес электронной почты"
+            value="{{ form.login.data if form.login.data }}">
+          <small class="form-text text-muted">Введите адрес электронной почты.</small>
+        </div>
+        {% if form.login.errors %}
+        <small class="d-block alert alert-danger">
+          {% for error in form.login.errors %}
+          <div>{{ error }}</div>
+          {% endfor %}
+        </small>
+        {% endif %}
+        <div class="form-group mb-2">
+          <label>Пароль</label>
+          <input name="password" type="password" class="form-control" placeholder="Пароль">
+          <small class="form-text text-muted">Введите пароль.</small>
+        </div>
+        {% if form.password.errors %}
+        <small class="d-block alert alert-danger">
+          {% for error in form.password.errors %}
+          <div>{{ error }}</div>
+          {% endfor %}
+        </small>
+        {% endif %}
+        {{ form.csrf_token }}
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <button type="submit" class="btn btn-primary w-100 d-block">
+              Войти
+            </button>
           </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Цифровой ассистент преподавателя
-      </li>
-    </ol>
-  </div>
-</nav>
-<div class="container">
-  <div class="row mt-4">
-    <div class="col-12 col-md-9 col-lg-6">
-      <div class="card">
-        <form class="card-body" action="/login" method="POST">
-          <b class="card-title d-block">Авторизация</b>
-          <div class="form-group mb-2">
-            <label>Электронная почта</label>
-            <input name="login" type="text" class="form-control"
-                   placeholder="Адрес электронной почты"
-                   value="{{ form.login.data if form.login.data }}">
-            <small class="form-text text-muted">Введите адрес электронной почты.</small>
+          {% if registration %}
+          <div class="col-md-6 mb-3">
+            <a href="/register" class="btn btn-outline-primary w-100 d-block">
+              Зарегистрироваться
+            </a>
           </div>
-          {% if form.login.errors %}
-            <small class="d-block alert alert-danger">
-              {% for error in form.login.errors %}
-                <div>{{ error }}</div>
-              {% endfor %}
-            </small>
-          {% endif %}
-          <div class="form-group mb-2">
-            <label>Пароль</label>
-            <input name="password" type="password" class="form-control" placeholder="Пароль">
-            <small class="form-text text-muted">Введите пароль.</small>
-          </div>
-          {% if form.password.errors %}
-            <small class="d-block alert alert-danger">
-              {% for error in form.password.errors %}
-                <div>{{ error }}</div>
-              {% endfor %}
-            </small>
-          {% endif %}
-          {{ form.csrf_token }}
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <button type="submit" class="btn btn-primary w-100 d-block">
-                Войти
-              </button>
-            </div>
-            <div class="col-md-6 mb-3">
-              <a href="/register" class="btn btn-outline-primary w-100 d-block">
-                Зарегистрироваться
-              </a>
-            </div>
-            <div class="col-md-12">
-              <a href="/change-password" class="btn btn-outline-primary w-100 d-block">
-                Сменить пароль
-              </a>
-            </div>
-          </div>
-          {% if form.lks_oauth_enabled %}
-          <div class="row mt-0">
-            <div class="col-12">
-              <hr>
-            </div>
-            <div class="col-12">
-              <a href="/login/lks" class="btn btn-outline-primary w-100 d-block">
-                <img src="{{ url_for('static', filename='mirea.ico') }}" alt="Иконка ЛКС" width="16" height="16">
-                Войти через Единую систему аутентификации РТУ МИРЭА
-              </a>
-            </div>
+          <div class="col-md-12">
+            <a href="/change-password" class="btn btn-outline-primary w-100 d-block">
+              Сменить пароль
+            </a>
           </div>
           {% endif %}
-        </form>
-      </div>
+        </div>
+        {% if form.lks_oauth_enabled %}
+        <div class="row mt-0">
+          <div class="col-12">
+            <hr>
+          </div>
+          <div class="col-12">
+            <a href="/login/lks" class="btn btn-outline-primary w-100 d-block">
+              <img src="{{ url_for('static', filename='mirea.ico') }}" alt="Иконка ЛКС" width="16" height="16">
+              Войти через Единую систему аутентификации РТУ МИРЭА
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </form>
     </div>
   </div>
 </div>

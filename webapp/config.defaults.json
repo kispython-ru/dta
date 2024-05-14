@@ -9,6 +9,7 @@
     "READONLY": false,
     "TASK_BASE_URL": "http://kispython.ru/docs",
     "ENABLE_REGISTRATION": false,
+    "HIDE_GROUPS": false,
     "IMAP_LOGIN": null,
     "IMAP_PASSWORD": null,
     "FINAL_TASKS": {

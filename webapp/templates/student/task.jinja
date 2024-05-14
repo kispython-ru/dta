@@ -1,134 +1,137 @@
-{% extends 'student/student_layout.jinja' %}
-
+{% extends 'layout.jinja' %}
 {% block header %}
-    <li class="breadcrumb-item">
-      <a class="text-decoration-none" href="/group/{{ status.group }}">
-        {{ status.group_title }}
-      </a>
-    </li>
-    <li class="breadcrumb-item active" aria-current="page">
-        №{{ status.formulation if status.formulation else status.task + 1 }}, вариант №{{ status.variant + 1 }}
-    </li>
+<li class="breadcrumb-item">
+  <a class="text-decoration-none" href="/group/{{ status.group }}">
+    {{ status.group_title }}
+  </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">
+  №{{ status.formulation if status.formulation else status.task + 1 }}, вариант №{{ status.variant + 1 }}
+</li>
 {% endblock %}
 
 {% block main %}
+<h6 class="card-title fw-bold">
+  Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.formulation if status.formulation
+    else status.task + 1 }}</span>,
+  вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
+  группа <a href="/group/{{ status.group }}" class="badge alert-primary"
+    style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
+</h6>
+<h6 class="card-subtitle mb-2 text-muted">
+  Здесь Вы можете отправить ответ на задание №{{ status.formulation if status.formulation else status.task + 1 }} для
+  варианта №{{ status.variant + 1 }}.
+</h6>
+<div class="card-subtitle mb-4 mt-2">
+  <a class="text-decoration-none btn btn-primary" target="__blank" href="{{ status.formulation_url }}">
+    Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{
+    status.external.group_title }}
+  </a>
+</div>
+<div>
   <h6 class="card-title fw-bold">
-    Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.formulation if status.formulation else status.task + 1 }}</span>,
-    вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
-    группа <a href="/group/{{ status.group }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
+    Состояние задачи
   </h6>
   <h6 class="card-subtitle mb-2 text-muted">
-    Здесь Вы можете отправить ответ на задание №{{ status.formulation if status.formulation else status.task + 1 }} для варианта №{{ status.variant + 1 }}.
+    В данной секции Вы можете отслеживать состояние отправленного задания.
   </h6>
-  <div class="card-subtitle mb-4 mt-2">
-  <a class="text-decoration-none btn btn-primary"
-     target="__blank"
-     href="{{ status.formulation_url }}">
-    Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{ status.external.group_title }}
-  </a>
+  {% if status.status == 4 %}
+  <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
+  {% else %}
+  <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
+    {{ status.name }}
   </div>
-  <div>
-    <h6 class="card-title fw-bold">
-      Состояние задачи
-    </h6>
-    <h6 class="card-subtitle mb-2 text-muted">
-      В данной секции Вы можете отслеживать состояние отправленного задания.
-    </h6>
-    {% if status.status == 4 %}
-      <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
-    {% else %}
-      <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
-        {{ status.name }}
+  {% if status.error_message is not none and status.error_message %}
+  <div>Подробные сведения об ошибке:</div>
+  <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
+  {% else %}
+  <div class="mb-2"></div>
+  {% endif %}
+  {% endif %}
+</div>
+{% if status.show_achievements %}
+<div>
+  <h6 class="card-title fw-bold">
+    Разблокированные достижения
+    <small class="text-muted">
+      {{ status.earned }} из {{ status.achievements | length }}
+    </small>
+  </h6>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Сможете ли Вы решить задачу всеми способами, известными <a class="text-decoration-none"
+      href="https://github.com/true-grue/kispython/blob/main/contrib/elm.ipynb">искусственной нейронной сети</a>?
+  </h6>
+  {% if status.achievements %}
+  {% for dto in status.achievements %}
+  <div class="callout callout-{{ 'success' if dto.active else 'default text-muted' }}">
+    <div>{{ dto.title }} {{ '✓' if dto.active else '' }}</div>
+    <small>{{ dto.description }}</small>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endif %}
+<div class="card m-auto mt-3 mb-5">
+  <form class="card-body" action="{{ status.submission_url }}" method="POST">
+    <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
+    <div class="text-muted mb-2">
+      Во избежание утери данных рекомендуется сохранять отправляемые программы локально.
+    </div>
+    {% if registration and not student %}
+    <div class="row">
+      <div class="col-md-8">
+        <a class="btn btn-outline-danger w-100 d-block" href="/login">
+          Войдите или зарегистрируйтесь, чтобы отправить решение на проверку
+        </a>
       </div>
-      {% if status.error_message is not none and status.error_message %}
-        <div>Подробные сведения об ошибке:</div>
-        <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
-      {% else %}
-        <div class="mb-2"></div>
-      {% endif %}
+    </div>
+    {% else %}
+    <div class="form-group mb-2">
+      <textarea id="code-textarea" name="code" type="text" class="form-control" {% if status.disabled or registration
+        and not student %}disabled{%endif%} placeholder="Ответ на задание"
+        style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
+      <small class="form-text text-muted">
+        <div>
+          Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция
+          <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
+          использование модулей только из стандартной библиотеки Python.
+        </div>
+      </small>
+    </div>
+    {% if form.code.errors %}
+    <ul class="errors">
+      {% for error in form.code.errors %}
+      <li class="text-danger">{{ error }}</li>
+      {% endfor %}
+    </ul>
     {% endif %}
-  </div>
-  {% if status.show_achievements %}
-    <div>
-      <h6 class="card-title fw-bold">
-        Разблокированные достижения
-        <small class="text-muted">
-          {{ status.earned }} из {{ status.achievements | length }}
-        </small>
-      </h6>
-      <h6 class="card-subtitle mb-2 text-muted">
-        Сможете ли Вы решить задачу всеми способами, известными <a class="text-decoration-none" href="https://github.com/true-grue/kispython/blob/main/contrib/elm.ipynb">искусственной нейронной сети</a>?
-      </h6>
-      {% if status.achievements %}
-        {% for dto in status.achievements %}
-          <div class="callout callout-{{ 'success' if dto.active else 'default text-muted' }}">
-            <div>{{ dto.title }} {{ '✓' if dto.active else '' }}</div>
-            <small>{{ dto.description }}</small>
-          </div>
-        {% endfor %}
+    {{ form.csrf_token }}
+    <div class="row">
+      <div class="col-md-8">
+        <button type="submit" class="btn btn-primary w-100 d-block" {% if status.disabled or registration and not
+          student %}disabled{%endif%}>
+          Отправить решение на проверку
+        </button>
+      </div>
+      {% if student and student.teacher %}
+      <div class="col-md-4">
+        <a class="btn btn-outline-primary w-100 d-block"
+           href="/teacher/submissions/group/{{ status.group }}/variant/{{ status.variant }}/task/{{ status.task }}">
+          История решений 📕
+        </a>
+      </div>
       {% endif %}
     </div>
-  {% endif %}
-  <div class="card m-auto mt-3 mb-5">
-    <form class="card-body" action="{{ status.submission_url }}" method="POST">
-      <h6 class="card-title fw-bold mb-0">Добавить новый ответ</h6>
-      <div class="text-muted mb-2">
-        Во избежание утери данных рекомендуется сохранять отправляемые программы локально.
-      </div>
-      {% if registration and not student %}
-        <div class="row">
-          <div class="col-md-8">
-            <a class="btn btn-outline-danger w-100 d-block" href="/login">
-              Войдите или зарегистрируйтесь, чтобы отправить решение на проверку
-            </a>
-          </div>
-        </div>
-      {% else %}
-        <div class="form-group mb-2">
-          <textarea
-            id="code-textarea"
-            name="code"
-            type="text"
-            class="form-control"
-            {% if status.disabled or registration and not student %}disabled{%endif%}
-            placeholder="Ответ на задание"
-            style="min-height: 250px;font-family: monospace, monospace;">{{ form.code.data if form.code.data }}</textarea>
-          <small class="form-text text-muted">
-            <div>
-              Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция
-              <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
-              использование модулей только из стандартной библиотеки Python.
-            </div>
-          </small>
-        </div>
-        {% if form.code.errors %}
-          <ul class="errors">
-            {% for error in form.code.errors %}
-              <li class="text-danger">{{ error }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-        {{ form.csrf_token }}
-        <div class="row">
-          <div class="col-md-8">
-            <button
-              type="submit"
-              class="btn btn-primary w-100 d-block"
-              {% if status.disabled or registration and not student %}disabled{%endif%}>
-              Отправить решение на проверку
-            </button>
-          </div>
-        </div>
-      {% endif %}
-    </form>
-  </div>
+    {% endif %}
+  </form>
+</div>
 
 {% if highlight and not (status.disabled or registration and not student) %}
-  <script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
-  <script type="text/javascript">
-    CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true, indentUnit: 4 })
-  </script>
+<script src="{{ url_for('static', filename='js/codemirror.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/python.min.js') }}"></script>
+<script type="text/javascript">
+  CodeMirror.fromTextArea(document.querySelector('#code-textarea'), { mode: 'python', lineNumbers: true, indentUnit: 4 })
+</script>
 {% endif %}
 
 {% endblock %}

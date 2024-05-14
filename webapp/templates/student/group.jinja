@@ -1,71 +1,113 @@
-{% extends 'student/student_layout.jinja' %}
+{% extends 'layout.jinja' %}
+{% block head %}
+<style>
+  .blurred-table {
+    pointer-events: none;
+    filter: blur(40px);
+    opacity: 0.8;
+  }
+
+  .blurred-table-hint {
+    position: absolute;
+    top: 350px;
+    left: 50%;
+    transform: translate(-50%, 50%);
+  }
+
+  .blurred-logo {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    border: solid 2px #AcB9C5;
+    padding: 27px 25px 23px 25px;
+    top: -230px;
+    left: 50%;
+    transform: translate(-50%, 50%);
+  }
+
+  .blurred-logo-img {
+    width: 90px;
+    height: 90px;
+  }
+</style>
+{% endblock %}
 
 {% block header %}
-    <li class="breadcrumb-item active" aria-current="page">
-         {{ group.title }}
-    </li>
+<li class="breadcrumb-item active" aria-current="page">
+  {{ group.title }}
+</li>
 {% endblock %}
 
 {% block main %}
-  {% if blocked %}
-    <h5 class="card-title fw-bold">
-      Зачёт ещё не начат
-    </h5>
-    <h6 class="card-subtitle mb-2 text-muted mt-2">
-      Зачёт для группы {{ group.title }} ещё не начат.
-    </h6>
-  {% else %}
-    <h5 class="card-title fw-bold">
-      Варианты заданий группы
-      <span class="text-primary" style="font-size: inherit">
-        {{ group.title }}
-      </span>
-    </h5>
-    <h6 class="card-subtitle mb-3 text-muted">
-      Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
-    </h6>
-    <div class="mb-5" style="overflow-x:auto">
-      <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
-        <thead>
-          <tr>
-            <th scope="col" style="width:100px">Вариант</th>
-            {% for task in group.tasks %}
-              <td scope="col" class="text-center">
-                <a class="text-decoration-none"
-                  target="__blank"
-                  href="{{ task.url }}">
-                  №{{ task.formulation if task.formulation else task.id + 1 }}
-                </a>
-              </td>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody style="border-top: 0px">
-          {% for variant in group.variants %}
-            <tr>
-              <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
-                <span class="p-1 d-block" title="{{ variant.earned }}">
-                  {{ variant.id + 1 }}
-                </span>
-              </td>
-              {% for status in variant.statuses %}
-                <td scope="col" style="border-bottom: 0; padding: 0">
-                  <a class="d-block text-center text-decoration-none p-1 position-relative"
-                    style="background-color:{{ status.cell_background }}"
-                    href="{{ status.submission_url }}">
-                    {{ status.code }}
-                    {% if status.earned > 1 %}
-                      <span class="achievements-counter">
-                        {{ status.earned }}
-                      </span>
-                    {% endif %}
-                  </a>
-                </td>
-              {% endfor %}
-            </tr>
+{% if blocked %}
+<h5 class="card-title fw-bold">
+  Зачёт ещё не начат
+</h5>
+<h6 class="card-subtitle mb-2 text-muted mt-2">
+  Зачёт для группы {{ group.title }} ещё не начат.
+</h6>
+{% else %}
+<h5 class="card-title fw-bold">
+  Варианты заданий группы
+  <span class="text-primary" style="font-size: inherit">
+    {{ group.title }}
+  </span>
+</h5>
+<h6 class="card-subtitle mb-3 text-muted">
+  Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
+</h6>
+<div class="position-relative">
+  <div class="{{ 'blurred-table' if hide_groups and registration and not student }} mb-5" style="overflow-x:auto">
+    <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
+      <thead>
+        <tr>
+          <th scope="col" style="width:100px">Вариант</th>
+          {% for task in group.tasks %}
+          <td scope="col" class="text-center">
+            <a class="text-decoration-none" target="__blank" href="{{ task.url }}">
+              №{{ task.formulation if task.formulation else task.id + 1 }}
+            </a>
+          </td>
           {% endfor %}
-        </tbody>
-      </table>
+        </tr>
+      </thead>
+      <tbody style="border-top: 0px">
+        {% for variant in group.variants %}
+        <tr>
+          <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
+            <span class="p-1 d-block" title="{{ variant.earned }}">
+              {{ variant.id + 1 }}
+            </span>
+          </td>
+          {% for status in variant.statuses %}
+          <td scope="col" style="border-bottom: 0; padding: 0">
+            <a class="d-block text-center text-decoration-none p-1 position-relative"
+              style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
+              {{ status.code }}
+              {% if status.earned > 1 %}
+              <span class="achievements-counter">
+                {{ status.earned }}
+              </span>
+              {% endif %}
+            </a>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if hide_groups and registration and not student %}
+  <div class="blurred-table-hint text-center">
+    <div class="blurred-logo">
+      <img class="blurred-logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
     </div>
+    <div class="mb-3">Для просмотра страницы необходимо:</div>
+    <a class="btn btn-primary" href="/login">
+      Войти на сайт
+    </a>
+  </div>
   {% endif %}
+</div>
+{% endif %}
 {% endblock %}

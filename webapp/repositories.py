@@ -15,7 +15,6 @@ from webapp.models import (
     Student,
     Task,
     TaskStatus,
-    Teacher,
     Variant,
     create_session_maker
 )
@@ -457,30 +456,6 @@ class FinalSeedRepository:
                 .delete()
 
 
-class TeacherRepository:
-    def __init__(self, db: DbContextManager):
-        self.db = db
-
-    def get_by_id(self, id: int) -> Teacher | None:
-        with self.db.create_session() as session:
-            teacher = session.query(Teacher).get(id)
-            return teacher
-
-    def find_by_login(self, login: str) -> Teacher | None:
-        with self.db.create_session() as session:
-            teacher = session.query(Teacher) \
-                .filter_by(login=login) \
-                .first()
-            return teacher
-
-    def create(self, login: str, password: str):
-        with self.db.create_session() as session:
-            teacher = Teacher(login=login,
-                              password_hash=password)
-            session.add(teacher)
-            return teacher
-
-
 class StudentRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
@@ -524,10 +499,10 @@ class StudentRepository:
                     unconfirmed_hash=None,
                 ))
 
-    def create(self, email: str, password: str) -> Student:
+    def create(self, email: str, password: str, teacher=False) -> Student:
         email = email.lower()
         with self.db.create_session() as session:
-            student = Student(email=email, unconfirmed_hash=password, blocked=False)
+            student = Student(email=email, unconfirmed_hash=password, teacher=teacher, blocked=False)
             session.add(student)
             return student
 
@@ -580,6 +555,5 @@ class AppDatabase:
         self.messages = MessageRepository(db)
         self.checks = MessageCheckRepository(db)
         self.seeds = FinalSeedRepository(db)
-        self.teachers = TeacherRepository(db)
         self.students = StudentRepository(db)
         self.mailers = MailerRepository(db)

@@ -9,7 +9,7 @@ from bs4.element import ResultSet, Tag
 
 from flask.testing import FlaskClient
 
-from webapp.managers import TeacherManager
+from webapp.managers import StudentManager
 from webapp.repositories import AppDatabase
 
 
@@ -57,12 +57,13 @@ def get_tags(
 
 
 def teacher_login(db: AppDatabase, client: FlaskClient):
-    login = unique_str()
+    email = f'{unique_str()}@{unique_str()}.ru'
     password = unique_str()
-    tm = TeacherManager(db.teachers)
-    tm.create(login, password)
-    return client.post("/teacher/login", data={
-        "login": login,
+    students = StudentManager(None, db.students, db.mailers)
+    students.create(email, password, True)
+    db.students.confirm(email)
+    return client.post("/login", data={
+        "login": email,
         "password": password
     }, follow_redirects=True)
 

@@ -122,13 +122,6 @@ class FinalSeed(Base):
     group = sa.Column("group", sa.Integer, sa.ForeignKey('groups.id'), primary_key=True, nullable=False)
 
 
-class Teacher(Base):
-    __tablename__ = "teachers"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
-    login = sa.Column("login", sa.String, nullable=False)
-    password_hash = sa.Column("password_hash", sa.String, nullable=False)
-
-
 class Student(Base):
     __tablename__ = "students"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
@@ -139,6 +132,7 @@ class Student(Base):
     password_hash = sa.Column("password_hash", sa.String, nullable=True)
     unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
     blocked = sa.Column("blocked", sa.Boolean, nullable=False)
+    teacher = sa.Column("teacher", sa.Boolean, nullable=True)
 
 
 class Mailer(Base):

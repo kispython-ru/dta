@@ -12,13 +12,13 @@ def test_login_logout(db: AppDatabase, client: FlaskClient):
     assert "login" not in response.request.path
     assert "Выгрузка всех присланных сообщений" in response.get_data(as_text=True)
 
-    response = client.get("/teacher/logout", follow_redirects=True)
+    response = client.get("/logout", follow_redirects=True)
 
-    assert "login" in response.request.path
+    assert response.request.path == "/"
 
 
 def test_false_login(db: AppDatabase, client: FlaskClient):
-    response = client.post("/teacher/login", data={
+    response = client.post("/login", data={
         "login": "badLogin",
         "password": "evenWorsePassword"
     }, follow_redirects=True)
@@ -93,7 +93,7 @@ def test_anonymous_submission(db: AppDatabase, client: FlaskClient):
 
     assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
     assert code in response.get_data(as_text=True)
-    assert "студент" not in response.get_data(as_text=True)
+    assert ", студент" not in response.get_data(as_text=True)
 
 
 def test_invalid_page_redirect(db: AppDatabase, client: FlaskClient):

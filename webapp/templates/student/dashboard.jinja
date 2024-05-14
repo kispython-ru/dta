@@ -1,32 +1,31 @@
-{% extends 'student/student_layout.jinja' %}
-
+{% extends 'layout.jinja' %}
 {% block header %}
-    <li class="breadcrumb-item active" aria-current="page">
-         Цифровой ассистент преподавателя
-    </li>
+<li class="breadcrumb-item active" aria-current="page">
+  Цифровой ассистент преподавателя
+</li>
 {% endblock %}
 
 {% block main %}
-  <h5 class="card-title fw-bold">
-    {% if exam %} Режим зачёта {% else %} Перечень групп {% endif %}
-  </h5>
-  <h6 class="card-subtitle mb-2 text-muted">
-    Нажмите на группу, чтобы перейти к вариантам заданий группы.
-  </h6>
+<h5 class="card-title fw-bold">
+  {% if exam %} Режим зачёта {% else %} Перечень групп {% endif %}
+</h5>
+<h6 class="card-subtitle mb-2 text-muted">
+  Нажмите на группу, чтобы перейти к вариантам заданий группы.
+</h6>
+<div>
+  {% for key, grouping in groupings.items() %}
   <div>
-    {% for key, grouping in groupings.items() %}
-      <div>
-        <small class="mb-2 text-muted d-block">
-          <span>{{ key }}</span>
-        </small>
-        {% for group in grouping %}
-          <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
-            {{ group.title }}
-          </a>
-        {% endfor %}
-      </div>
+    <small class="mb-2 text-muted d-block">
+      <span>{{ key }}</span>
+    </small>
+    {% for group in grouping %}
+    <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
+      {{ group.title }}
+    </a>
     {% endfor %}
   </div>
+  {% endfor %}
+</div>
 {% endblock %}
 
 {% block footer %}
