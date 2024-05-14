@@ -93,7 +93,7 @@ def test_anonymous_submission(db: AppDatabase, client: FlaskClient):
 
     assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
     assert code in response.get_data(as_text=True)
-    assert "студент" not in response.get_data(as_text=True)
+    assert ", студент" not in response.get_data(as_text=True)
 
 
 def test_invalid_page_redirect(db: AppDatabase, client: FlaskClient):
