@@ -113,6 +113,14 @@
           Отправить решение на проверку
         </button>
       </div>
+      {% if student and student.teacher %}
+      <div class="col-md-4">
+        <a class="btn btn-outline-primary w-100 d-block"
+           href="/teacher/submissions/group/{{ status.group }}/variant/{{ status.variant }}/task/{{ status.task }}">
+          История решений 📕
+        </a>
+      </div>
+      {% endif %}
     </div>
     {% endif %}
   </form>

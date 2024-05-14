@@ -102,6 +102,16 @@
             {% endif %}
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
+            {% if student is defined and student is not none and student.teacher %}
+            <li>
+              <a class="dropdown-item" href="/teacher">
+                <div>Преподавательская 📕</div>
+                <small class="opacity-50">
+                  Решения студентов, зачёты, ...
+                </small>
+              </a>
+            </li>
+            {% endif %}
             <li>
               <a class="dropdown-item d-block" target="__blank" href="https://github.com/true-grue/kispython">
                 <div>Материалы курса 📖</div>
@@ -116,9 +126,6 @@
             <li><a class="dropdown-item" href="/rating/groups">Рейтинг групп</a></li>
             {% endif %}
             {% if student is defined and student is not none %}
-            {% if student.teacher %}
-            <li><a class="dropdown-item" href="/teacher">Преподавательская 📕</a></li>
-            {% endif %}
             <li><a class="dropdown-item" target="__blank" href="https://t.me/kispython">Telegram для оповещений</a></li>
             <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
             <li>
