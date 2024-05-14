@@ -8,7 +8,7 @@
 {% block main %}
 <div class="row">
   {% if groups is not none %}
-  <div class="col-12 mt-3">
+  <div class="col-12 mb-3">
     <b class="card-title d-block">Управление группами</b>
     <form action="/teacher/group/select" method="GET" class="w-100">
       <select class="form-select mb-2" name="group">
@@ -24,7 +24,7 @@
     </form>
   </div>
   {% endif %}
-  <div class="col-12 mt-3">
+  <div class="col-12 mb-3">
     <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
     <form action="/teacher/messages" method="GET" class="w-100">
       <select class="form-select mb-2" name="separator">
@@ -43,7 +43,7 @@
       </button>
     </form>
   </div>
-  <div class="col-12 mt-3">
+  <div class="col-12 mb-3">
     <b class="card-title d-block">Просмотр решений студентов</b>
     <form action="/teacher/submissions" method="GET" class="w-100">
       <select class="form-select mb-2" name="gid">
@@ -67,7 +67,7 @@
     </form>
   </div>
   {% if exam %}
-  <div class="col-12 mt-3">
+  <div class="col-12 mb-3">
     <b class="card-title d-block">Действия с группами</b>
     <form action="/teacher/exam/start" method="GET" class="w-100">
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">

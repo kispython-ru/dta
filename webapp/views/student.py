@@ -193,11 +193,20 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
-        return render_template("student/login.jinja", form=form)
+        return render_template(
+            "student/login.jinja", 
+            registration=config.config.registration,
+            group_rating=config.config.groups,
+            form=form
+        )
     error = students.login(form.login.data, form.password.data)
     if error:
         form.login.errors.append(error)
-        return render_template("student/login.jinja", form=form)
+        return render_template(
+            "student/login.jinja",
+            registration=config.config.registration,
+            group_rating=config.config.groups,
+            form=form)
     student = db.students.find_by_email(form.login.data)
     response = redirect("/teacher" if student.teacher else "/")
     set_access_cookies(response, create_access_token(identity=student.id))
@@ -251,7 +260,12 @@ def register():
     form = StudentRegisterForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if form.validate_on_submit():
         form.login.errors.append(students.register(form.login.data, form.password.data))
-    return render_template("student/register.jinja", form=form)
+    return render_template(
+        "student/register.jinja",
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        form=form
+    )
 
 
 @blueprint.route("/change-password", methods=['GET', 'POST'])
@@ -260,7 +274,12 @@ def change_password():
     form = StudentChangePasswordForm()
     if form.validate_on_submit():
         form.login.errors.append(students.change_password(form.login.data, form.password.data))
-    return render_template("student/password.jinja", form=form)
+    return render_template(
+        "student/password.jinja",
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        form=form
+    )
 
 
 @blueprint.route("/logout", methods=['GET'])
