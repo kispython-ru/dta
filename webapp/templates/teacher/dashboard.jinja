@@ -1,107 +1,92 @@
 {% extends 'layout.jinja' %}
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="collapse navbar-collapse container">
-    <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
-      <li>
-        <a class="logo-container text-decoration-none" href="/teacher">
-          <div class="logo">
-            <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-          </div>
-        </a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Преподавательская
-      </li>
-    </ol>
-    <a class="breadcrumb-item text-decoration-none" href="/logout">
-      Выйти
-    </a>
+{% block header %}
+<li class="breadcrumb-item active" aria-current="page">
+  Преподавательская
+</li>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+  {% if groups is not none %}
+  <div class="col-12 mt-3">
+    <b class="card-title d-block">Управление группами</b>
+    <form action="/teacher/group/select" method="GET" class="w-100">
+      <select class="form-select mb-2" name="group">
+        {% for group in groups %}
+        <option value="{{ group.id }}">
+          {{ group.title }}
+        </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block">
+        Далее
+      </button>
+    </form>
   </div>
-</nav>
-<div class="container">
-  <div class="row">
-    {% if groups is not none %}
-      <div class="col-12 mt-3">
-        <b class="card-title d-block">Управление группами</b>
-        <form action="/teacher/group/select" method="GET" class="w-100">
-          <select class="form-select mb-2" name="group">
-            {% for group in groups %}
-              <option value="{{ group.id }}">
-                {{ group.title }}
-              </option>
-            {% endfor %}
-          </select>
-          <button type="submit" class="btn btn-outline-primary w-100 d-block">
-            Далее
-          </button>
-        </form>
-      </div>
-    {% endif %}
-    <div class="col-12 mt-3">
-      <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
-      <form action="/teacher/messages" method="GET" class="w-100">
-        <select class="form-select mb-2" name="separator">
-            <option value=";">Точка с запятой</option>
-            <option value=",">Запятая</option>
-        </select>
-        <select class="form-select mb-2" name="count">
-            <option value="10">10 сообщений</option>
-            <option value="100">100 сообщений</option>
-            <option value="500">500 сообщений</option>
-            <option value="1000">1000 сообщений</option>
-            <option value="10000">10 000 сообщений</option>
-        </select>
-        <button type="submit" class="btn btn-outline-primary w-100 d-block">
-          Выгрузить статистику
-        </button>
-      </form>
-    </div>
-    <div class="col-12 mt-3">
-      <b class="card-title d-block">Просмотр решений студентов</b>
-      <form action="/teacher/submissions" method="GET" class="w-100">
-        <select class="form-select mb-2" name="gid">
-            {% for g in glist %}
-                <option value="{{ g.id }}">Группа {{ g.title }}</option>
-            {% endfor %}
-        </select>
-        <select class="form-select mb-2" name="vid">
-            {% for v in vlist %}
-                <option value="{{ v.id }}">Вариант №{{ v.id + 1   }}</option>
-            {% endfor %}
-        </select>
-        <select class="form-select mb-2" name="tid">
-            {% for t in tlist %}
-                <option value="{{ t.id }}">Задание №{{ t.id + 1 }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-outline-primary w-100 d-block">
-          Перейти к решениям
-        </button>
-      </form>
-    </div>
-    {% if exam %}
-      <div class="col-12 mt-3">
-        <b class="card-title d-block">Действия с группами</b>
-        <form action="/teacher/exam/start" method="GET" class="w-100">
-          <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
-            Начать зачёт у всех групп
-          </button>
-        </form>
-        <form action="/teacher/exam/end" method="GET" class="w-100">
-          <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
-            Завершить зачёт у всех групп
-          </button>
-        </form>
-        {% if clearable %}
-          <form action="/teacher/exam/delete" method="GET" class="w-100">
-            <button class="btn btn-outline-danger w-100 mb-2 d-block" type="submit">
-              Очистить таблицы всех групп
-            </button>
-          </form>
-        {% endif %}
-      </div>
+  {% endif %}
+  <div class="col-12 mt-3">
+    <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
+    <form action="/teacher/messages" method="GET" class="w-100">
+      <select class="form-select mb-2" name="separator">
+        <option value=";">Точка с запятой</option>
+        <option value=",">Запятая</option>
+      </select>
+      <select class="form-select mb-2" name="count">
+        <option value="10">10 сообщений</option>
+        <option value="100">100 сообщений</option>
+        <option value="500">500 сообщений</option>
+        <option value="1000">1000 сообщений</option>
+        <option value="10000">10 000 сообщений</option>
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block">
+        Выгрузить статистику
+      </button>
+    </form>
+  </div>
+  <div class="col-12 mt-3">
+    <b class="card-title d-block">Просмотр решений студентов</b>
+    <form action="/teacher/submissions" method="GET" class="w-100">
+      <select class="form-select mb-2" name="gid">
+        {% for g in glist %}
+        <option value="{{ g.id }}">Группа {{ g.title }}</option>
+        {% endfor %}
+      </select>
+      <select class="form-select mb-2" name="vid">
+        {% for v in vlist %}
+        <option value="{{ v.id }}">Вариант №{{ v.id + 1 }}</option>
+        {% endfor %}
+      </select>
+      <select class="form-select mb-2" name="tid">
+        {% for t in tlist %}
+        <option value="{{ t.id }}">Задание №{{ t.id + 1 }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block">
+        Перейти к решениям
+      </button>
+    </form>
+  </div>
+  {% if exam %}
+  <div class="col-12 mt-3">
+    <b class="card-title d-block">Действия с группами</b>
+    <form action="/teacher/exam/start" method="GET" class="w-100">
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
+        Начать зачёт у всех групп
+      </button>
+    </form>
+    <form action="/teacher/exam/end" method="GET" class="w-100">
+      <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
+        Завершить зачёт у всех групп
+      </button>
+    </form>
+    {% if clearable %}
+    <form action="/teacher/exam/delete" method="GET" class="w-100">
+      <button class="btn btn-outline-danger w-100 mb-2 d-block" type="submit">
+        Очистить таблицы всех групп
+      </button>
+    </form>
     {% endif %}
   </div>
+  {% endif %}
 </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
+from flask_jwt_extended import unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
@@ -46,9 +46,12 @@ def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: in
         "teacher/submissions.jinja",
         submissions=submissions_statuses,
         highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
         page=page,
         info=(gid, vid, tid),
         pagination=pagination,
+        student=teacher,
     )
 
 
@@ -70,7 +73,10 @@ def dashboard(teacher: Student):
     tlist = db.tasks.get_all()
     return render_template(
         "teacher/dashboard.jinja",
+        student=teacher,
         clearable=config.config.clearable_database,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
         exam=config.config.exam,
         groups=groups,
         glist=glist,
@@ -93,7 +99,14 @@ def select_group(teacher: Student):
 def exam(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
-    return render_template("teacher/exam.jinja", group=group, seed=seed)
+    return render_template(
+        "teacher/exam.jinja", 
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        group=group,
+        seed=seed,
+        student=teacher
+    )
 
 
 @blueprint.route("/teacher/group/<group_id>/exam/toggle", methods=["GET"])
@@ -183,7 +196,14 @@ def queue(teacher: Student, group_id: int):
     message = db.messages.get_next_pending_message()
     matches = message is None or group.id == message.group
     if matches and config.config.no_background_worker:
-        return render_template("teacher/queue.jinja", group=group, message=message)
+        return render_template(
+            "teacher/queue.jinja", 
+            registration=config.config.registration,
+            group_rating=config.config.groups,
+            group=group,
+            message=message,
+            student=teacher
+        )
     return redirect(f'/teacher')
 
 

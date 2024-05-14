@@ -1,73 +1,150 @@
 <!doctype html>
 <html>
+
 <head>
   <title>Цифровой ассистент преподавателя</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#ffffff"/>
-  <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}"/>
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='css/bootstrap.min.css') }}"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
   <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/codemirror.min.css') }}">
   <style>
-  .logo {
-    width: 44px;
-    height: 44px;
-    position: absolute;
-    top: -28px;
-    background-color: white;
-    border-radius: 22px;
-    border: solid 1px #9ca9b5;
-  }
-  .logo-img {
-    width: 28px;
-    height: 28px;
-    margin-left: 7px;
-    margin-top: 8px;
-  }
-  .logo-container {
-    width: 24px;
-    position: relative;
-    margin-right: 30px;
-    display: inline-block;
-  }
-  .callout {
-    padding: 8px 20px;
-    margin: 10px 0;
-    border: 1px solid #eee;
-    border-left-width: 7px;
-    border-radius: 3px;
-  }
-  .callout p:last-child {
-    margin-bottom: 0;
-  }
-  .callout code {
-    border-radius: 3px;
-  }
-  .callout-success {
-    border-left-color: #28a745;
-  }
-  .callout-success div {
-    color: #28a745;
-    font-weight: bold;
-  }
-  .achievements-counter {
-    position: absolute;
-    font-size: 12px;
-    opacity: 0.7;
-    padding-left: 8px;
-    padding-top: 4px;
-  }
-  .department-img {
-    width: 150px;
-    margin-bottom: -20px;
-  }
+    .logo {
+      width: 44px;
+      height: 44px;
+      position: absolute;
+      top: -28px;
+      background-color: white;
+      border-radius: 22px;
+      border: solid 1px #9ca9b5;
+    }
+
+    .logo-img {
+      width: 28px;
+      height: 28px;
+      margin-left: 7px;
+      margin-top: 8px;
+    }
+
+    .logo-container {
+      width: 24px;
+      position: relative;
+      margin-right: 30px;
+      display: inline-block;
+    }
+
+    .callout {
+      padding: 8px 20px;
+      margin: 10px 0;
+      border: 1px solid #eee;
+      border-left-width: 7px;
+      border-radius: 3px;
+    }
+
+    .callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .callout code {
+      border-radius: 3px;
+    }
+
+    .callout-success {
+      border-left-color: #28a745;
+    }
+
+    .callout-success div {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .achievements-counter {
+      position: absolute;
+      font-size: 12px;
+      opacity: 0.7;
+      padding-left: 8px;
+      padding-top: 4px;
+    }
+
+    .department-img {
+      width: 150px;
+      margin-bottom: -20px;
+    }
   </style>
-    {% block head %}{% endblock %}
+  {% block head %}{% endblock %}
 </head>
+
 <body>
-{% block content %}{% endblock %}
-{% block footer %}{% endblock %}
+  {% block content %}
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="collapse navbar-collapse container">
+      <ol class="breadcrumb bg-light pt-2 pb-2 m-0">
+        <li>
+          <a class="logo-container text-decoration-none" href="/">
+            <div class="logo">
+              <img class="logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
+            </div>
+          </a>
+        </li>
+        {% block header %} {% endblock %}
+      </ol>
+      <div class="d-block gap-3 col-12 col-lg-3 col-md-5 mt-2 mt-md-0">
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" id="dLabel" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if student is not none %}
+            {{ student.email | hide }}
+            {% elif registration %}
+            Войти
+            {% else %}
+            Меню
+            {% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel">
+            <li>
+              <a class="dropdown-item d-block" target="__blank" href="https://github.com/true-grue/kispython">
+                <div>Материалы курса 📖</div>
+                <small class="opacity-50">
+                  Программирование на языке Python
+                </small>
+              </a>
+            </li>
+            {% if registration %}
+            <li><a class="dropdown-item" href="/rating">Рейтинг студентов</a></li>
+            {% if group_rating %}
+            <li><a class="dropdown-item" href="/rating/groups">Рейтинг групп</a></li>
+            {% endif %}
+            {% if student is not none %}
+            {% if student.teacher %}
+            <li><a class="dropdown-item" href="/teacher">Преподавательская</a></li>
+            {% endif %}
+            <li><a class="dropdown-item" target="__blank" href="https://t.me/kispython">Telegram для оповещений</a></li>
+            <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="/logout">Выйти</a></li>
+            {% else %}
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="/login">Войти</a></li>
+            {% endif %}
+            {% endif %}
+            {% if exam or not registration %}
+            <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-3">
+    {% block main %} {% endblock %}
+  </div>
+  {% endblock %}
+  {% block footer %}{% endblock %}
 </body>
+
 </html>
