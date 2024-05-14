@@ -43,6 +43,7 @@
               Войти
             </button>
           </div>
+          {% if registration %}
           <div class="col-md-6 mb-3">
             <a href="/register" class="btn btn-outline-primary w-100 d-block">
               Зарегистрироваться
@@ -53,6 +54,7 @@
               Сменить пароль
             </a>
           </div>
+          {% endif %}
         </div>
         {% if form.lks_oauth_enabled %}
         <div class="row mt-0">

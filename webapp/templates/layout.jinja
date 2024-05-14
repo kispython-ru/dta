@@ -131,7 +131,6 @@
             <li>
               <hr class="dropdown-divider">
             </li>
-            <li><a class="dropdown-item" href="/logout">Выйти</a></li>
             {% else %}
             <li>
               <hr class="dropdown-divider">
@@ -141,6 +140,9 @@
             {% endif %}
             {% if exam or not registration %}
             <li><a class="dropdown-item" href="/submissions">Отправленные решения</a></li>
+            {% endif %}
+            {% if student is defined and student is not none %}
+            <li><a class="dropdown-item" href="/logout">Выйти</a></li>
             {% endif %}
           </ul>
         </div>
