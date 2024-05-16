@@ -94,7 +94,7 @@ def submissions(student: Student | None, page: int):
 @blueprint.route("/group/<group_id>", methods=["GET"])
 @student_jwt_optional(db.students)
 def group(student: Student | None, group_id: int):
-    group = statuses.get_group_statuses(group_id)
+    group = statuses.get_group_statuses(student, group_id)
     seed = db.seeds.get_final_seed(group_id)
     blocked = config.config.exam and seed is None
     return render_template(

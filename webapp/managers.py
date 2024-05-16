@@ -161,9 +161,11 @@ class StatusManager:
         self.checks = checks
         self.achievements = None
 
-    def get_group_statuses(self, group_id: int) -> GroupDto:
+    def get_group_statuses(self, student: Student | None, group_id: int) -> GroupDto:
         config = self.config.config
         group = self.groups.get_by_id(group_id)
+        if config.hide_groups and config.registration and not student:
+            return GroupDto(group, [], [])
         variants = self.variants.get_all()
         statuses = self.__get_statuses(group.id)
         e = self.__get_external_task_manager(group)

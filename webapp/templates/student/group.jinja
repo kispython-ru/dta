@@ -7,6 +7,11 @@
     opacity: 0.8;
   }
 
+  .blurred-table-content {
+    background-color: #e3ffee;
+    min-height: 700px;
+  }
+
   .blurred-table-hint {
     position: absolute;
     top: 350px;
@@ -58,44 +63,48 @@
 </h6>
 <div class="position-relative">
   <div class="{{ 'blurred-table' if hide_groups and registration and not student }} mb-5" style="overflow-x:auto">
-    <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
-      <thead>
-        <tr>
-          <th scope="col" style="width:100px">Вариант</th>
-          {% for task in group.tasks %}
-          <td scope="col" class="text-center">
-            <a class="text-decoration-none" target="__blank" href="{{ task.url }}">
-              №{{ task.formulation if task.formulation else task.id + 1 }}
-            </a>
-          </td>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody style="border-top: 0px">
-        {% for variant in group.variants %}
-        <tr>
-          <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
-            <span class="p-1 d-block" title="{{ variant.earned }}">
-              {{ variant.id + 1 }}
-            </span>
-          </td>
-          {% for status in variant.statuses %}
-          <td scope="col" style="border-bottom: 0; padding: 0">
-            <a class="d-block text-center text-decoration-none p-1 position-relative"
-              style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
-              {{ status.code }}
-              {% if status.earned > 1 %}
-              <span class="achievements-counter">
-                {{ status.earned }}
+    {% if hide_groups and registration and not student %}
+      <div class="blurred-table-content"></div>
+    {% else %}
+      <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
+        <thead>
+          <tr>
+            <th scope="col" style="width:100px">Вариант</th>
+            {% for task in group.tasks %}
+            <td scope="col" class="text-center">
+              <a class="text-decoration-none" target="__blank" href="{{ task.url }}">
+                №{{ task.formulation if task.formulation else task.id + 1 }}
+              </a>
+            </td>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody style="border-top: 0px">
+          {% for variant in group.variants %}
+          <tr>
+            <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
+              <span class="p-1 d-block" title="{{ variant.earned }}">
+                {{ variant.id + 1 }}
               </span>
-              {% endif %}
-            </a>
-          </td>
+            </td>
+            {% for status in variant.statuses %}
+            <td scope="col" style="border-bottom: 0; padding: 0">
+              <a class="d-block text-center text-decoration-none p-1 position-relative"
+                style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
+                {{ status.code }}
+                {% if status.earned > 1 %}
+                <span class="achievements-counter">
+                  {{ status.earned }}
+                </span>
+                {% endif %}
+              </a>
+            </td>
+            {% endfor %}
+          </tr>
           {% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    {% endif %}
   </div>
   {% if hide_groups and registration and not student %}
   <div class="blurred-table-hint text-center">
