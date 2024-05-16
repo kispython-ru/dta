@@ -41,7 +41,7 @@
   <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
     {{ status.name }}
   </div>
-  {% if status.error_message is not none and status.error_message and student %}
+  {% if status.error_message is not none and status.error_message and (not registration or student) %}
   <div>Подробные сведения об ошибке:</div>
   <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
   {% else %}
