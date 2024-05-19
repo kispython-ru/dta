@@ -231,7 +231,7 @@ def reject(teacher: Student, group_id: int, message_id: int):
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())
-    return render_template("error.jinja", redirect="/teacher")
+    return render_template("error.jinja", redirect="/")
 
 
 @blueprint.errorhandler(JWTExtendedException)

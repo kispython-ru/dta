@@ -8,12 +8,9 @@ from webapp.views.student import hide_email_filter
 
 def test_login_logout(db: AppDatabase, client: FlaskClient):
     response = teacher_login(db, client)
-
     assert "login" not in response.request.path
-    assert "Выгрузка всех присланных сообщений" in response.get_data(as_text=True)
-
+    assert response.request.path == "/"
     response = client.get("/logout", follow_redirects=True)
-
     assert response.request.path == "/"
 
 

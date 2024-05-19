@@ -208,7 +208,7 @@ def login():
             group_rating=config.config.groups,
             form=form)
     student = db.students.find_by_email(form.login.data)
-    response = redirect("/teacher" if student.teacher else "/")
+    response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
     return response
 
