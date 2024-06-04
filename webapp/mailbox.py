@@ -68,7 +68,7 @@ def background_worker(login: str, password: str, connection: str):
 
 @blueprint.before_app_first_request
 def start_background_worker():
-    if not config.config.enable_registration:
+    if not config.config.enable_registration or config.config.readonly:
         return
     if not config.config.imap_login or not config.config.imap_password:
         print("IMAP credentials not provided, disabling email confirmation.")
