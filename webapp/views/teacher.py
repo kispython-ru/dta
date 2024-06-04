@@ -71,6 +71,7 @@ def dashboard(teacher: Student):
     glist = db.groups.get_all()
     vlist = db.variants.get_all()
     tlist = db.tasks.get_all()
+    ips = db.ips.list_allowed()
     return render_template(
         "teacher/dashboard.jinja",
         student=teacher,
@@ -81,7 +82,8 @@ def dashboard(teacher: Student):
         groups=groups,
         glist=glist,
         vlist=vlist,
-        tlist=tlist
+        tlist=tlist,
+        ips=ips,
     )
 
 
@@ -226,6 +228,22 @@ def reject(teacher: Student, group_id: int, message_id: int):
         comment = request.args.get("comment")
         process_message(message, False, comment)
     return redirect(f"/teacher/group/{group_id}")
+
+
+@blueprint.route("/teacher/ips/allow", methods=["GET"])
+@teacher_jwt_required(db.students)
+def allow_ip(teacher: Student):
+    ip = request.args.get('ip')
+    label = request.args.get('label')
+    db.ips.allow(ip, label)
+    return redirect("/teacher")
+
+
+@blueprint.route("/teacher/ips/disallow/<int:id>", methods=["GET"])
+@teacher_jwt_required(db.students)
+def disallow_ip(teacher: Student, id: int):
+    db.ips.disallow(id)
+    return redirect("/teacher")
 
 
 @blueprint.errorhandler(Exception)

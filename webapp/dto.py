@@ -26,7 +26,6 @@ class AppConfig:
         self.places_in_rating: int = config["PLACES_IN_RATING"]
         self.places_in_group: int = config["PLACES_IN_GROUP"]
         self.groups: dict = config["GROUPS"]
-        self.allow_ip: list[str] = config["ALLOW_IP"]
         self.hide_groups: bool = config["HIDE_GROUPS"]
 
     @property

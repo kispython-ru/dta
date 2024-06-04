@@ -162,8 +162,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     form = StudentMessageForm()
     valid = form.validate_on_submit()
     ip = get_real_ip(request)
-    allow_ip = config.config.allow_ip or ""
-    if valid and allowed and not status.disabled and allow_ip in ip:
+    if valid and allowed and not status.disabled and db.ips.is_allowed(ip):
         sid = student.id if student else None
         session_id = request.cookies.get("anonymous_identifier")
         db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)

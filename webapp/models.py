@@ -139,3 +139,10 @@ class Mailer(Base):
     __tablename__ = "mailers"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
     domain = sa.Column("domain", sa.String, nullable=False)
+
+
+class AllowedIp(Base):
+    __tablename__ = "allowed_ips"
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    ip = sa.Column("ip", sa.String, nullable=False)
+    label = sa.Column("label", sa.String, nullable=True)

@@ -2,10 +2,11 @@ import datetime
 import uuid
 from typing import Callable
 
-from sqlalchemy import desc, func, null
+from sqlalchemy import desc, func, literal, null
 from sqlalchemy.orm import Session
 
 from webapp.models import (
+    AllowedIp,
     FinalSeed,
     Group,
     Mailer,
@@ -545,6 +546,38 @@ class MailerRepository:
             return mailer
 
 
+class AllowedIpRepository:
+    def __init__(self, db: DbContextManager):
+        self.db = db
+
+    def is_allowed(self, ip: str) -> bool:
+        with self.db.create_session() as session:
+            total = session.query(AllowedIp).count()
+            if total == 0:
+                return True
+            return session.query(AllowedIp) \
+                .filter(literal(ip).contains(AllowedIp.ip)) \
+                .count()
+
+    def list_allowed(self):
+        with self.db.create_session() as session:
+            return session.query(AllowedIp) \
+                .order_by(AllowedIp.id) \
+                .all()
+
+    def allow(self, ip: str, label: str):
+        with self.db.create_session() as session:
+            aip = AllowedIp(ip=ip, label=label)
+            session.add(aip)
+            return aip
+
+    def disallow(self, id: int):
+        with self.db.create_session() as session:
+            session.query(AllowedIp) \
+                .filter_by(id=id) \
+                .delete()
+
+
 class AppDatabase:
     def __init__(self, get_connection: Callable[[], str]):
         db = DbContextManager(get_connection)
@@ -557,3 +590,4 @@ class AppDatabase:
         self.seeds = FinalSeedRepository(db)
         self.students = StudentRepository(db)
         self.mailers = MailerRepository(db)
+        self.ips = AllowedIpRepository(db)
