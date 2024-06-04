@@ -12,10 +12,7 @@
     "HIDE_GROUPS": false,
     "IMAP_LOGIN": null,
     "IMAP_PASSWORD": null,
-    "FINAL_TASKS": {
-        "0": [0, 1, 2, 3, 4],
-        "1": [5, 6, 7, 8]
-    },
+    "FINAL_TASKS": null,
     "ENABLE_LKS_OAUTH": false,
     "LKS_OAUTH_CLIENT_ID": "kispython.ru",
     "LKS_OAUTH_CLIENT_SECRET": "CHANGE_ME",
@@ -24,6 +21,5 @@
     "PLACES_IN_RATING": 8,
     "PLACES_IN_GROUP": 30,
     "GROUPS": {},
-    "CLEARABLE_DATABASE": true,
-    "ALLOW_IP": null
+    "CLEARABLE_DATABASE": true
 }

@@ -88,5 +88,40 @@
     {% endif %}
   </div>
   {% endif %}
+
+  <div class="col-12 mb-3">
+    <b class="card-title d-block">Разрешённые IP-адреса</b>
+    <p>Оставьте список пустым, чтобы разрешить отправку решений с любого IP-адреса.</p>
+    <div class="row">
+      {% for ip in ips %}
+        <div class="col-7 mb-2">
+          <input class="form-control" type="text" value="{{ ip.ip }}" readonly>
+        </div>
+        <div class="col-3 mb-2">
+          <input class="form-control" type="text" value="{{ ip.label }}" readonly>
+        </div>
+        <div class="col-2 mb-2">
+          <form action="/teacher/ips/disallow/{{ ip.id }}" method="GET">
+            <button type="submit" class="btn btn-danger w-100">
+              Удалить
+            </button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+    <form class="row" action="/teacher/ips/allow" method="GET">
+      <div class="col-7">
+        <input class="form-control" type="text" placeholder="IP-адрес" name="ip">
+      </div>
+      <div class="col-3">
+        <input class="form-control" type="text" placeholder="Пометка" name="label">
+      </div>
+      <div class="col-2">
+        <button type="submit" class="btn btn-primary w-100">
+          Добавить
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
