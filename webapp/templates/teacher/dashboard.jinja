@@ -68,7 +68,20 @@
   </div>
   {% if exam %}
   <div class="col-12 mb-3">
-    <b class="card-title d-block">Действия с группами</b>
+    <b class="card-title d-block">Действия с выбранными группами</b>
+    <form action="/teacher/exam/start/many" method="POST" class="w-100">
+      <select name="groups" class="form-select mb-2" size="5" multiple>
+        {% for group in groups %}
+          <option value="{{ group.id }}">
+            {{ group.title }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+        Начать зачёт у выбранных групп
+      </button>
+    </form>
+    <b class="card-title d-block">Действия со всеми группами</b>
     <form action="/teacher/exam/start" method="GET" class="w-100">
       <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
         Начать зачёт у всех групп

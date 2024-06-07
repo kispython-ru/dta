@@ -137,6 +137,19 @@ def exam_startall(teacher: Student):
     return redirect('/teacher')
 
 
+@blueprint.route("/teacher/exam/start/many", methods=["POST"])
+@teacher_jwt_required(db.students)
+def exam_startmany(teacher: Student):
+    for id in request.form.getlist('groups'):
+        id = int(id)
+        seed = db.seeds.get_final_seed(id)
+        if seed is None and config.config.final_tasks:
+            db.seeds.begin_final_test(id)
+        elif seed is not None:
+            db.seeds.continue_final_test(id)
+    return redirect('/teacher')
+
+
 @blueprint.route("/teacher/exam/end", methods=["GET"])
 @teacher_jwt_required(db.students)
 def exam_endall(teacher: Student):
