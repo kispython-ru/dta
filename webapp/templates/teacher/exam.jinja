@@ -68,4 +68,10 @@
   <button class="btn btn-outline-danger w-100 d-block" type="submit">Очистить таблицу</button>
 </form>
 {% endif %}
+{% if seed != None %}
+<h6 class="d-block fw-bold mt-3">Дополнительные действия</h6>
+<a class="btn btn-outline-primary w-100 d-block" href="/group/{{ group.id }}">
+  Перейти к таблице группы
+</a>
+{% endif %}
 {% endblock %}
