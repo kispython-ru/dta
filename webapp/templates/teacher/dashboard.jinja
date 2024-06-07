@@ -24,48 +24,6 @@
     </form>
   </div>
   {% endif %}
-  <div class="col-12 mb-3">
-    <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
-    <form action="/teacher/messages" method="GET" class="w-100">
-      <select class="form-select mb-2" name="separator">
-        <option value=";">Точка с запятой</option>
-        <option value=",">Запятая</option>
-      </select>
-      <select class="form-select mb-2" name="count">
-        <option value="10">10 сообщений</option>
-        <option value="100">100 сообщений</option>
-        <option value="500">500 сообщений</option>
-        <option value="1000">1000 сообщений</option>
-        <option value="10000">10 000 сообщений</option>
-      </select>
-      <button type="submit" class="btn btn-outline-primary w-100 d-block">
-        Выгрузить статистику
-      </button>
-    </form>
-  </div>
-  <div class="col-12 mb-3">
-    <b class="card-title d-block">Просмотр решений студентов</b>
-    <form action="/teacher/submissions" method="GET" class="w-100">
-      <select class="form-select mb-2" name="gid">
-        {% for g in glist %}
-        <option value="{{ g.id }}">Группа {{ g.title }}</option>
-        {% endfor %}
-      </select>
-      <select class="form-select mb-2" name="vid">
-        {% for v in vlist %}
-        <option value="{{ v.id }}">Вариант №{{ v.id + 1 }}</option>
-        {% endfor %}
-      </select>
-      <select class="form-select mb-2" name="tid">
-        {% for t in tlist %}
-        <option value="{{ t.id }}">Задание №{{ t.id + 1 }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit" class="btn btn-outline-primary w-100 d-block">
-        Перейти к решениям
-      </button>
-    </form>
-  </div>
   {% if exam %}
   <div class="col-12 mb-3">
     <b class="card-title d-block">Действия с выбранными группами</b>
@@ -133,6 +91,48 @@
           Добавить
         </button>
       </div>
+    </form>
+  </div>
+    <div class="col-12 mb-3">
+    <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
+    <form action="/teacher/messages" method="GET" class="w-100">
+      <select class="form-select mb-2" name="separator">
+        <option value=";">Точка с запятой</option>
+        <option value=",">Запятая</option>
+      </select>
+      <select class="form-select mb-2" name="count">
+        <option value="10">10 сообщений</option>
+        <option value="100">100 сообщений</option>
+        <option value="500">500 сообщений</option>
+        <option value="1000">1000 сообщений</option>
+        <option value="10000">10 000 сообщений</option>
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block">
+        Выгрузить статистику
+      </button>
+    </form>
+  </div>
+  <div class="col-12 mb-3">
+    <b class="card-title d-block">Просмотр решений студентов</b>
+    <form action="/teacher/submissions" method="GET" class="w-100">
+      <select class="form-select mb-2" name="gid">
+        {% for g in glist %}
+        <option value="{{ g.id }}">Группа {{ g.title }}</option>
+        {% endfor %}
+      </select>
+      <select class="form-select mb-2" name="vid">
+        {% for v in vlist %}
+        <option value="{{ v.id }}">Вариант №{{ v.id + 1 }}</option>
+        {% endfor %}
+      </select>
+      <select class="form-select mb-2" name="tid">
+        {% for t in tlist %}
+        <option value="{{ t.id }}">Задание №{{ t.id + 1 }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-outline-primary w-100 d-block">
+        Перейти к решениям
+      </button>
     </form>
   </div>
 </div>
