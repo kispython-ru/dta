@@ -285,7 +285,7 @@ class StatusManager:
             output=check.output,
             status=check.status,
             achievements=[]
-        ), []), message.code, check.time, message.time, student)
+        ), []), message.code, check.time, message.time, message.ip, student)
 
     def __get_task_status_dto(
         self,

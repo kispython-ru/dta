@@ -236,6 +236,7 @@ class SubmissionDto:
         code: str,
         checked: str,
         sent: str,
+        ip: str,
         student: Student | None
     ):
         self.status = status
@@ -243,6 +244,7 @@ class SubmissionDto:
         self.checked = checked
         self.sent = sent
         self.student = student
+        self.ip = ip
 
 
 class GroupInRatingDto:

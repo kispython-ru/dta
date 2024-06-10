@@ -31,6 +31,7 @@
       <span class="badge alert-{{ submission.status.color }}">{{ submission.status.name }}</span>
       <span class="badge alert-light">Отправлено: {{ submission.sent.strftime('%d.%m.%Y %H:%M') }}</span>
       <span class="badge alert-light">Проверено: {{ submission.checked.strftime('%d.%m.%Y %H:%M') }}</span>
+      <span class="badge alert-light">IP: {{ submission.ip }}</span>
     </div>
     {% if submission.status.error_message is not none and submission.status.error_message %}
     <div>Подробные сведения об ошибке:</div>
