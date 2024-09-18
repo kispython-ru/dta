@@ -77,68 +77,39 @@ class ExternalTaskManager:
         self,
         group: Group,
         seed: FinalSeed | None,
-        tasks: TaskRepository,
         groups: GroupRepository,
-        variants: VariantRepository,
         config: AppConfig,
     ):
         self.config = config
         self.group = group
         self.seed = seed
-        self.tasks = tasks
-        self.groups = groups
-        self.variants = variants
-        self.fetch_lists()
+        self.groups = groups.get_all() if self.config.exam else None
 
     @property
     def random_active(self) -> bool:
         return self.seed and self.seed.active
 
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
-        if self.seed is None:
-            not_exam_mode = not self.config.final_tasks
+        if not (self.config.exam and self.random_active):
             return ExternalTaskDto(
                 group_title=self.group.title,
                 task=task,
                 variant=variant,
-                active=not_exam_mode
+                active=not self.config.exam,
             )
-        unique = f'{task}{variant}'
-        task: Task = self.sample_task(str(variant), task)
-        group: Group = self.sample(unique, self.all_groups, self.group.id)
-        variant: Variant = self.sample(unique, self.all_variants, variant)
+        seed = f'{task}{variant}'
+        task: int = self.sample(seed, self.config.final_tasks[str(task)])
+        variant: int = self.sample(seed, list(range(1, self.config.final_variants + 1)))
+        group: Group = self.sample(seed, self.groups)
         return ExternalTaskDto(
-            task=task.id,
+            task=task,
+            variant=variant,
             group_title=group.external if group.external else group.title,
-            variant=variant.id,
             active=bool(self.seed.active),
         )
 
-    def sample_task(self, seed: str, task: int):
-        final_tasks: dict[str, list[int]] = self.config.final_tasks
-        if not final_tasks:
-            return self.sample(seed, self.all_tasks, task)
-        possible_options: list[int] = final_tasks[str(task)]
-        composite_seed = f'{self.seed.seed}{seed}'
-        rand = random.Random(composite_seed)
-        id = rand.choice(possible_options)
-        return Task(id=id)
-
-    def sample(self, seed: str, list: list[dict[str, int]], i: int):
-        composite_seed = f'{self.seed.seed}{seed}'
-        rand = random.Random(composite_seed)
-        length = len(list)
-        identifiers = [item.id for item in list]
-        index = identifiers.index(i)
-        random_sample = rand.sample(list, length)
-        return random_sample[index]
-
-    def fetch_lists(self):
-        if self.seed is None:
-            return
-        self.all_tasks = self.tasks.get_all()
-        self.all_variants = self.variants.get_all()
-        self.all_groups = self.groups.get_all()
+    def sample(self, seed: str, options: list) -> list:
+        return random.Random(f'{self.seed.seed}{seed}').choice(options)
 
 
 class StatusManager:
@@ -327,9 +298,7 @@ class StatusManager:
         return ExternalTaskManager(
             group=group,
             seed=seed,
-            tasks=self.tasks,
             groups=self.groups,
-            variants=self.variants,
             config=self.config.config,
         )
 

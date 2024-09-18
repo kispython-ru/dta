@@ -59,15 +59,8 @@ def process_pending_messages(config: AppConfig, db: AppDatabase):
         task = db.tasks.get_by_id(message.task)
         variant = db.variants.get_by_id(message.variant)
         seed = db.seeds.get_final_seed(group.id)
-        external_manager = ExternalTaskManager(
-            group=group,
-            seed=seed,
-            tasks=db.tasks,
-            groups=db.groups,
-            variants=db.variants,
-            config=config,
-        )
-        ext = external_manager.get_external_task(task.id, variant.id)
+        external = ExternalTaskManager(group=group, seed=seed, groups=db.groups, config=config)
+        ext = external.get_external_task(task.id, variant.id)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:

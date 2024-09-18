@@ -18,7 +18,7 @@ def test_background_task_check(db: AppDatabase, client: FlaskClient):
             content_type='application/json'
         )
 
-    (group, variant, task) = arrange_task(db)
+    group, variant, task = arrange_task(db)
     url = f"/api/v1/group/{group}/variant/{variant}/task/{task}"
 
     response = post_code(url, "main = lambda x: 42")

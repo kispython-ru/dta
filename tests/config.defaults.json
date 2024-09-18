@@ -9,6 +9,7 @@
     "HIGHLIGHT_SYNTAX": false,
     "READONLY": false,
     "TASK_BASE_URL": "http://sovietov.com/kispython",
+    "FINAL_VARIANTS": 40,
     "FINAL_TASKS": null,
     "ENABLE_REGISTRATION": false,
     "HIDE_GROUPS": false,

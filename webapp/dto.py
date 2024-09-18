@@ -13,6 +13,7 @@ class AppConfig:
         self.task_base_url: str = config["TASK_BASE_URL"]
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
+        self.final_variants: int = config["FINAL_VARIANTS"]
         self.clearable_database: bool = config["CLEARABLE_DATABASE"]
         self.readonly: bool = config["READONLY"]
         self.enable_registration: bool = config["ENABLE_REGISTRATION"]

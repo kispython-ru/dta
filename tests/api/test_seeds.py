@@ -1,6 +1,6 @@
 import json
 
-from tests.utils import arrange_task
+from tests.utils import arrange_task, mode
 
 from flask.testing import FlaskClient
 
@@ -22,12 +22,16 @@ def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
     assert response.json['status_name'] == "Не отправлено"
 
 
+@mode("exam")
 def test_final_seed_is_used(db: AppDatabase, client: FlaskClient):
-    (group, var, task) = arrange_task(db)
-    group_title = db.groups.get_by_id(group).title
+    task = 0
+    group, var, _ = arrange_task(db)
+    title = db.groups.get_by_id(group).title
+
+    db.tasks.create_by_ids([task])
     db.seeds.begin_final_test(group)
 
-    default_template = f'/{task}/{group_title}.html#вариант-{var + 1}'
+    default_template = f'/{task}/{title}.html#вариант-{var + 1}'
     response = client.get(f"/api/v1/group/{group}/variant/{var}/task/{task}")
 
     assert response.is_json
@@ -54,6 +58,7 @@ def test_final_submissions_are_allowed(db: AppDatabase, client: FlaskClient):
     assert response.json['status_name'] == "Отправлено"
 
 
+@mode("exam")
 def test_final_submissions_are_paused(db: AppDatabase, client: FlaskClient):
     (group, variant, task) = arrange_task(db)
     db.seeds.begin_final_test(group)
