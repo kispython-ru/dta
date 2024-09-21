@@ -70,6 +70,12 @@ class GroupRepository:
             group = session.query(Group).get(group_id)
             return group
 
+    def rename(self, group_id: int, title: str):
+        with self.db.create_session() as session:
+            session.query(Group) \
+                .filter_by(id=group_id) \
+                .update(dict(title=title))
+
     def create_by_names(self, names: list[str]):
         for name in names:
             self.create(name)
@@ -519,7 +525,9 @@ class StudentRepository:
 
     def update_group(self, student: Student, group: str | None):
         with self.db.create_session() as session:
-            session.query(Student).filter_by(id=student.id).update(dict(group=group))
+            session.query(Student) \
+                .filter_by(id=student.id) \
+                .update(dict(group=group))
 
 
 class MailerRepository:

@@ -96,6 +96,15 @@ def select_group(teacher: Student):
     return redirect(f'/teacher/group/{group}')
 
 
+@blueprint.route("/teacher/group/<group_id>/rename", methods=["GET"])
+@teacher_jwt_required(db.students)
+def rename(teacher: Student, group_id: int):
+    group = db.groups.get_by_id(group_id)
+    title = request.args.get('title')
+    db.groups.rename(group_id, title if title else group.external)
+    return redirect(f'/teacher/group/{group_id}/exam')
+
+
 @blueprint.route("/teacher/group/<group_id>/exam", methods=["GET"])
 @teacher_jwt_required(db.students)
 def exam(teacher: Student, group_id: int):
