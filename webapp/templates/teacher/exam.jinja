@@ -24,20 +24,6 @@
   </label>
   <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Начать</button>
 </form>
-<form action="/teacher/group/{{ group.id }}/rename" method="GET" class="w-100">
-  <label class="mx-auto fw-bold mt-2 mb-2 d-block">
-    Видимое название группы {{ group.external }}
-  </label>
-  <input
-    name="title"
-    type="text"
-    class="form-control mb-2"
-    placeholder="Видимое название группы"
-    value="{{ group.title }}">
-  <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
-    Переименовать группу
-  </button>
-</form>
 {% elif seed.active == false %}
 <h6 class="d-block fw-bold">Зачёт завершён</h6>
 <div class="mx-auto mb-2 breadcrumb-item active d-block">
@@ -87,5 +73,19 @@
 <a class="btn btn-outline-primary w-100 d-block" href="/group/{{ group.id }}">
   Перейти к таблице группы
 </a>
+<form action="/teacher/group/{{ group.id }}/rename" method="GET" class="w-100">
+  <label class="mx-auto fw-bold mt-2 mb-2 d-block">
+    Видимое название группы {{ group.external }}
+  </label>
+  <input
+    name="title"
+    type="text"
+    class="form-control mb-2"
+    placeholder="Видимое название группы"
+    value="{{ group.title }}">
+  <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
+    Переименовать группу
+  </button>
+</form>
 {% endif %}
 {% endblock %}
