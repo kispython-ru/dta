@@ -19,7 +19,7 @@ from webapp.dto import (
     TaskStatusDto,
     VariantDto
 )
-from webapp.models import FinalSeed, Group, Message, MessageCheck, Student, Task, TaskStatus, Variant
+from webapp.models import FinalSeed, Group, Message, MessageCheck, Status, Student, Task, TaskStatus, Variant
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
@@ -132,7 +132,7 @@ class StatusManager:
         self.checks = checks
         self.achievements = None
 
-    def get_group_statuses(self, student: Student | None, group_id: int) -> GroupDto:
+    def get_group_statuses(self, student: Student | None, group_id: int, hide_pending: bool) -> GroupDto:
         config = self.config.config
         group = self.groups.get_by_id(group_id)
         if config.hide_groups and config.registration and not student:
@@ -144,6 +144,9 @@ class StatusManager:
         dtos: list[VariantDto] = []
         for var in variants:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
+            solved = any(status.status != Status.NotSubmitted for status in dto.statuses)
+            if hide_pending and not solved:
+                continue
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 

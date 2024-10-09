@@ -60,6 +60,17 @@
 </h5>
 <h6 class="card-subtitle mb-3 text-muted">
   Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
+  {% if student.teacher and exam %}
+    {% if hide_pending %}
+      <a class="text-decoration-none" href="/group/{{ group.id }}">
+        Показать нерешённые варианты.
+      </a>
+    {% else %}
+      <a class="text-decoration-none" href="/group/{{ group.id }}/?hide_pending=1">
+        Скрыть нерешённые варианты.
+      </a>
+    {% endif %}
+  {% endif %}
 </h6>
 <div class="position-relative">
   <div class="{{ 'blurred-table' if hide_groups and registration and not student }} mb-5" style="overflow-x:auto">

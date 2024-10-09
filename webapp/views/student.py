@@ -94,13 +94,15 @@ def submissions(student: Student | None, page: int):
 @blueprint.route("/group/<group_id>", methods=["GET"])
 @student_jwt_optional(db.students)
 def group(student: Student | None, group_id: int):
-    group = statuses.get_group_statuses(student, group_id)
+    hide_pending = config.config.exam and request.args.get('hide_pending', False)
+    group = statuses.get_group_statuses(student, group_id, hide_pending)
     seed = db.seeds.get_final_seed(group_id)
     blocked = config.config.exam and seed is None
     return render_template(
         "student/group.jinja",
         group=group,
         blocked=blocked,
+        hide_pending=hide_pending,
         hide_groups=config.config.hide_groups,
         registration=config.config.registration,
         group_rating=config.config.groups,
