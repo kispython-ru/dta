@@ -73,6 +73,7 @@
 <a class="btn btn-outline-primary w-100 d-block" href="/group/{{ group.id }}">
   Перейти к таблице группы
 </a>
+{% endif %}
 <form action="/teacher/group/{{ group.id }}/rename" method="GET" class="w-100">
   <label class="mx-auto fw-bold mt-2 mb-2 d-block">
     Видимое название группы {{ group.external }}
@@ -87,5 +88,4 @@
     Переименовать группу
   </button>
 </form>
-{% endif %}
 {% endblock %}
