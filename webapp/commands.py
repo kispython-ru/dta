@@ -53,7 +53,7 @@ class SeedCmd:
     def run(self, dir: str):
         config = AppConfigManager(lambda: load_config_files(dir)).config
         print(f'Seeding db {config.connection_string} using core {config.core_path}...')
-        groups, tasks = worker.load_tests(config.core_path)
+        groups, tasks, _ = worker.load_config(config.core_path)
         migrate(config.connection_string)
         db = AppDatabase(lambda: config.connection_string)
         db.groups.delete_all()

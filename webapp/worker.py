@@ -33,19 +33,18 @@ def check_solution(
     return (ok, error)
 
 
-def load_tests(core_path: str):
+def load_config(core_path: str):
     if core_path not in sys.path:
         sys.path.insert(1, core_path)
-    from check_solution import GROUPS, TASKS
-    return GROUPS, TASKS
+    from check_solution import load_config
+    return load_config()
 
 
 def analyze_solution(analytics_path: str, task: int, code: str):
     if analytics_path not in sys.path:
         sys.path.insert(1, analytics_path)
     from analyze_solution import analyze_solution
-    analytics = analyze_solution(task, code)
-    return analytics
+    return analyze_solution(task, code)
 
 
 def process_pending_messages(config: AppConfig, db: AppDatabase):
