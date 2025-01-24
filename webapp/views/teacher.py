@@ -268,6 +268,16 @@ def disallow_ip(teacher: Student, id: int):
     return redirect("/teacher")
 
 
+@blueprint.route("/teacher/student", methods=["GET"])
+@teacher_jwt_required(db.students)
+def student(teacher: Student):
+    email = request.args.get("email")
+    user = db.students.find_by_email(email)
+    if not user:
+        return redirect("/teacher")
+    return render_template('teacher/student.jinja', user=user, student=teacher)
+
+
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())

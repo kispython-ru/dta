@@ -1,0 +1,39 @@
+{% extends 'layout.jinja' %}
+{% block header %}
+<li class="breadcrumb-item">
+  <a class="text-decoration-none" href="/teacher">
+    Преподавательская
+  </a>
+</li>
+<li class="breadcrumb-item active">
+  {{ user.email }}
+</li>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+  <div class="col-12">
+    <h5 class="card-title fw-bold mb-2">
+      {{ user.email }}
+    </h5>
+    <h6 class="card-subtitle mb-3 text-muted">
+      Идентификатор: {{ user.id }}.
+      {% if user.unconfirmed_hash %}
+        Адрес почты не подтверждён.
+      {% else %}
+        Адрес почты подтверждён.
+      {% endif %}
+      {% if user.provider == 'lks' %}
+        Вход через ЕСИА.
+      {% endif %}
+    </h6>
+  </div>
+  <div class="col-12">
+    {% if user.group is none %}
+      Группа не выбрана.
+    {% else %}
+
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
