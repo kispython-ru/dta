@@ -5,7 +5,7 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import make_response, redirect, render_template, request
+from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
 from webapp.models import Message, Student
@@ -275,7 +275,25 @@ def student(teacher: Student):
     user = db.students.find_by_email(email)
     if not user:
         return redirect("/teacher")
-    return render_template('teacher/student.jinja', user=user, student=teacher)
+    group = None if user.group is None else db.groups.get_by_id(user.group)
+    groups = db.groups.get_all()
+    return render_template(
+        "teacher/student.jinja",
+        user=user,
+        group=group,
+        groups=groups,
+        student=teacher
+    )
+
+
+@blueprint.route("/teacher/student/<int:id>/group", methods=["POST"])
+@teacher_jwt_required(db.students)
+def update_student_group(teacher: Student, id: int):
+    student = db.students.get_by_id(id)
+    gid = request.form["group"]
+    group = db.groups.get_by_id(gid)
+    db.students.update_group(student.id, group.id)
+    return redirect(url_for("teacher.student", email=student.email))
 
 
 @blueprint.errorhandler(Exception)

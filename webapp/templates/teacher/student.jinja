@@ -24,16 +24,33 @@
         Адрес почты подтверждён.
       {% endif %}
       {% if user.provider == 'lks' %}
-        Вход через ЕСИА.
+        Аккаунт связан с ЕСИА РТУ МИРЭА.
       {% endif %}
     </h6>
   </div>
   <div class="col-12">
-    {% if user.group is none %}
-      Группа не выбрана.
-    {% else %}
-
-    {% endif %}
+    <b class="card-title d-block">Группа студента</b>
+    <form action="/teacher/student/{{ user.id }}/group" method="POST" class="w-100">
+      <div class="row">
+        <div class="col-md-10 mb-2">
+          <select name="group" class="form-select mb-2">
+            <option value="" {{ "selected='selected'" if group is none else "" }}>
+              Не выбрана
+            </option>
+            {% for g in groups %}
+              <option value="{{ g.id }}" {{ "selected='selected'" if g.id == group.id else "" }}>
+                {{ g.title }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 mb-2">
+          <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+            Обновить группу
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

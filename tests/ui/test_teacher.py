@@ -56,7 +56,7 @@ def test_submission(db: AppDatabase, client: FlaskClient):
 
     student = db.students.create(student_email, unique_str())
     db.students.confirm(student_email)
-    db.students.update_group(db.students.find_by_email(student_email), gid)
+    db.students.update_group(student.id, gid)
 
     code = "main = lambda: 42"
     ip = "0.0.0.0"

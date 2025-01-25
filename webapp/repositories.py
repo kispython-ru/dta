@@ -523,10 +523,10 @@ class StudentRepository:
             session.add(student)
             return student
 
-    def update_group(self, student: Student, group: str | None):
+    def update_group(self, student: int, group: int | None):
         with self.db.create_session() as session:
             session.query(Student) \
-                .filter_by(id=student.id) \
+                .filter_by(id=student) \
                 .update(dict(group=group))
 
 

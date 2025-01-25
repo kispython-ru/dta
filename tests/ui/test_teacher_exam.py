@@ -47,7 +47,8 @@ def test_exam_download(db: AppDatabase, client: FlaskClient):
 
     db.students.create(student_email, unique_str())
     db.students.confirm(student_email)
-    db.students.update_group(db.students.find_by_email(student_email), gid)
+    student = db.students.find_by_email(student_email)
+    db.students.update_group(student.id, gid)
 
     response = client.get(f"/teacher/group/{gid}/exam/csv", follow_redirects=True)
 
