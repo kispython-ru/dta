@@ -44,7 +44,7 @@ class StudentRegisterForm(FlaskForm):
 
     password = PasswordField('password', [
         DataRequired(message="Данное поле не может быть пустым!"),
-        Length(min=8, message="Пароль содержит как минимум 8 символов."),
+        Length(min=8, message="Пароль должен содержать как минимум 8 символов."),
         NoneOf(["12345678", "password"], message="Не используйте такие пароли, как 12345678 и password.")
     ])
 
@@ -56,3 +56,11 @@ class StudentRegisterForm(FlaskForm):
 
 class StudentChangePasswordForm(StudentRegisterForm):
     pass
+
+
+class TeacherChangePasswordForm(FlaskForm):
+    password = PasswordField('password', [
+        DataRequired(message="Данное поле не может быть пустым!"),
+        Length(min=8, message="Пароль должен содержать как минимум 8 символов."),
+        NoneOf(["12345678", "password"], message="Не используйте такие пароли, как 12345678 и password.")
+    ])

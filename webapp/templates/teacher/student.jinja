@@ -29,10 +29,13 @@
     </h6>
   </div>
   <div class="col-12">
-    <b class="card-title d-block">Группа студента</b>
+    <b class="d-block">Группа студента</b>
+    <div class="text-muted">
+      Если установить значение "Не выбрана", студенту будет предложено выбрать группу самостоятельно.
+    </div>
     <form action="/teacher/student/{{ user.id }}/group" method="POST" class="w-100">
       <div class="row">
-        <div class="col-md-10 mb-2">
+        <div class="col-md-8 mb-2">
           <select name="group" class="form-select mb-2">
             <option value="" {{ "selected='selected'" if group is none else "" }}>
               Не выбрана
@@ -44,9 +47,35 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2 mb-2">
+        <div class="col-md-4 mb-2">
           <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
-            Обновить группу
+            Сохранить группу
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-12">
+    <b class="d-block">Пароль студента</b>
+    <div class="text-muted">
+      Пароль от аккаунта студента можно обновить вручную, если почтовый сервис недоступен.
+    </div>
+    <form action="/teacher/student/{{ user.id }}/password" method="POST" class="w-100">
+      <div class="row">
+        <div class="col-md-8 mb-2">
+          <input name="password" type="password" class="form-control mb-2" placeholder="Пароль" />
+          {% if password_form.password.errors %}
+          <small class="d-block alert alert-danger">
+            {% for error in password_form.password.errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+          </small>
+          {% endif %}
+        </div>
+        <div class="col-md-4 mb-2">
+          {{ password_form.csrf_token }}
+          <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+            Сохранить пароль
           </button>
         </div>
       </div>

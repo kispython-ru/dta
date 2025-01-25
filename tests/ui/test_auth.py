@@ -118,7 +118,7 @@ def test_register_off_get(db: AppDatabase, client: FlaskClient):
 
 @mode('registration')
 @pytest.mark.parametrize("password, message", [
-    ("1234", "Пароль содержит как минимум 8 символов."),
+    ("1234", "Пароль должен содержать как минимум 8 символов."),
     ("", "Данное поле не может быть пустым!"),
     ("12345678", "Не используйте такие пароли, как 12345678 и password."),
     ("password", "Не используйте такие пароли, как 12345678 и password.")

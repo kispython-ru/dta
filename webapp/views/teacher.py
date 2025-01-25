@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
+from webapp.forms import TeacherChangePasswordForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
 from webapp.models import Message, Student
 from webapp.repositories import AppDatabase
@@ -282,7 +283,32 @@ def student(teacher: Student):
         user=user,
         group=group,
         groups=groups,
-        student=teacher
+        student=teacher,
+        password_form=TeacherChangePasswordForm(),
+    )
+
+
+@blueprint.route("/teacher/student/<int:id>/password", methods=["POST"])
+@teacher_jwt_required(db.students)
+def update_student_password(teacher: Student, id: int):
+    student = db.students.get_by_id(id)
+    password_form = TeacherChangePasswordForm()
+    if password_form.validate_on_submit():
+        message = students.change_password(student.email, password_form.password.data)
+        password_form.password.errors.append(message)
+        if 'Запрос' in message:
+            db.students.confirm(student.email)
+            password_form.password.errors.clear()
+            password_form.password.errors.append('Пароль успешно изменён преподавателем.')
+    group = db.groups.get_by_id(student.group)
+    groups = db.groups.get_all()
+    return render_template(
+        "teacher/student.jinja",
+        user=student,
+        group=group,
+        groups=groups,
+        student=teacher,
+        password_form=password_form,
     )
 
 
@@ -291,8 +317,8 @@ def student(teacher: Student):
 def update_student_group(teacher: Student, id: int):
     student = db.students.get_by_id(id)
     gid = request.form["group"]
-    group = db.groups.get_by_id(gid)
-    db.students.update_group(student.id, group.id)
+    group = db.groups.get_by_id(gid).id if gid.strip() else None
+    db.students.update_group(student.id, group)
     return redirect(url_for("teacher.student", email=student.email))
 
 
