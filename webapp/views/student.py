@@ -95,7 +95,7 @@ def submissions(student: Student | None, page: int):
 @student_jwt_optional(db.students)
 def group(student: Student | None, group_id: int):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
-    group = statuses.get_group_statuses(student, group_id, hide_pending)
+    group = statuses.get_group_statuses(group_id, hide_pending)
     seed = db.seeds.get_final_seed(group_id)
     blocked = config.config.exam and seed is None
     return render_template(
@@ -103,7 +103,6 @@ def group(student: Student | None, group_id: int):
         group=group,
         blocked=blocked,
         hide_pending=hide_pending,
-        hide_groups=config.config.hide_groups,
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,

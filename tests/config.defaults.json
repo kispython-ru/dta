@@ -12,7 +12,6 @@
     "FINAL_VARIANTS": 40,
     "FINAL_TASKS": null,
     "ENABLE_REGISTRATION": false,
-    "HIDE_GROUPS": false,
     "IMAP_LOGIN": "example@example.com",
     "IMAP_PASSWORD": "CHANGE_ME",
     "ENABLE_LKS_OAUTH": false,
