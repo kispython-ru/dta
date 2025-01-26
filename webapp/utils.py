@@ -15,7 +15,7 @@ from webapp.models import Student
 from webapp.repositories import StudentRepository
 
 
-def student_jwt_reset(config: AppConfigManager, path: str, auth_redirect=True):
+def logout(config: AppConfigManager, path: str, auth_redirect=True):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):
@@ -30,7 +30,7 @@ def student_jwt_reset(config: AppConfigManager, path: str, auth_redirect=True):
     return wrapper
 
 
-def authorize(students: StudentRepository, check: Callable[[Student], bool] | None):
+def authorize(students: StudentRepository, check: Callable[[Student], bool] | None = None):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):
@@ -44,14 +44,6 @@ def authorize(students: StudentRepository, check: Callable[[Student], bool] | No
             raise PyJWTError()
         return decorator
     return wrapper
-
-
-def student_jwt_optional(students: StudentRepository):
-    return authorize(students, None)
-
-
-def teacher_jwt_required(students: StudentRepository):
-    return authorize(students, lambda student: student.teacher)
 
 
 def get_real_ip(request: Request) -> str:

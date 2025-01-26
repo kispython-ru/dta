@@ -15,15 +15,14 @@ from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMes
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional, student_jwt_reset
+from webapp.utils import authorize, get_exception_info, get_real_ip, logout
 
 
 blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants,
-                         db.statuses, config, db.seeds, db.checks)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -36,7 +35,7 @@ def set_anonymous_identifier(response: Response) -> Response:
 
 
 @blueprint.route("/", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def dashboard(student: Student | None):
     groupings = groups.get_groupings()
     return render_template(
@@ -51,7 +50,7 @@ def dashboard(student: Student | None):
 
 @blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})
 @blueprint.route("/submissions/<int:page>", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def submissions(student: Student | None, page: int):
     size = 5
     session_id = request.cookies.get("anonymous_identifier")
@@ -92,7 +91,7 @@ def submissions(student: Student | None, page: int):
 
 
 @blueprint.route("/group/<group_id>", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def group(student: Student | None, group_id: int):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(group_id, hide_pending)
@@ -111,7 +110,7 @@ def group(student: Student | None, group_id: int):
 
 
 @blueprint.route("/rating/groups", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def rating_groups(student: Student | None):
     groupings = statuses.get_group_rating()
     return render_template(
@@ -125,7 +124,7 @@ def rating_groups(student: Student | None):
 
 
 @blueprint.route("/rating", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def rating(student: Student | None):
     groupings = statuses.get_rating()
     return render_template(
@@ -139,7 +138,7 @@ def rating(student: Student | None):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm()
@@ -156,7 +155,7 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     allowed = student is not None or not config.config.registration
     status = statuses.get_task_status(gid, vid, tid)
@@ -189,7 +188,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 
 
 @blueprint.route("/login", methods=['GET', 'POST'])
-@student_jwt_reset(config, "/login", False)
+@logout(config, "/login", False)
 def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
@@ -214,7 +213,7 @@ def login():
 
 
 @blueprint.route("/login/lks", methods=["GET", "POST"])
-@student_jwt_reset(config, "/login/lks")
+@logout(config, "/login/lks")
 def login_with_lks():
     if not config.config.enable_lks_oauth:
         return redirect("/")
@@ -228,7 +227,7 @@ def login_with_lks():
 
 
 @blueprint.route("/login/lks/callback", methods=["GET", "POST"])
-@student_jwt_reset(config, "/login/lks/callback")
+@logout(config, "/login/lks/callback")
 def login_with_lks_callback():
     if not config.config.enable_lks_oauth:
         return redirect("/")
@@ -255,7 +254,7 @@ def login_with_lks_callback():
 
 
 @blueprint.route("/register", methods=["GET", "POST"])
-@student_jwt_reset(config, "/register")
+@logout(config, "/register")
 def register():
     form = StudentRegisterForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if form.validate_on_submit():
@@ -269,7 +268,7 @@ def register():
 
 
 @blueprint.route("/change-password", methods=['GET', 'POST'])
-@student_jwt_reset(config, "/change-password")
+@logout(config, "/change-password")
 def change_password():
     form = StudentChangePasswordForm()
     if form.validate_on_submit():
@@ -283,7 +282,7 @@ def change_password():
 
 
 @blueprint.route("/logout", methods=['GET'])
-def logout():
+def do_logout():
     response = redirect("/")
     unset_jwt_cookies(response)
     return response
