@@ -15,7 +15,7 @@ from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMes
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import authorize, get_exception_info, get_real_ip, logout
+from webapp.utils import get_exception_info, get_real_ip, logout, authorize
 
 
 blueprint = Blueprint("student", __name__)
@@ -54,7 +54,7 @@ def dashboard(student: Student | None):
 def submissions(student: Student | None, page: int):
     size = 5
     session_id = request.cookies.get("anonymous_identifier")
-    if config.config.exam or not config.config.enable_registration:
+    if not config.config.enable_registration:
         if not session_id:
             return redirect('/')
         submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
