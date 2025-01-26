@@ -23,8 +23,8 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 
 
-@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"], defaults={'page': 0})
-@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>/<int:page>", methods=["GET"])
+@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"], defaults={'page': 0})
+@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>/<int:page>", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: int):
     size = 5
@@ -97,7 +97,7 @@ def select_group(teacher: Student):
     return redirect(f'/teacher/group/{group}')
 
 
-@blueprint.route("/teacher/group/<group_id>/rename", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/rename", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def rename(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
@@ -106,7 +106,7 @@ def rename(teacher: Student, group_id: int):
     return redirect(f'/teacher/group/{group_id}/exam')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/exam", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def exam(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
@@ -121,7 +121,7 @@ def exam(teacher: Student, group_id: int):
     )
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/toggle", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/exam/toggle", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def exam_toggle(teacher: Student, group_id: int):
     seed = db.seeds.get_final_seed(group_id)
@@ -181,7 +181,7 @@ def exam_deleteall(teacher: Student):
     return redirect('/teacher')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/delete", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/exam/delete", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def exam_delete(teacher: Student, group_id: int):
     if not config.config.final_tasks or not config.config.clearable_database:
@@ -191,7 +191,7 @@ def exam_delete(teacher: Student, group_id: int):
     return redirect(f'/teacher/group/{group_id}/exam')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/csv", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/exam/csv", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def exam_csv(teacher: Student, group_id: int):
     delimiter = request.args.get('delimiter')
@@ -214,7 +214,7 @@ def messages(teacher: Student):
     return output
 
 
-@blueprint.route("/teacher/group/<group_id>", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def queue(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
@@ -232,7 +232,7 @@ def queue(teacher: Student, group_id: int):
     return redirect(f'/teacher')
 
 
-@blueprint.route("/teacher/group/<group_id>/queue/<message_id>/accept", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/queue/<int:message_id>/accept", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def accept(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
@@ -242,7 +242,7 @@ def accept(teacher: Student, group_id: int, message_id: int):
     return redirect(f"/teacher/group/{group_id}")
 
 
-@blueprint.route("/teacher/group/<group_id>/queue/<message_id>/reject", methods=["GET"])
+@blueprint.route("/teacher/group/<int:group_id>/queue/<int:message_id>/reject", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def reject(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)

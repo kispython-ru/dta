@@ -90,7 +90,7 @@ def submissions(student: Student | None, page: int):
     )
 
 
-@blueprint.route("/group/<group_id>", methods=["GET"])
+@blueprint.route("/group/<int:group_id>", methods=["GET"])
 @authorize(db.students)
 def group(student: Student | None, group_id: int):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
@@ -137,7 +137,7 @@ def rating(student: Student | None):
     )
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"])
 @authorize(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
@@ -154,7 +154,7 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["POST"])
 @authorize(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     allowed = student is not None or not config.config.registration
