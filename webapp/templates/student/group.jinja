@@ -58,6 +58,17 @@
     {{ group.title }}
   </span>
 </h5>
+{% if student and not student.teacher and student.group is none %}
+<h6 class="card-subtitle mb-3 text-muted">
+  Для начала работы с системой необходимо выбрать группу. Это точно Ваша группа?
+</h6>
+<div class="alert alert-primary" role="alert">
+<b>Внимание!</b> После выбора группы изменить Ваш выбор сможет только преподаватель.
+</div>
+<a class="btn btn-outline-primary w-100 d-block" href="/group/select/{{ group.id }}">
+  Подтвердить выбор группы
+</a>
+{% else %}
 <h6 class="card-subtitle mb-3 text-muted">
   Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
   {% if student.teacher and exam %}
@@ -114,5 +125,6 @@
     </table>
   </div>
 </div>
+{% endif %}
 {% endif %}
 {% endblock %}

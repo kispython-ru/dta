@@ -37,6 +37,8 @@ def set_anonymous_identifier(response: Response) -> Response:
 @blueprint.route("/", methods=["GET"])
 @authorize(db.students)
 def dashboard(student: Student | None):
+    if config.config.registration and student and student.group is not None:
+        return redirect(f"/group/{student.group}")
     groupings = groups.get_groupings()
     return render_template(
         "student/dashboard.jinja",
@@ -44,6 +46,94 @@ def dashboard(student: Student | None):
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
+        student=student,
+    )
+
+
+@blueprint.route("/group/<int:gid>", methods=["GET"])
+@authorize(db.students)
+def group(student: Student | None, gid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and student.group is not None and student.group != gid:
+        return redirect(f"/group/{student.group}")
+    hide_pending = config.config.exam and request.args.get('hide_pending', False)
+    group = statuses.get_group_statuses(gid, hide_pending)
+    seed = db.seeds.get_final_seed(gid)
+    blocked = config.config.exam and seed is None
+    return render_template(
+        "student/group.jinja",
+        group=group,
+        blocked=blocked,
+        hide_pending=hide_pending,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        exam=config.config.exam,
+        student=student,
+    )
+
+
+@blueprint.route("/group/select/<int:gid>", methods=["GET"])
+@authorize(db.students, lambda _: True)
+def group_select(student: Student, gid: int):
+    if student.group is None:
+        db.students.update_group(student.id, gid)
+    return redirect(f"/group/{gid}")
+
+
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["POST"])
+@authorize(db.students)
+def submit_task(student: Student | None, gid: int, vid: int, tid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and student.group is not None and student.group != gid:
+        return redirect(f"/group/{student.group}")
+    form = StudentMessageForm()
+    valid = form.validate_on_submit()
+    status = statuses.get_task_status(gid, vid, tid)
+    ip = get_real_ip(request)
+    if valid and not status.disabled and db.ips.is_allowed(ip):
+        sid = student.id if student else None
+        session_id = request.cookies.get("anonymous_identifier")
+        db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)
+        db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
+        return render_template(
+            "student/success.jinja",
+            status=status,
+            registration=config.config.registration,
+            group_rating=config.config.groups,
+            exam=config.config.exam,
+            student=student,
+        )
+    return render_template(
+        "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        exam=config.config.exam,
+        status=status,
+        form=form,
+        student=student,
+    )
+
+
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"])
+@authorize(db.students)
+def task(student: Student | None, gid: int, vid: int, tid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and student.group is not None and student.group != gid:
+        return redirect(f"/group/{student.group}")
+    status = statuses.get_task_status(gid, vid, tid)
+    form = StudentMessageForm()
+    return render_template(
+        "student/task.jinja",
+        highlight=config.config.highlight_syntax,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        exam=config.config.exam,
+        status=status,
+        form=form,
         student=student,
     )
 
@@ -90,25 +180,6 @@ def submissions(student: Student | None, page: int):
     )
 
 
-@blueprint.route("/group/<int:group_id>", methods=["GET"])
-@authorize(db.students)
-def group(student: Student | None, group_id: int):
-    hide_pending = config.config.exam and request.args.get('hide_pending', False)
-    group = statuses.get_group_statuses(group_id, hide_pending)
-    seed = db.seeds.get_final_seed(group_id)
-    blocked = config.config.exam and seed is None
-    return render_template(
-        "student/group.jinja",
-        group=group,
-        blocked=blocked,
-        hide_pending=hide_pending,
-        registration=config.config.registration,
-        group_rating=config.config.groups,
-        exam=config.config.exam,
-        student=student,
-    )
-
-
 @blueprint.route("/rating/groups", methods=["GET"])
 @authorize(db.students)
 def rating_groups(student: Student | None):
@@ -137,56 +208,6 @@ def rating(student: Student | None):
     )
 
 
-@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"])
-@authorize(db.students)
-def task(student: Student | None, gid: int, vid: int, tid: int):
-    status = statuses.get_task_status(gid, vid, tid)
-    form = StudentMessageForm()
-    return render_template(
-        "student/task.jinja",
-        highlight=config.config.highlight_syntax,
-        registration=config.config.registration,
-        group_rating=config.config.groups,
-        exam=config.config.exam,
-        status=status,
-        form=form,
-        student=student,
-    )
-
-
-@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["POST"])
-@authorize(db.students)
-def submit_task(student: Student | None, gid: int, vid: int, tid: int):
-    allowed = student is not None or not config.config.registration
-    status = statuses.get_task_status(gid, vid, tid)
-    form = StudentMessageForm()
-    valid = form.validate_on_submit()
-    ip = get_real_ip(request)
-    if valid and allowed and not status.disabled and db.ips.is_allowed(ip):
-        sid = student.id if student else None
-        session_id = request.cookies.get("anonymous_identifier")
-        db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)
-        db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-        return render_template(
-            "student/success.jinja",
-            status=status,
-            registration=config.config.registration,
-            group_rating=config.config.groups,
-            exam=config.config.exam,
-            student=student,
-        )
-    return render_template(
-        "student/task.jinja",
-        highlight=config.config.highlight_syntax,
-        registration=config.config.registration,
-        group_rating=config.config.groups,
-        exam=config.config.exam,
-        status=status,
-        form=form,
-        student=student,
-    )
-
-
 @blueprint.route("/login", methods=['GET', 'POST'])
 @logout(config, "/login", False)
 def login():
@@ -205,7 +226,8 @@ def login():
             "student/login.jinja",
             registration=config.config.registration,
             group_rating=config.config.groups,
-            form=form)
+            form=form
+        )
     student = db.students.find_by_email(form.login.data)
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
