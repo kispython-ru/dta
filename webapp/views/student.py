@@ -53,23 +53,23 @@ def dashboard(student: Student | None):
 @authorize(db.students)
 def submissions(student: Student | None, page: int):
     size = 5
-    session_id = request.cookies.get("anonymous_identifier")
+    session = request.cookies.get("anonymous_identifier")
     if not config.config.enable_registration:
-        if not session_id:
+        if not session:
             return redirect('/')
-        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
-        submissions_count = statuses.count_session_id_submissions(session_id)
+        submissions = statuses.get_anonymous_submissions_statuses(session, (page - 1) * size, size)
+        count = statuses.count_session_id_submissions(session)
     elif student is not None:
-        submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
-        submissions_count = statuses.count_student_submissions(student)
+        submissions = statuses.get_submissions_statuses(student, (page - 1) * size, size)
+        count = statuses.count_student_submissions(student)
     else:
         return redirect('/')
-    if not submissions_statuses and page > 0:
+    if not submissions and page > 0:
         return redirect(f"/submissions/{page - 1}")
     pagination = Pagination(
         page=page,
         per_page=size,
-        total=submissions_count,
+        total=count,
         search=False,
         prev_label="<",
         next_label=">",
@@ -79,7 +79,7 @@ def submissions(student: Student | None, page: int):
     )
     return render_template(
         "student/submissions.jinja",
-        submissions=submissions_statuses,
+        submissions=submissions,
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
