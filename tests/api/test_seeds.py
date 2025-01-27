@@ -10,10 +10,10 @@ from webapp.repositories import AppDatabase
 
 def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
     (group, var, task) = arrange_task(db)
-    group_title = db.groups.get_by_id(group).title
+    group = db.groups.get_by_id(group)
 
-    default_template = f'/{task}/{group_title}.html#вариант-{var + 1}'
-    response = client.get(f"/api/v1/group/{group}/variant/{var}/task/{task}")
+    default_template = f'/files/task/{task}/group/{group.id}#вариант-{var + 1}'
+    response = client.get(f"/api/v1/group/{group.id}/variant/{var}/task/{task}")
 
     assert response.is_json
     assert response.json['id'] == task

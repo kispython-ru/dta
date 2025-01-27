@@ -18,7 +18,7 @@ def test_task_html_id(db: AppDatabase, client: FlaskClient):
     html_group = response.get_data(as_text=True)
 
     tag_contents = [tag for tag in
-                    get_tags(html_group, 'td')
+                    get_tags(html_group, 'td', True)
                     if f'№{task_id + 1}' in tag.get_text()]
 
     assert len(tag_contents) == 1
