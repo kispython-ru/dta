@@ -91,22 +91,12 @@ class ExternalTaskManager:
 
     def get_external_task(self, task: int, variant: int) -> ExternalTaskDto:
         if not (self.config.exam and self.random_active):
-            return ExternalTaskDto(
-                group_title=self.group.title,
-                task=task,
-                variant=variant,
-                active=not self.config.exam,
-            )
+            return ExternalTaskDto(self.group.id, self.group.title, task, variant, not self.config.exam)
         seed = f'{task}{variant}'
         task: int = self.sample(seed, self.config.final_tasks[str(task)])
         variant: int = self.sample(seed, list(range(1, self.config.final_variants + 1)))
         group: Group = self.sample(seed, self.groups)
-        return ExternalTaskDto(
-            task=task,
-            variant=variant,
-            group_title=group.external if group.external else group.title,
-            active=bool(self.seed.active),
-        )
+        return ExternalTaskDto(group.id, group.title, task, variant, bool(self.seed.active))
 
     def sample(self, seed: str, options: list) -> list:
         return random.Random(f'{self.seed.seed}{seed}').choice(options)
@@ -138,7 +128,7 @@ class StatusManager:
         variants = self.variants.get_all()
         statuses = self.__get_statuses(group.id)
         e = self.__get_external_task_manager(group)
-        tasks = self.__get_tasks(group, config, e.random_active)
+        tasks = self.__get_tasks()
         dtos: list[VariantDto] = []
         for var in variants:
             dto = self.__get_variant(group, var, tasks, statuses, config, e)
@@ -193,7 +183,7 @@ class StatusManager:
         variant = self.variants.get_by_id(vid)
         statuses = self.__get_statuses(group.id)
         e = self.__get_external_task_manager(group)
-        tasks = self.__get_tasks(group, config, e.random_active)
+        tasks = self.__get_tasks()
         dto = self.__get_variant(group, variant, tasks, statuses, config, e)
         return dto
 
@@ -271,8 +261,7 @@ class StatusManager:
         task = self.tasks.get_by_id(tid)
         e = self.__get_external_task_manager(group)
         ext = e.get_external_task(task.id, variant.id)
-        task_dto = TaskDto(group, task, config, e.random_active)
-        return TaskStatusDto(group, variant, task_dto, status, ext, config, achievements)
+        return TaskStatusDto(group, variant, TaskDto(task), status, ext, config, achievements)
 
     def __get_task_achievements(self, task: int) -> list[int]:
         achievements = self.__read_achievements()
@@ -322,18 +311,9 @@ class StatusManager:
             dtos.append(dto)
         return VariantDto(variant, dtos)
 
-    def __get_tasks(
-        self,
-        group: Group,
-        config: AppConfig,
-        active: bool
-    ) -> list[TaskDto]:
+    def __get_tasks(self) -> list[TaskDto]:
         tasks = self.tasks.get_all()
-        dtos: list[TaskDto] = []
-        for task in tasks:
-            dto = TaskDto(group, task, config, active)
-            dtos.append(dto)
-        return dtos
+        return [TaskDto(task) for task in tasks]
 
     def __get_statuses(self, group: int) -> dict[tuple[int, int], TaskStatus]:
         statuses = self.statuses.get_by_group(group=group)

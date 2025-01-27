@@ -84,16 +84,14 @@
   {% endif %}
 </h6>
 <div class="position-relative">
-  <div class="mb-5" style="overflow-x:auto">
+  <div style="overflow-x:auto">
     <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
       <thead>
         <tr>
           <th scope="col" style="width:100px">Вариант</th>
           {% for task in group.tasks %}
           <td scope="col" class="text-center">
-            <a class="text-decoration-none" target="__blank" href="{{ task.url }}">
-              №{{ task.formulation if task.formulation else task.id + 1 }}
-            </a>
+            №{{ task.formulation if task.formulation else task.id + 1 }}
           </td>
           {% endfor %}
         </tr>
@@ -127,4 +125,21 @@
 </div>
 {% endif %}
 {% endif %}
+{% endblock %}
+
+{% block footer %}
+<div class="container mt-3 mb-4">
+  <div class="row opacity-75">
+    <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+      <div class="text-muted">
+        <a class="text-decoration-none" href="https://github.com/true-grue/kispython" target="_blank">
+          Программирование на языке Python.
+        </a>
+        <a class="text-decoration-none text-muted" href="https://vk.com/kis_it_mirea" target="_blank">
+          Кафедра корпоративных информационных систем, РТУ МИРЭА
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

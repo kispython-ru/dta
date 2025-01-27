@@ -7,7 +7,7 @@
     "DISABLE_BACKGROUND_WORKER": false,
     "HIGHLIGHT_SYNTAX": false,
     "READONLY": false,
-    "TASK_BASE_URL": "http://kispython.ru/docs",
+    "TASK_BASE_PATH": "/home/artyom/docs",
     "ENABLE_REGISTRATION": false,
     "IMAP_LOGIN": null,
     "IMAP_PASSWORD": null,

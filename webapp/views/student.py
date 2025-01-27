@@ -1,3 +1,4 @@
+import os
 from secrets import token_hex
 
 import requests
@@ -9,13 +10,13 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint, Response
 from flask import current_app as app
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip, logout, authorize
+from webapp.utils import authorize, get_exception_info, get_real_ip, logout
 
 
 blueprint = Blueprint("student", __name__)
@@ -56,7 +57,7 @@ def group(student: Student | None, gid: int):
     if config.config.registration and not student:
         return redirect("/login")
     if student and student.group is not None and student.group != gid:
-        return redirect(f"/group/{student.group}")
+        return redirect("/")
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(gid, hide_pending)
     seed = db.seeds.get_final_seed(gid)
@@ -86,8 +87,8 @@ def group_select(student: Student, gid: int):
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    if student and student.group is not None and student.group != gid:
-        return redirect(f"/group/{student.group}")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
     form = StudentMessageForm()
     valid = form.validate_on_submit()
     status = statuses.get_task_status(gid, vid, tid)
@@ -122,8 +123,8 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 def task(student: Student | None, gid: int, vid: int, tid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    if student and student.group is not None and student.group != gid:
-        return redirect(f"/group/{student.group}")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm()
     return render_template(
@@ -136,6 +137,19 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
         form=form,
         student=student,
     )
+
+
+@blueprint.route("/files/task/<int:tid>/group/<int:gid>", methods=["GET"])
+@authorize(db.students)
+def files(student: Student | None, tid: int, gid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
+    group = db.groups.get_by_id(gid)
+    title = group.external or group.title
+    path = os.path.join(str(tid), f'{title}.html')
+    return send_from_directory(config.config.task_base_path, path)
 
 
 @blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})

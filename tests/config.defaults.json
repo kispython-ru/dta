@@ -8,7 +8,7 @@
     "DISABLE_BACKGROUND_WORKER": true,
     "HIGHLIGHT_SYNTAX": false,
     "READONLY": false,
-    "TASK_BASE_URL": "http://sovietov.com/kispython",
+    "TASK_BASE_PATH": "/tmp",
     "FINAL_VARIANTS": 40,
     "FINAL_TASKS": null,
     "ENABLE_REGISTRATION": false,

@@ -23,7 +23,8 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 
 
-@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"], defaults={'page': 0})
+@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>",
+                 methods=["GET"], defaults={'page': 0})
 @blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>/<int:page>", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: int):
