@@ -12,7 +12,7 @@ def test_get_by_student(db: AppDatabase):
 
     student = db.students.create(student_email, unique_str())
     db.students.confirm(student_email)
-    db.students.update_group(db.students.find_by_email(student_email), group_id)
+    db.students.update_group(student.id, group_id)
 
     code = "main = lambda: 42"
     ip = "0.0.0.0"
@@ -36,7 +36,7 @@ def test_count_student_submissions(db: AppDatabase):
 
     student = db.students.create(student_email, unique_str())
     db.students.confirm(student_email)
-    db.students.update_group(db.students.find_by_email(student_email), group_id)
+    db.students.update_group(student.id, group_id)
 
     code = "main = lambda: 42"
     ip = "0.0.0.0"
@@ -57,7 +57,7 @@ def test_count_submissions_by_info(db: AppDatabase):
 
     student = db.students.create(student_email, unique_str())
     db.students.confirm(student_email)
-    db.students.update_group(db.students.find_by_email(student_email), group_id)
+    db.students.update_group(student.id, group_id)
 
     code = "main = lambda: 42"
     ip = "0.0.0.0"

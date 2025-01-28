@@ -58,6 +58,17 @@
     {{ group.title }}
   </span>
 </h5>
+{% if student and not student.teacher and student.group is none %}
+<h6 class="card-subtitle mb-3 text-muted">
+  Для начала работы с системой необходимо выбрать группу. Это точно Ваша группа?
+</h6>
+<div class="alert alert-primary" role="alert">
+<b>Внимание!</b> После выбора группы изменить Ваш выбор сможет только преподаватель.
+</div>
+<a class="btn btn-outline-primary w-100 d-block" href="/group/select/{{ group.id }}">
+  Подтвердить выбор группы
+</a>
+{% else %}
 <h6 class="card-subtitle mb-3 text-muted">
   Список вариантов. Нажмите на соответствующую Вашему варианту ячейку, чтобы перейти к отправке.
   {% if student.teacher and exam %}
@@ -73,61 +84,62 @@
   {% endif %}
 </h6>
 <div class="position-relative">
-  <div class="{{ 'blurred-table' if hide_groups and registration and not student }} mb-5" style="overflow-x:auto">
-    {% if hide_groups and registration and not student %}
-      <div class="blurred-table-content"></div>
-    {% else %}
-      <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
-        <thead>
-          <tr>
-            <th scope="col" style="width:100px">Вариант</th>
-            {% for task in group.tasks %}
-            <td scope="col" class="text-center">
-              <a class="text-decoration-none" target="__blank" href="{{ task.url }}">
-                №{{ task.formulation if task.formulation else task.id + 1 }}
-              </a>
-            </td>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody style="border-top: 0px">
-          {% for variant in group.variants %}
-          <tr>
-            <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
-              <span class="p-1 d-block" title="{{ variant.earned }}">
-                {{ variant.id + 1 }}
-              </span>
-            </td>
-            {% for status in variant.statuses %}
-            <td scope="col" style="border-bottom: 0; padding: 0">
-              <a class="d-block text-center text-decoration-none p-1 position-relative"
-                style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
-                {{ status.code }}
-                {% if status.earned > 1 %}
-                <span class="achievements-counter">
-                  {{ status.earned }}
-                </span>
-                {% endif %}
-              </a>
-            </td>
-            {% endfor %}
-          </tr>
+  <div style="overflow-x:auto">
+    <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
+      <thead>
+        <tr>
+          <th scope="col" style="width:100px">Вариант</th>
+          {% for task in group.tasks %}
+          <td scope="col" class="text-center">
+            №{{ task.formulation if task.formulation else task.id + 1 }}
+          </td>
           {% endfor %}
-        </tbody>
-      </table>
-    {% endif %}
+        </tr>
+      </thead>
+      <tbody style="border-top: 0px">
+        {% for variant in group.variants %}
+        <tr>
+          <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
+            <span class="p-1 d-block" title="{{ variant.earned }}">
+              {{ variant.id + 1 }}
+            </span>
+          </td>
+          {% for status in variant.statuses %}
+          <td scope="col" style="border-bottom: 0; padding: 0">
+            <a class="d-block text-center text-decoration-none p-1 position-relative"
+              style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
+              {{ status.code }}
+              {% if status.earned > 1 %}
+              <span class="achievements-counter">
+                {{ status.earned }}
+              </span>
+              {% endif %}
+            </a>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  {% if hide_groups and registration and not student %}
-  <div class="blurred-table-hint text-center">
-    <div class="blurred-logo">
-      <img class="blurred-logo-img" src="{{ url_for('static', filename='logo.svg') }}" />
-    </div>
-    <div class="mb-2">Для просмотра страницы необходимо:</div>
-    <a class="btn btn-primary w-100" href="/login">
-      Войти на сайт
-    </a>
-  </div>
-  {% endif %}
 </div>
 {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<div class="container mt-3 mb-4">
+  <div class="row opacity-75">
+    <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+      <div class="text-muted">
+        <a class="text-decoration-none" href="https://github.com/true-grue/kispython" target="_blank">
+          Программирование на языке Python.
+        </a>
+        <a class="text-decoration-none text-muted" href="https://vk.com/kis_it_mirea" target="_blank">
+          Кафедра корпоративных информационных систем, РТУ МИРЭА
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

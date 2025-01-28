@@ -58,7 +58,6 @@
     </form>
     {% endif %}
   </div>
-  {% endif %}
   <div class="col-12 mb-3">
     <b class="card-title d-block">Разрешённые IP-адреса</b>
     <p>Оставьте список пустым, чтобы разрешить отправку решений с любого IP-адреса.</p>
@@ -93,7 +92,8 @@
       </div>
     </form>
   </div>
-    <div class="col-12 mb-3">
+  {% endif %}
+  <div class="col-12 mb-3">
     <b class="card-title d-block">Выгрузка всех присланных сообщений</b>
     <form action="/teacher/messages" method="GET" class="w-100">
       <select class="form-select mb-2" name="separator">
@@ -113,7 +113,7 @@
     </form>
   </div>
   <div class="col-12 mb-3">
-    <b class="card-title d-block">Просмотр решений студентов</b>
+    <b class="card-title d-block">Просмотр решений</b>
     <form action="/teacher/submissions" method="GET" class="w-100">
       <select class="form-select mb-2" name="gid">
         {% for g in glist %}
@@ -133,6 +133,21 @@
       <button type="submit" class="btn btn-outline-primary w-100 d-block">
         Перейти к решениям
       </button>
+    </form>
+  </div>
+  <div class="col-12 mb-3">
+    <b class="card-title d-block">Управление аккаунтом студента</b>
+    <form action="/teacher/student" method="GET" class="w-100">
+      <div class="row">
+        <div class="col-md-8">
+          <input class="form-control" type="email" name="email" placeholder="Email пользователя" />
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-outline-primary w-100 d-block">
+            Открыть аккаунт
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 </div>

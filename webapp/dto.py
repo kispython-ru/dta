@@ -10,7 +10,7 @@ class AppConfig:
         self.analytics_path: str = config["ANALYTICS_PATH"]
         self.api_token: str = config["API_TOKEN"]
         self.connection_string: str = config["CONNECTION_STRING"]
-        self.task_base_url: str = config["TASK_BASE_URL"]
+        self.task_base_path: str = config["TASK_BASE_PATH"]
         self.no_background_worker: bool = config["DISABLE_BACKGROUND_WORKER"]
         self.final_tasks: dict[str, list[int]] = config["FINAL_TASKS"]
         self.final_variants: int = config["FINAL_VARIANTS"]
@@ -27,7 +27,6 @@ class AppConfig:
         self.places_in_rating: int = config["PLACES_IN_RATING"]
         self.places_in_group: int = config["PLACES_IN_GROUP"]
         self.groups: dict = config["GROUPS"]
-        self.hide_groups: bool = config["HIDE_GROUPS"]
 
     @property
     def exam(self) -> bool:
@@ -39,30 +38,17 @@ class AppConfig:
 
 
 class ExternalTaskDto:
-    def __init__(
-        self,
-        group_title: str,
-        task: int,
-        variant: int,
-        active: bool
-    ):
+    def __init__(self, group: int, group_title: str, task: int, variant: int, active: bool):
         self.group_title = group_title
+        self.group = group
         self.task = task
         self.variant = variant
         self.active = active
 
 
 class TaskDto:
-    def __init__(
-        self,
-        group: Group,
-        task: Task,
-        config: AppConfig,
-        random: bool
-    ):
+    def __init__(self, task: Task):
         self.id = int(task.id)
-        self.original = f'{config.task_base_url}/{self.id}/{group.title}.html'
-        self.url = self.original if not random else "#"
         self.formulation = task.formulation
 
 
@@ -103,7 +89,6 @@ class TaskStatusDto:
         self.variant = variant.id
         self.group = int(group.id)
         self.group_title = group.title
-        self.base_url = config.task_base_url
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status in [Status.Checked, Status.CheckedSubmitted, Status.CheckedFailed]
@@ -120,11 +105,10 @@ class TaskStatusDto:
 
     @property
     def formulation_url(self) -> str:
-        git = self.external.group_title
+        gid = self.external.group
         vid = self.external.variant
         tid = self.external.task
-        furl = self.base_url
-        return f'{furl}/{tid}/{git}.html#вариант-{vid + 1}'
+        return f'/files/task/{tid}/group/{gid}#вариант-{vid + 1}'
 
     @property
     def cell_background(self) -> str:
@@ -206,12 +190,7 @@ class VariantDto:
 
 
 class GroupDto:
-    def __init__(
-        self,
-        group: Group,
-        tasks: list[TaskDto],
-        variants: list[VariantDto]
-    ):
+    def __init__(self, group: Group, tasks: list[TaskDto], variants: list[VariantDto]):
         self.title = str(group.title)
         self.id = int(group.id)
         self.tasks = tasks

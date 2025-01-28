@@ -6,6 +6,7 @@ dta.json
 
 # LocalDB
 *.db
+*.db.bak
 *.db.journal
 
 # Byte-compiled / optimized / DLL files

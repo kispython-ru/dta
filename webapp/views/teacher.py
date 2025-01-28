@@ -5,12 +5,13 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint
 from flask import current_app as app
-from flask import make_response, redirect, render_template, request
+from flask import make_response, redirect, render_template, request, url_for
 
+from webapp.forms import TeacherChangePasswordForm
 from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
 from webapp.models import Message, Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, teacher_jwt_required
+from webapp.utils import authorize, get_exception_info
 
 
 blueprint = Blueprint("teacher", __name__)
@@ -22,9 +23,10 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 
 
-@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"], defaults={'page': 0})
-@blueprint.route("/teacher/submissions/group/<gid>/variant/<vid>/task/<tid>/<int:page>", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>",
+                 methods=["GET"], defaults={'page': 0})
+@blueprint.route("/teacher/submissions/group/<int:gid>/variant/<int:vid>/task/<int:tid>/<int:page>", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: int):
     size = 5
     submissions_statuses = statuses.get_submissions_statuses_by_info(gid, vid, tid, (page - 1) * size, size)
@@ -56,7 +58,7 @@ def teacher_submissions(teacher: Student, gid: int, vid: int, tid: int, page: in
 
 
 @blueprint.route("/teacher/submissions", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def select_submissions(teacher: Student):
     gid = request.args.get('gid')
     vid = request.args.get('vid')
@@ -65,7 +67,7 @@ def select_submissions(teacher: Student):
 
 
 @blueprint.route("/teacher", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def dashboard(teacher: Student):
     groups = db.groups.get_all() if config.config.no_background_worker or config.config.final_tasks else None
     glist = db.groups.get_all()
@@ -88,7 +90,7 @@ def dashboard(teacher: Student):
 
 
 @blueprint.route("/teacher/group/select", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def select_group(teacher: Student):
     group = request.args.get('group')
     if config.config.exam:
@@ -96,8 +98,8 @@ def select_group(teacher: Student):
     return redirect(f'/teacher/group/{group}')
 
 
-@blueprint.route("/teacher/group/<group_id>/rename", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/rename", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def rename(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     title = request.args.get('title')
@@ -105,8 +107,8 @@ def rename(teacher: Student, group_id: int):
     return redirect(f'/teacher/group/{group_id}/exam')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/exam", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def exam(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     seed = db.seeds.get_final_seed(group_id)
@@ -120,8 +122,8 @@ def exam(teacher: Student, group_id: int):
     )
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/toggle", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/exam/toggle", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def exam_toggle(teacher: Student, group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     if seed is None and config.config.final_tasks:
@@ -134,7 +136,7 @@ def exam_toggle(teacher: Student, group_id: int):
 
 
 @blueprint.route("/teacher/exam/start", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def exam_startall(teacher: Student):
     groups = db.groups.get_all()
     for group in groups:
@@ -147,7 +149,7 @@ def exam_startall(teacher: Student):
 
 
 @blueprint.route("/teacher/exam/start/many", methods=["POST"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def exam_startmany(teacher: Student):
     for id in request.form.getlist('groups'):
         id = int(id)
@@ -160,7 +162,7 @@ def exam_startmany(teacher: Student):
 
 
 @blueprint.route("/teacher/exam/end", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def exam_endall(teacher: Student):
     groups = db.groups.get_all()
     for group in groups:
@@ -169,7 +171,7 @@ def exam_endall(teacher: Student):
 
 
 @blueprint.route("/teacher/exam/delete", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def exam_deleteall(teacher: Student):
     if not config.config.final_tasks or not config.config.clearable_database:
         return redirect('/teacher')
@@ -180,8 +182,8 @@ def exam_deleteall(teacher: Student):
     return redirect('/teacher')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/delete", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/exam/delete", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def exam_delete(teacher: Student, group_id: int):
     if not config.config.final_tasks or not config.config.clearable_database:
         return redirect(f'/teacher/group/{group_id}/exam')
@@ -190,8 +192,8 @@ def exam_delete(teacher: Student, group_id: int):
     return redirect(f'/teacher/group/{group_id}/exam')
 
 
-@blueprint.route("/teacher/group/<group_id>/exam/csv", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/exam/csv", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def exam_csv(teacher: Student, group_id: int):
     delimiter = request.args.get('delimiter')
     value = exports.export_exam_results(group_id, delimiter)
@@ -202,7 +204,7 @@ def exam_csv(teacher: Student, group_id: int):
 
 
 @blueprint.route("/teacher/messages", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def messages(teacher: Student):
     separator = request.args.get('separator')
     count = request.args.get('count')
@@ -213,8 +215,8 @@ def messages(teacher: Student):
     return output
 
 
-@blueprint.route("/teacher/group/<group_id>", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def queue(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_next_pending_message()
@@ -231,8 +233,8 @@ def queue(teacher: Student, group_id: int):
     return redirect(f'/teacher')
 
 
-@blueprint.route("/teacher/group/<group_id>/queue/<message_id>/accept", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/queue/<int:message_id>/accept", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def accept(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
@@ -241,8 +243,8 @@ def accept(teacher: Student, group_id: int, message_id: int):
     return redirect(f"/teacher/group/{group_id}")
 
 
-@blueprint.route("/teacher/group/<group_id>/queue/<message_id>/reject", methods=["GET"])
-@teacher_jwt_required(db.students)
+@blueprint.route("/teacher/group/<int:group_id>/queue/<int:message_id>/reject", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
 def reject(teacher: Student, group_id: int, message_id: int):
     group = db.groups.get_by_id(group_id)
     message = db.messages.get_by_id(message_id)
@@ -253,7 +255,7 @@ def reject(teacher: Student, group_id: int, message_id: int):
 
 
 @blueprint.route("/teacher/ips/allow", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def allow_ip(teacher: Student):
     ip = request.args.get('ip')
     label = request.args.get('label')
@@ -262,10 +264,63 @@ def allow_ip(teacher: Student):
 
 
 @blueprint.route("/teacher/ips/disallow/<int:id>", methods=["GET"])
-@teacher_jwt_required(db.students)
+@authorize(db.students, lambda s: s.teacher)
 def disallow_ip(teacher: Student, id: int):
     db.ips.disallow(id)
     return redirect("/teacher")
+
+
+@blueprint.route("/teacher/student", methods=["GET"])
+@authorize(db.students, lambda s: s.teacher)
+def student(teacher: Student):
+    email = request.args.get("email")
+    user = db.students.find_by_email(email)
+    if not user:
+        return redirect("/teacher")
+    group = None if user.group is None else db.groups.get_by_id(user.group)
+    groups = db.groups.get_all()
+    return render_template(
+        "teacher/student.jinja",
+        user=user,
+        group=group,
+        groups=groups,
+        student=teacher,
+        password_form=TeacherChangePasswordForm(),
+    )
+
+
+@blueprint.route("/teacher/student/<int:id>/password", methods=["POST"])
+@authorize(db.students, lambda s: s.teacher)
+def update_student_password(teacher: Student, id: int):
+    student = db.students.get_by_id(id)
+    password_form = TeacherChangePasswordForm()
+    if password_form.validate_on_submit():
+        message = students.change_password(student.email, password_form.password.data)
+        password_form.password.errors.append(message)
+        if 'Запрос' in message:
+            db.students.confirm(student.email)
+            password_form.password.errors.clear()
+            password_form.password.errors.append('Пароль успешно изменён преподавателем.')
+    group = db.groups.get_by_id(student.group)
+    groups = db.groups.get_all()
+    return render_template(
+        "teacher/student.jinja",
+        user=student,
+        group=group,
+        groups=groups,
+        student=teacher,
+        password_form=password_form,
+    )
+
+
+@blueprint.route("/teacher/student/<int:id>/group", methods=["POST"])
+@authorize(db.students, lambda s: s.teacher)
+def update_student_group(teacher: Student, id: int):
+    student = db.students.get_by_id(id)
+    gid = request.form["group"]
+    group = db.groups.get_by_id(gid).id if gid.strip() else None
+    db.students.update_group(student.id, group)
+    return redirect(url_for("teacher.student", email=student.email))
 
 
 @blueprint.errorhandler(Exception)

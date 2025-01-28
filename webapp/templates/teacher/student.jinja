@@ -1,0 +1,85 @@
+{% extends 'layout.jinja' %}
+{% block header %}
+<li class="breadcrumb-item">
+  <a class="text-decoration-none" href="/teacher">
+    Преподавательская
+  </a>
+</li>
+<li class="breadcrumb-item active">
+  {{ user.email }}
+</li>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+  <div class="col-12">
+    <h5 class="card-title fw-bold mb-2">
+      {{ user.email }}
+    </h5>
+    <h6 class="card-subtitle mb-3 text-muted">
+      Идентификатор: {{ user.id }}.
+      {% if user.unconfirmed_hash %}
+        Адрес почты не подтверждён.
+      {% else %}
+        Адрес почты подтверждён.
+      {% endif %}
+      {% if user.provider == 'lks' %}
+        Аккаунт связан с ЕСИА РТУ МИРЭА.
+      {% endif %}
+    </h6>
+  </div>
+  <div class="col-12">
+    <b class="d-block">Группа студента</b>
+    <div class="text-muted">
+      Если установить значение "Не выбрана", студенту будет предложено выбрать группу самостоятельно.
+    </div>
+    <form action="/teacher/student/{{ user.id }}/group" method="POST" class="w-100">
+      <div class="row">
+        <div class="col-md-8 mb-2">
+          <select name="group" class="form-select mb-2">
+            <option value="" {{ "selected='selected'" if group is none else "" }}>
+              Не выбрана
+            </option>
+            {% for g in groups %}
+              <option value="{{ g.id }}" {{ "selected='selected'" if g.id == group.id else "" }}>
+                {{ g.title }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 mb-2">
+          <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+            Сохранить группу
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-12">
+    <b class="d-block">Пароль студента</b>
+    <div class="text-muted">
+      Пароль от аккаунта студента можно обновить вручную, если почтовый сервис недоступен.
+    </div>
+    <form action="/teacher/student/{{ user.id }}/password" method="POST" class="w-100">
+      <div class="row">
+        <div class="col-md-8 mb-2">
+          <input name="password" type="password" class="form-control mb-2" placeholder="Пароль" />
+          {% if password_form.password.errors %}
+          <small class="d-block alert alert-danger">
+            {% for error in password_form.password.errors %}
+            <div>{{ error }}</div>
+            {% endfor %}
+          </small>
+          {% endif %}
+        </div>
+        <div class="col-md-4 mb-2">
+          {{ password_form.csrf_token }}
+          <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+            Сохранить пароль
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

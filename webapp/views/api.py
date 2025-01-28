@@ -23,7 +23,7 @@ def group_prefixes():
     return jsonify(dict(prefixes=keys))
 
 
-@blueprint.route("/group/<prefix>", methods=["GET"])
+@blueprint.route("/group/<string:prefix>", methods=["GET"])
 def group(prefix: str):
     groups = db.groups.get_by_prefix(prefix)
     dtos = [dict(id=group.id, title=group.title) for group in groups]
@@ -37,7 +37,7 @@ def variant_list():
     return jsonify(dtos)
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/list", methods=["GET"])
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/list", methods=["GET"])
 def task_list(gid: int, vid: int):
     variant = statuses.get_variant_statuses(gid, vid)
     response = [dict(
@@ -49,7 +49,7 @@ def task_list(gid: int, vid: int):
     return jsonify(response)
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"])
 def task(gid: int, vid: int, tid: int):
     status = statuses.get_task_status(gid, vid, tid)
     return jsonify(dict(
@@ -61,7 +61,7 @@ def task(gid: int, vid: int, tid: int):
     ))
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["POST"])
 def submit_task(gid: int, vid: int, tid: int):
     token = request.headers.get("token")
     if config.config.api_token != token:

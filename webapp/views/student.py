@@ -1,3 +1,4 @@
+import os
 from secrets import token_hex
 
 import requests
@@ -9,21 +10,20 @@ from jwt.exceptions import PyJWTError
 
 from flask import Blueprint, Response
 from flask import current_app as app
-from flask import redirect, render_template, request
+from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student
 from webapp.repositories import AppDatabase
-from webapp.utils import get_exception_info, get_real_ip, student_jwt_optional, student_jwt_reset
+from webapp.utils import authorize, get_exception_info, get_real_ip, logout
 
 
 blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants,
-                         db.statuses, config, db.seeds, db.checks)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -36,8 +36,10 @@ def set_anonymous_identifier(response: Response) -> Response:
 
 
 @blueprint.route("/", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def dashboard(student: Student | None):
+    if config.config.registration and student and student.group is not None:
+        return redirect(f"/group/{student.group}")
     groupings = groups.get_groupings()
     return render_template(
         "student/dashboard.jinja",
@@ -51,26 +53,26 @@ def dashboard(student: Student | None):
 
 @blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})
 @blueprint.route("/submissions/<int:page>", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def submissions(student: Student | None, page: int):
     size = 5
-    session_id = request.cookies.get("anonymous_identifier")
-    if config.config.exam or not config.config.enable_registration:
-        if not session_id:
+    session = request.cookies.get("anonymous_identifier")
+    if not config.config.enable_registration:
+        if not session:
             return redirect('/')
-        submissions_statuses = statuses.get_anonymous_submissions_statuses(session_id, (page - 1) * size, size)
-        submissions_count = statuses.count_session_id_submissions(session_id)
+        submissions = statuses.get_anonymous_submissions_statuses(session, (page - 1) * size, size)
+        count = statuses.count_session_id_submissions(session)
     elif student is not None:
-        submissions_statuses = statuses.get_submissions_statuses(student, (page - 1) * size, size)
-        submissions_count = statuses.count_student_submissions(student)
+        submissions = statuses.get_submissions_statuses(student, (page - 1) * size, size)
+        count = statuses.count_student_submissions(student)
     else:
         return redirect('/')
-    if not submissions_statuses and page > 0:
+    if not submissions and page > 0:
         return redirect(f"/submissions/{page - 1}")
     pagination = Pagination(
         page=page,
         per_page=size,
-        total=submissions_count,
+        total=count,
         search=False,
         prev_label="<",
         next_label=">",
@@ -80,7 +82,7 @@ def submissions(student: Student | None, page: int):
     )
     return render_template(
         "student/submissions.jinja",
-        submissions=submissions_statuses,
+        submissions=submissions,
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
@@ -91,19 +93,22 @@ def submissions(student: Student | None, page: int):
     )
 
 
-@blueprint.route("/group/<group_id>", methods=["GET"])
-@student_jwt_optional(db.students)
-def group(student: Student | None, group_id: int):
+@blueprint.route("/group/<int:gid>", methods=["GET"])
+@authorize(db.students)
+def group(student: Student | None, gid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and student.group is not None and student.group != gid:
+        return redirect("/")
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
-    group = statuses.get_group_statuses(student, group_id, hide_pending)
-    seed = db.seeds.get_final_seed(group_id)
+    group = statuses.get_group_statuses(gid, hide_pending)
+    seed = db.seeds.get_final_seed(gid)
     blocked = config.config.exam and seed is None
     return render_template(
         "student/group.jinja",
         group=group,
         blocked=blocked,
         hide_pending=hide_pending,
-        hide_groups=config.config.hide_groups,
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
@@ -111,8 +116,16 @@ def group(student: Student | None, group_id: int):
     )
 
 
+@blueprint.route("/group/select/<int:gid>", methods=["GET"])
+@authorize(db.students, lambda _: True)
+def group_select(student: Student, gid: int):
+    if student.group is None:
+        db.students.update_group(student.id, gid)
+    return redirect(f"/group/{gid}")
+
+
 @blueprint.route("/rating/groups", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def rating_groups(student: Student | None):
     groupings = statuses.get_group_rating()
     return render_template(
@@ -126,7 +139,7 @@ def rating_groups(student: Student | None):
 
 
 @blueprint.route("/rating", methods=["GET"])
-@student_jwt_optional(db.students)
+@authorize(db.students)
 def rating(student: Student | None):
     groupings = statuses.get_rating()
     return render_template(
@@ -139,9 +152,13 @@ def rating(student: Student | None):
     )
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["GET"])
-@student_jwt_optional(db.students)
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["GET"])
+@authorize(db.students)
 def task(student: Student | None, gid: int, vid: int, tid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm()
     return render_template(
@@ -156,15 +173,18 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
-@blueprint.route("/group/<gid>/variant/<vid>/task/<tid>", methods=["POST"])
-@student_jwt_optional(db.students)
+@blueprint.route("/group/<int:gid>/variant/<int:vid>/task/<int:tid>", methods=["POST"])
+@authorize(db.students)
 def submit_task(student: Student | None, gid: int, vid: int, tid: int):
-    allowed = student is not None or not config.config.registration
-    status = statuses.get_task_status(gid, vid, tid)
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
     form = StudentMessageForm()
     valid = form.validate_on_submit()
+    status = statuses.get_task_status(gid, vid, tid)
     ip = get_real_ip(request)
-    if valid and allowed and not status.disabled and db.ips.is_allowed(ip):
+    if valid and not status.disabled and db.ips.is_allowed(ip):
         sid = student.id if student else None
         session_id = request.cookies.get("anonymous_identifier")
         db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)
@@ -189,8 +209,21 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
+@blueprint.route("/files/task/<int:tid>/group/<int:gid>", methods=["GET"])
+@authorize(db.students)
+def files(student: Student | None, tid: int, gid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
+    group = db.groups.get_by_id(gid)
+    title = group.external or group.title
+    path = os.path.join(str(tid), f'{title}.html')
+    return send_from_directory(config.config.task_base_path, path)
+
+
 @blueprint.route("/login", methods=['GET', 'POST'])
-@student_jwt_reset(config, "/login", False)
+@logout(config, "/login", False)
 def login():
     form = StudentLoginForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if not form.validate_on_submit():
@@ -207,7 +240,8 @@ def login():
             "student/login.jinja",
             registration=config.config.registration,
             group_rating=config.config.groups,
-            form=form)
+            form=form
+        )
     student = db.students.find_by_email(form.login.data)
     response = redirect("/")
     set_access_cookies(response, create_access_token(identity=student.id))
@@ -215,7 +249,7 @@ def login():
 
 
 @blueprint.route("/login/lks", methods=["GET", "POST"])
-@student_jwt_reset(config, "/login/lks")
+@logout(config, "/login/lks")
 def login_with_lks():
     if not config.config.enable_lks_oauth:
         return redirect("/")
@@ -229,7 +263,7 @@ def login_with_lks():
 
 
 @blueprint.route("/login/lks/callback", methods=["GET", "POST"])
-@student_jwt_reset(config, "/login/lks/callback")
+@logout(config, "/login/lks/callback")
 def login_with_lks_callback():
     if not config.config.enable_lks_oauth:
         return redirect("/")
@@ -256,7 +290,7 @@ def login_with_lks_callback():
 
 
 @blueprint.route("/register", methods=["GET", "POST"])
-@student_jwt_reset(config, "/register")
+@logout(config, "/register")
 def register():
     form = StudentRegisterForm(lks_oauth_enabled=config.config.enable_lks_oauth)
     if form.validate_on_submit():
@@ -270,7 +304,7 @@ def register():
 
 
 @blueprint.route("/change-password", methods=['GET', 'POST'])
-@student_jwt_reset(config, "/change-password")
+@logout(config, "/change-password")
 def change_password():
     form = StudentChangePasswordForm()
     if form.validate_on_submit():
@@ -284,7 +318,7 @@ def change_password():
 
 
 @blueprint.route("/logout", methods=['GET'])
-def logout():
+def do_logout():
     response = redirect("/")
     unset_jwt_cookies(response)
     return response
