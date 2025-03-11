@@ -16,15 +16,13 @@ poetry install
 
 3. Run tests, launch the app:
 ```bash
-poetry shell
-make test
-make flask
+poetry run make test
+poetry run make flask
 ```
 
 4. If you wish to seed the database, run:
 ```bash
-poetry shell
-make seed # python -m webapp.app --seed
+poetry run make seed # python -m webapp.app --seed
 ```
 
 #### Windows 10
@@ -46,15 +44,13 @@ poetry install
 
 5. Run tests, launch the app:
 ```bash
-poetry shell
-make test
-make flask-win
+poetry run make test
+poetry run make flask-win
 ```
 
 6. If you wish to seed the database, run:
 ```bash
-poetry shell
-make seed # python -m webapp.app --seed
+poetry run make seed # python -m webapp.app --seed
 ```
 
 ### Acknoledgements
