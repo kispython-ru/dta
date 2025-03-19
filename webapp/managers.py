@@ -463,7 +463,7 @@ class ExportManager:
         messages = self.__get_latest_messages(count)
         group_titles = self.__get_group_titles()
         table = self.__create_messages_table(messages, group_titles)
-        delimiter = ";" if separator == "semicolon" else ","
+        delimiter = ";" if separator == ";" else ","
         output = self.__create_csv(table, delimiter)
         return output
 
