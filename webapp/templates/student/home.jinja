@@ -3,6 +3,17 @@
 <li class="breadcrumb-item active" aria-current="page">
   Главная страница
 </li>
+<style>
+.task-card {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.d-flex {
+    min-height: 10vh;
+}
+</style>
 {% endblock %}
 
 {% block main %}
@@ -10,7 +21,80 @@
   {{ greeting_message }}!
 </h5>
 <h6 class="card-subtitle mb-2 text-muted">
-  Здесь будет контент главной страницы студента
+  <div class="container mt-4">
+    <div class="row">
+        <!-- Левая колонка -->
+        <div class="col-md-4">
+            <a href="https://www.google.com" class="text-decoration-none text-muted">
+                <div class="card text-bg-light mb-3" role="button">
+                    <div class="card-body  task-card">
+                        <h2 class="card-title">Новая задача: №6</h2>
+                        <p class="card-text">Задача №6 ЦАП имеет отношение к операциям над множествами.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Правая колонка -->
+        <div class="col-md-8">
+            <!-- Ряд с рейтингами -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <a href="https://www.google.com" class="text-decoration-none text-muted">
+                        <div class="card p-3">
+                            <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг групп</h5>
+                            <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
+                                <h3 class="mb-0 me-2">№1</h3>
+                                <h4 class="mb-0 me-2">ИКБО-20-23</h4>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-6">
+                    <a href="https://www.google.com" class="text-decoration-none text-muted">
+                        <div class="card p-3">
+                            <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг студентов</h5>
+                            <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
+                                <h3 class="mb-0 me-2">№2</h3>
+                                <h4 class="mb-0 me-2">ИКБО-20-23 Вар. 24</h4>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Секция "Ваши задачи" -->
+            <div class="card tasks-card">
+                <div class="card-body">
+                    <h5 class="card-title">Ваши задачи</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-success">№1</button>
+                        <button class="btn btn-success">№2</button>
+                        <button class="btn btn-danger">№3</button>
+                        <button class="btn btn-success">№4</button>
+                        <button class="btn btn-danger">№5</button>
+                        <button class="btn btn-secondary">№6</button>
+                        <button class="btn btn-secondary">№7</button>
+                        <button class="btn btn-secondary">№8</button>
+                        <button class="btn btn-secondary">№9</button>
+                        <button class="btn btn-secondary">№10</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                        <button class="btn btn-secondary">№11</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 </h6>
 {% endblock %}
 

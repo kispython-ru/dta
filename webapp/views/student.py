@@ -42,7 +42,6 @@ def set_anonymous_identifier(response: Response) -> Response:
 @blueprint.route("/", methods=["GET"])
 @authorize(db.students)
 def dashboard(student: Student | None):
-    print(config.config.registration, student, student.group is not None)
     if config.config.registration and student and student.group is not None:
         return redirect(f"/home")
     groupings = groups.get_groupings()
@@ -103,6 +102,8 @@ def submissions(student: Student | None, page: int):
 def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
+    if config.config.exam:
+        return redirect("/exam")
     greeting_message = "Здравствуйте"
     if current_time() < datetime.strptime("12:00", "%H:%M").time():
         greeting_message = "Доброе утро"
@@ -114,13 +115,16 @@ def home(student: Student | None):
         greeting_message = "Доброй ночи"
     return render_template(
         "student/home.jinja",
-        greeting_message=greeting_message
+        greeting_message=greeting_message,
+        registration = config.config.registration,
+        group_rating = config.config.groups,
+        exam = config.config.exam,
     )
 
 
 @blueprint.route("/group/<int:gid>", methods=["GET"])
 @authorize(db.students)
-def group(student: Student | None):
+def group(student: Student | None, gid: int):
     if config.config.registration and not student:
         return redirect("/login")
     if student and student.group is not None and student.group != gid:
