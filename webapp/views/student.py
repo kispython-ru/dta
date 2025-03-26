@@ -1,5 +1,6 @@
 import os
 from secrets import token_hex
+from datetime import datetime
 
 import requests
 from authlib.integrations.requests_client import OAuth2Session
@@ -38,8 +39,9 @@ def set_anonymous_identifier(response: Response) -> Response:
 @blueprint.route("/", methods=["GET"])
 @authorize(db.students)
 def dashboard(student: Student | None):
+    print(config.config.registration, student, student.group is not None)
     if config.config.registration and student and student.group is not None:
-        return redirect(f"/group/{student.group}")
+        return redirect(f"/home")
     groupings = groups.get_groupings()
     return render_template(
         "student/dashboard.jinja",
@@ -93,9 +95,30 @@ def submissions(student: Student | None, page: int):
     )
 
 
+@blueprint.route("/home", methods=["GET"])
+@authorize(db.students)
+def home(student: Student | None):
+    if config.config.registration and not student:
+        return redirect("/login")
+    current_time = datetime.now().time()
+    greeting_message = ""
+    if current_time < datetime.strptime("12:00", "%H:%M").time():
+        greeting_message = "Доброе утро"
+    elif current_time < datetime.strptime("18:00", "%H:%M").time():
+        greeting_message = "Добрый день"
+    elif current_time < datetime.strptime("22:00", "%H:%M").time():
+        greeting_message = "Добрый вечер"
+    else:
+        greeting_message = "Доброй ночи"
+    return render_template(
+        "student/home.jinja",
+        greeting_message=greeting_message
+    )
+
+
 @blueprint.route("/group/<int:gid>", methods=["GET"])
 @authorize(db.students)
-def group(student: Student | None, gid: int):
+def group(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
     if student and student.group is not None and student.group != gid:
