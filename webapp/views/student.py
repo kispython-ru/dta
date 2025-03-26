@@ -29,6 +29,9 @@ groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
 
+current_time = lambda: datetime.now().time()
+
+
 @blueprint.after_request
 def set_anonymous_identifier(response: Response) -> Response:
     if not config.config.registration and not request.cookies.get("anonymous_identifier"):
@@ -100,15 +103,14 @@ def submissions(student: Student | None, page: int):
 def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
-    current_time = datetime.now().time()
-    greeting_message = ""
-    if current_time < datetime.strptime("12:00", "%H:%M").time():
+    greeting_message = "Здравствуйте"
+    if current_time() < datetime.strptime("12:00", "%H:%M").time():
         greeting_message = "Доброе утро"
-    elif current_time < datetime.strptime("18:00", "%H:%M").time():
+    if current_time() < datetime.strptime("18:00", "%H:%M").time():
         greeting_message = "Добрый день"
-    elif current_time < datetime.strptime("22:00", "%H:%M").time():
+    if current_time() < datetime.strptime("22:00", "%H:%M").time():
         greeting_message = "Добрый вечер"
-    else:
+    if current_time() < datetime.strptime("06:00", "%H:%M").time():
         greeting_message = "Доброй ночи"
     return render_template(
         "student/home.jinja",
