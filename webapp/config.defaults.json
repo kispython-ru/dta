@@ -12,7 +12,7 @@
     "IMAP_LOGIN": null,
     "IMAP_PASSWORD": null,
     "FINAL_VARIANTS": 40,
-    "FINAL_TASKS": null
+    "FINAL_TASKS": null,
     "ENABLE_LKS_OAUTH": false,
     "LKS_OAUTH_CLIENT_ID": "kispython.ru",
     "LKS_OAUTH_CLIENT_SECRET": "CHANGE_ME",
