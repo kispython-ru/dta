@@ -22,19 +22,23 @@
 </h4>
 <h6 class="card-subtitle mb-2 text-muted">
   <div class="mt-4">
-    <div class="row ">
+    <div class="row">
+        {% if group.tasks %}
         <div class="col-md-4">
-            <a href="/group/{{ group }}/variant/0/task/0" class="text-decoration-none text-muted">
+            <a href="/group/{{ group.id }}/variant/0/task/{{ group.tasks[-1].id }}" class="text-decoration-none text-muted">
                 <div class="card text-bg-light mb-3" role="button">
                     <div class="card-body  task-card">
-                        <h2 class="card-title">Новая задача: №6</h2>
-                        <p class="card-text">Задача №6 ЦАП имеет отношение к операциям над множествами.</p>
+                        <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
+                        {% if group.tasks[-1].formulation is not none %}
+                        <p class="card-text">{{ group.tasks[-1].formulation }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </a>
         </div>
+        {% endif %}
 
-        <div class="col-md-8">
+        <div class="col-md-{% if group.tasks %}8{% else %}12{% endif %}">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <a href="/rating/groups" class="text-decoration-none text-muted">
@@ -63,25 +67,24 @@
             <div class="card tasks-card">
                 <div class="card-body">
                     <h5 class="card-title">Ваши задачи</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-success">№1</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-success">№2</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-danger">№3</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-success">№4</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-danger">№5</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№6</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№7</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№8</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№9</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№10</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№11</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№12</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№13</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№14</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№15</a>
-                        <a href="/group/{{ group }}/variant/0/task/0" class="btn btn-secondary">№16</a>
+                    <div>
+                        <div class="row row-cols-4 row-cols-md-3 row-cols-sm-2 row-cols-1 g-2">
+                            {% for task in group.tasks %}
+                                <div class="col">
+                                    <a href="/group/{{ group.id }}/variant/0/task/{{ task.id }}"
+                                       class="btn
+                                        {% if tasks_statuses[task.id] == 3 %}
+                                        btn-outline-danger
+                                        {% elif tasks_statuses[task.id] in [2, 5, 6] %}
+                                        btn-outline-success
+                                        {% else %}
+                                        btn-outline-secondary
+                                        {% endif %} w-100">№{{ task.id + 1 }}</a>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <a href="/group/{{ group }}" target="_blank" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
+                    <a href="/group/{{ group.id }}" target="_blank" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
                         Посмотреть таблицу группы
                     </a>
                 </div>

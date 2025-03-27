@@ -105,23 +105,29 @@ def home(student: Student | None):
         return redirect("/login")
     if config.config.exam:
         return redirect("/exam")
-    greeting_message = "Здравствуйте"
-    print(get_time("22:00"), current_time(), get_time("06:00"))
+    # Определение сообщения приветствия
     if get_time("06:00") <= current_time() < get_time("12:00"):
         greeting_message = "Доброе утро"
     elif get_time("12:00") <= current_time() < get_time("18:00"):
         greeting_message = "Добрый день"
     elif get_time("18:00") <= current_time() < get_time("22:00"):
         greeting_message = "Добрый вечер"
-    elif get_time("22:00") <= current_time() or current_time() < get_time("06:00"):
+    else:
         greeting_message = "Доброй ночи"
+    # Получение всех заданий
+    hide_pending = config.config.exam and request.args.get('hide_pending', False)
+    group = statuses.get_group_statuses(student.group, hide_pending)
+    tasks_statuses = list(int(task_status.status) \
+                         for task_status in group.variants[0].statuses)
     return render_template(
         "student/home.jinja",
         greeting_message=greeting_message,
         registration = config.config.registration,
         group_rating = config.config.groups,
         exam = config.config.exam,
-        group=student.group,
+        group=group,
+        number_of_tasks=len(group.variants),
+        tasks_statuses=tasks_statuses,
     )
 
 
