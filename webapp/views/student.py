@@ -30,6 +30,7 @@ students = StudentManager(config, db.students, db.mailers)
 
 
 current_time = lambda: datetime.now().time()
+get_time = lambda string_time: datetime.strptime(string_time, "%H:%M").time()
 
 
 @blueprint.after_request
@@ -105,13 +106,13 @@ def home(student: Student | None):
     if config.config.exam:
         return redirect("/exam")
     greeting_message = "Здравствуйте"
-    if current_time() < datetime.strptime("12:00", "%H:%M").time():
+    if get_time("06:00") <= current_time() < get_time("12:00"):
         greeting_message = "Доброе утро"
-    if current_time() < datetime.strptime("18:00", "%H:%M").time():
+    elif get_time("12:00") <= current_time() < get_time("18:00"):
         greeting_message = "Добрый день"
-    if current_time() < datetime.strptime("22:00", "%H:%M").time():
+    elif get_time("18:00") <= current_time() < get_time("22:00"):
         greeting_message = "Добрый вечер"
-    if current_time() < datetime.strptime("06:00", "%H:%M").time():
+    elif get_time("22:00") <= current_time() < get_time("06:00"):
         greeting_message = "Доброй ночи"
     return render_template(
         "student/home.jinja",
@@ -119,6 +120,7 @@ def home(student: Student | None):
         registration = config.config.registration,
         group_rating = config.config.groups,
         exam = config.config.exam,
+        group=student.group,
     )
 
 

@@ -19,7 +19,7 @@
       <span>{{ key }}</span>
     </small>
     {% for group in grouping %}
-    <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{{ group.id }}">
+    <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{% if not exam %}select/{% endif %}{{ group.id }}">
       {{ group.title }}
     </a>
     {% endfor %}
