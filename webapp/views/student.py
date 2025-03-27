@@ -106,13 +106,14 @@ def home(student: Student | None):
     if config.config.exam:
         return redirect("/exam")
     greeting_message = "Здравствуйте"
+    print(get_time("22:00"), current_time(), get_time("06:00"))
     if get_time("06:00") <= current_time() < get_time("12:00"):
         greeting_message = "Доброе утро"
     elif get_time("12:00") <= current_time() < get_time("18:00"):
         greeting_message = "Добрый день"
     elif get_time("18:00") <= current_time() < get_time("22:00"):
         greeting_message = "Добрый вечер"
-    elif get_time("22:00") <= current_time() < get_time("06:00"):
+    elif get_time("22:00") <= current_time() or current_time() < get_time("06:00"):
         greeting_message = "Доброй ночи"
     return render_template(
         "student/home.jinja",
