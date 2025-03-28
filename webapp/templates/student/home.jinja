@@ -4,6 +4,13 @@
   Главная страница
 </li>
 <style>
+.h-card {
+    transition: filter 0.3s ease; /* Плавный переход для фильтра */
+}
+
+.h-card:hover {
+    filter: brightness(0.9); /* Увеличение яркости на 10% при наведении */
+}
 .task-card {
     min-height: 50vh;
     display: flex;
@@ -26,7 +33,7 @@
         {% if group.tasks %}
         <div class="col-md-4">
             <a href="/group/{{ group.id }}/variant/0/task/{{ group.tasks[-1].id }}" class="text-decoration-none text-muted">
-                <div class="card text-bg-light mb-3" style="background-color: #212529; color:white;" role="button">
+                <div class="card h-card text-bg-light mb-3" style="background-color: #212529; color:white;" role="button">
                     <div class="card-body  task-card">
                         <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
                         {% if group.tasks[-1].formulation is not none %}
@@ -41,7 +48,14 @@
         <div class="col-md-{% if group.tasks %}8{% else %}12{% endif %}">
             <div class="row mb-3">
                 <a href="/rating/groups" class="col-md-6 text-decoration-none text-muted">
-                    <div class="card p-3" style="min-height: 100%">
+                    <div class="card h-card p-3"
+                         style="min-height: 100%;
+                                background-color: {% if group_place == 0 %} #ffc107
+                                {% elif group_place == 1 %} #adb5bd
+                                {% elif group_place == 2 %} #fd7e14
+                                {% else %} #ffffff
+                                {% endif %};
+                                 {% if group_place <= 2 %}color: black;{% endif %}">
                         <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг групп</h5>
                         <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
                             <h3 class="mb-0 me-2">№{{ group_place + 1 }}</h3>
@@ -51,7 +65,7 @@
                 </a>
 
                 <a href="/rating" class="col-md-6 text-decoration-none text-muted">
-                    <div class="card p-3" style="min-height: 100%">
+                    <div class="card h-card p-3" style="min-height: 100%">
                         <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг студентов</h5>
                         <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
                             <h3 class="mb-0 me-2">№2</h3>
@@ -64,15 +78,15 @@
                 <div class="card-body">
                     <h5 class="card-title">Ваши задачи</h5>
                     <div>
-                        <div class="row row-cols-4 row-cols-md-3 row-cols-sm-2 row-cols-1 g-2">
+                        <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-2">
                             {% for task in group.tasks %}
                                 <div class="col">
                                     <a href="/group/{{ group.id }}/variant/0/task/{{ task.id }}"
                                        class="btn
                                         {% if tasks_statuses[task.id] == 3 %}
-                                        btn-outline-danger
+                                        btn-danger
                                         {% elif tasks_statuses[task.id] in [2, 5, 6] %}
-                                        btn-outline-success
+                                        btn-success
                                         {% else %}
                                         btn-outline-secondary
                                         {% endif %} w-100">№{{ task.id + 1 }}</a>
