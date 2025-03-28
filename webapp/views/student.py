@@ -119,8 +119,18 @@ def home(student: Student | None):
     group = statuses.get_group_statuses(student.group, hide_pending)
     tasks_statuses = list(int(task_status.status) \
                          for task_status in group.variants[0].statuses)
+    # Получение места группы в рейтинге
+    groupings = statuses.get_group_rating()
+    group_place = 0
+    for place in groupings.keys():
+        groups_in_place = groupings[place]
+        if student.group in \
+            list(group_in_place.group.id for group_in_place in groups_in_place):
+            group_place = place
+            break
     return render_template(
         "student/home.jinja",
+        student=student,
         greeting_message=greeting_message,
         registration = config.config.registration,
         group_rating = config.config.groups,
@@ -128,6 +138,7 @@ def home(student: Student | None):
         group=group,
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
+        group_place=group_place,
     )
 
 

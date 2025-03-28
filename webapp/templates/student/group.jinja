@@ -91,7 +91,7 @@
           <th scope="col" style="width:100px">Вариант</th>
           {% for task in group.tasks %}
           <td scope="col" class="text-center">
-            №{{ task.formulation if task.formulation else task.id + 1 }}
+            №{{ task.id + 1 }}
           </td>
           {% endfor %}
         </tr>

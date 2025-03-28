@@ -12,14 +12,13 @@
 
 {% block main %}
 <h6 class="card-title fw-bold">
-  Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.formulation if status.formulation
-    else status.task + 1 }}</span>,
+  Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
   вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
   группа <a href="/group/{{ status.group }}" class="badge alert-primary"
     style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
 </h6>
 <h6 class="card-subtitle mb-2 text-muted">
-  Здесь Вы можете отправить ответ на задание №{{ status.formulation if status.formulation else status.task + 1 }} для
+  Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для
   варианта №{{ status.variant + 1 }}.
 </h6>
 <div class="card-subtitle mb-4 mt-2">
@@ -95,7 +94,7 @@
           Введите ответ в поле выше. В отправляемом коде на языке программирования Python должна присутствовать функция
           <code class="font-weight-bold">main</code> и не должно быть какого-либо ввода/вывода. Поддерживается
           использование модулей только из стандартной библиотеки Python. <a href="/submissions" class="text-decoration-none">
-          Список отправленных решений.</a> 
+          Список отправленных решений.</a>
         </div>
       </small>
     </div>
