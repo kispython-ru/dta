@@ -49,27 +49,35 @@
             <div class="row mb-3">
                 <a href="/rating/groups" class="col-md-6 text-decoration-none text-muted">
                     <div class="card h-card p-3"
-                         style="min-height: 100%;
-                                background-color: {% if group_place == 0 %} #ffc107
-                                {% elif group_place == 1 %} #adb5bd
-                                {% elif group_place == 2 %} #fd7e14
-                                {% else %} #ffffff
-                                {% endif %};
-                                 {% if group_place <= 2 %}color: black;{% endif %}">
-                        <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг групп</h5>
-                        <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
-                            <h3 class="mb-0 me-2">№{{ group_place + 1 }}</h3>
+                         style="min-height: 100%;">
+                        <h5 class="">Рейтинг групп</h5>
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                            <h3 class="card p-3 mb-0 me-2"
+                                style="{% if group_place == 0 %}background-color: #ffc107; color: #664d03;
+                                {% elif group_place == 1 %}background-color: #adb5bd; color: #343a40;
+                                {% elif group_place == 2 %}background-color: #fd7e14; color: #653208;
+                                {% else %}background-color: #fff;
+                                {% endif %}">
+                                №{{ group_place + 1 }}</h3>
                             <h4 class="mb-0 me-2">{{ group.title }}</h4>
                         </div>
                     </div>
                 </a>
 
+
                 <a href="/rating" class="col-md-6 text-decoration-none text-muted">
-                    <div class="card h-card p-3" style="min-height: 100%">
-                        <h5 class="position-absolute top-0 start-0 mt-2 ms-3">Рейтинг студентов</h5>
-                        <div class="d-flex justify-content-left align-items-center mt-3 gap-1">
-                            <h3 class="mb-0 me-2">№2</h3>
-                            <h4 class="mb-0 me-2">ИКБО-20-23 Вар. 24</h4>
+                    <div class="card h-card p-3"
+                         style="min-height: 100%;">
+                        <h5 class="">Рейтинг студентов</h5>
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                            <h3 class="card p-3 mb-0 me-2">
+                                <!-- style="% if group_place == 0 %background-color: #ffc107; color: #664d03;
+                                % elif group_place == 1 %background-color: #adb5bd; color: #343a40;
+                                % elif group_place == 2 %background-color: #fd7e14; color: #653208;
+                                % else %background-color: #fff;
+                                % endif %" -->
+                                №1</h3>
+                            <h4 class="mb-0 me-2">{{ group.title }} | 1</h4>
                         </div>
                     </div>
                 </a>
