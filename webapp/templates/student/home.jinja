@@ -95,6 +95,8 @@
                                         btn-danger
                                         {% elif tasks_statuses[task.id] in [2, 5, 6] %}
                                         btn-success
+                                        {% elif tasks_statuses[task.id] == 0 %}
+                                        btn-primary
                                         {% else %}
                                         btn-outline-secondary
                                         {% endif %} w-100">№{{ task.id + 1 }}</a>
