@@ -69,16 +69,22 @@
                     <div class="card h-card p-3"
                          style="min-height: 100%;">
                         <h5 class="">Рейтинг студентов</h5>
+                        {% if student_place != -1 %}
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                            <h3 class="{% if group_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
+                            <h3 class="{% if student_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
                                 style="background-color: #fff;">
-                                {% if group_place == 0 %}🥇
-                                {% elif group_place == 1 %}🥈
-                                {% elif group_place == 2 %}🥉
+                                {% if student_place == 0 %}🥇
+                                {% elif student_place == 1 %}🥈
+                                {% elif student_place == 2 %}🥉
                                 {% else %}
-                                №{{ group_place + 1 }}{% endif %}</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }}</h4>
+                                №{{ student_place + 1 }}{% endif %}</h3>
+                            <h4 class="mb-0 me-2">{{ group.title }} {{ student.variant }}</h4>
                         </div>
+                        {% else %}
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                        <h5>На данный момент вас нет в рейтинге</h5>
+                        </div>
+                        {% endif %}
                     </div>
                 </a>
             </div>
@@ -89,7 +95,7 @@
                         <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-2">
                             {% for task in group.tasks %}
                                 <div class="col">
-                                    <a href="/group/{{ group.id }}/variant/0/task/{{ task.id }}"
+                                    <a href="/group/{{ group.id }}/variant/{{ student.variant }}/task/{{ task.id }}"
                                        class="btn
                                         {% if tasks_statuses[task.id] == 3 %}
                                         btn-danger

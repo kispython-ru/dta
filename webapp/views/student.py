@@ -14,8 +14,8 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
-from webapp.models import Student
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, VariantManager
+from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info, get_real_ip, logout
 
@@ -26,6 +26,7 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
+variants = VariantManager(config, db.variants, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
 
@@ -43,8 +44,10 @@ def set_anonymous_identifier(response: Response) -> Response:
 @blueprint.route("/", methods=["GET"])
 @authorize(db.students)
 def dashboard(student: Student | None):
-    if config.config.registration and student and student.group is not None:
-        return redirect(f"/home")
+    if config.config.registration and student and student.group is not None and student.variant is not None:
+        return redirect("/home")
+    if config.config.registration and not config.config.exam and student and student.group is not None and student.variant is None:
+        return redirect("/variant")
     groupings = groups.get_groupings()
     return render_template(
         "student/dashboard.jinja",
@@ -52,6 +55,27 @@ def dashboard(student: Student | None):
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
+        student=student,
+    )
+
+
+@blueprint.route("/variant", methods=["GET"])
+@authorize(db.students)
+def variant(student: Student | None):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if config.config.registration and student and student.variant is not None:
+        return redirect("/")
+    all_variants: list[int] = list(variant_obj.id for variant_obj in variants.get_variants())
+    group_students: list[Student] = students.students.get_all_by_group(student.group)
+    for group_student in group_students:
+        if group_student.variant is not None and group_student.variant in all_variants:
+            all_variants.remove(group_student.variant)
+    return render_template(
+        "student/choice_of_variant.jinja",
+        variants=all_variants,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
         student=student,
     )
 
@@ -103,6 +127,10 @@ def submissions(student: Student | None, page: int):
 def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
+    if config.config.registration and student and student.group is None:
+        return redirect("/")
+    if config.config.registration and student and student.group is not None and student.variant is None:
+        return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
     # Определение сообщения приветствия
@@ -118,16 +146,27 @@ def home(student: Student | None):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(student.group, hide_pending)
     tasks_statuses = list(int(task_status.status) \
-                         for task_status in group.variants[0].statuses)
+                         for task_status in group.variants[student.variant].statuses)
     # Получение места группы в рейтинге
     groupings = statuses.get_group_rating()
-    group_place = 0
+    group_place: int = -1
     for place in groupings.keys():
         groups_in_place = groupings[place]
         if student.group in \
             list(group_in_place.group.id for group_in_place in groups_in_place):
             group_place = place
             break
+    student_rating = statuses.get_rating()
+    student_place: int = -1
+    for place in student_rating.keys():
+        students_in_place = student_rating[place]
+        for student_in_place in students_in_place:
+            if student_in_place.group == student.group and student_in_place.variant == student.variant:
+                student_place = place
+                break
+        if student_place != -1:
+            break
+    # Получение места студента в рейтинге
     return render_template(
         "student/home.jinja",
         student=student,
@@ -139,6 +178,7 @@ def home(student: Student | None):
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
         group_place=group_place,
+        student_place=student_place,
     )
 
 
@@ -170,7 +210,20 @@ def group(student: Student | None, gid: int):
 def group_select(student: Student, gid: int):
     if student.group is None:
         db.students.update_group(student.id, gid)
-    return redirect(f"/group/{gid}")
+    return redirect("/variant")
+
+
+@blueprint.route("/variant/select/<int:vid>", methods=["GET"])
+@authorize(db.students, lambda _: True)
+def variant_select(student: Student, vid: int):
+    if student.group is None:
+        return redirect("/")
+    group_students: list[Student] = students.students.get_all_by_group(student.group)
+    if vid in list(group_student.variant for group_student in group_students):
+        return redirect("/variant")
+    if student.variant is None:
+        db.students.update_variant(student.id, vid)
+    return redirect(f"/home")
 
 
 @blueprint.route("/rating/groups", methods=["GET"])
