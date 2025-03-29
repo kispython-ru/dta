@@ -52,13 +52,13 @@
                          style="min-height: 100%;">
                         <h5 class="">Рейтинг групп</h5>
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                            <h3 class="card p-3 mb-0 me-2"
-                                style="{% if group_place == 0 %}background-color: #ffc107; color: #664d03;
-                                {% elif group_place == 1 %}background-color: #adb5bd; color: #343a40;
-                                {% elif group_place == 2 %}background-color: #fd7e14; color: #653208;
-                                {% else %}background-color: #fff;
-                                {% endif %}">
-                                №{{ group_place + 1 }}</h3>
+                            <h3 class="{% if group_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
+                                style="background-color: #fff;">
+                                {% if group_place == 0 %}🥇
+                                {% elif group_place == 1 %}🥈
+                                {% elif group_place == 2 %}🥉
+                                {% else %}
+                                №{{ group_place + 1 }}{% endif %}</h3>
                             <h4 class="mb-0 me-2">{{ group.title }}</h4>
                         </div>
                     </div>
@@ -70,14 +70,14 @@
                          style="min-height: 100%;">
                         <h5 class="">Рейтинг студентов</h5>
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                            <h3 class="card p-3 mb-0 me-2">
-                                <!-- style="% if group_place == 0 %background-color: #ffc107; color: #664d03;
-                                % elif group_place == 1 %background-color: #adb5bd; color: #343a40;
-                                % elif group_place == 2 %background-color: #fd7e14; color: #653208;
-                                % else %background-color: #fff;
-                                % endif %" -->
-                                №1</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }} | 1</h4>
+                            <h3 class="{% if group_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
+                                style="background-color: #fff;">
+                                {% if group_place == 0 %}🥇
+                                {% elif group_place == 1 %}🥈
+                                {% elif group_place == 2 %}🥉
+                                {% else %}
+                                №{{ group_place + 1 }}{% endif %}</h3>
+                            <h4 class="mb-0 me-2">{{ group.title }}</h4>
                         </div>
                     </div>
                 </a>
