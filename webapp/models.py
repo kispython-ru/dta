@@ -129,6 +129,7 @@ class Student(Base):
     provider = sa.Column("provider", sa.String, nullable=True)
     email = sa.Column("email", sa.String, nullable=False)
     group = sa.Column("group", sa.String, nullable=True)
+    variant = sa.Column("variant", sa.Integer, nullable=True)
     password_hash = sa.Column("password_hash", sa.String, nullable=True)
     unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
     blocked = sa.Column("blocked", sa.Boolean, nullable=False)
