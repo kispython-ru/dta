@@ -34,25 +34,18 @@ def test_group_html_link(db: AppDatabase, client: FlaskClient):
     prefix = unique_str().replace('-', '')
     title = f'{prefix}-{unique_str()}'
     db.groups.create_by_names([title])
-    print(f"Created group with title: {title}")
-
+    
     response = client.get('/')
     html_dashboard = response.get_data(as_text=True)
 
-    # Выводим HTML-код главной страницы
-    print(html_dashboard)
-
     group_id = next(group.id for group in db.groups.get_by_prefix(prefix))
-    print(f"Group ID: {group_id}")
 
     response = client.get(f'/group/select/{group_id}')
     html_group = response.get_data(as_text=True)
 
     tags = [tag.get('href') for tag in get_tags(html_dashboard, 'a', True)]
-    print(f"Tags found: {tags}")
 
     tag_contents = next(tag for tag in tags if tag == f'/group/select/{group_id}')
-    print(f"Tag contents: {tag_contents}")
 
     response = client.get(tag_contents)
     html_group_href = response.get_data(as_text=True)
