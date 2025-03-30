@@ -124,7 +124,17 @@ def submissions(student: Student | None, page: int):
 
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students)
-def home(student: Student | None):
+def default_home(student: Student | None):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if config.config.registration and student and student.variant is None:
+        return redirect("/variant")
+    return redirect(f"/home/{student.variant}")
+
+
+@blueprint.route("/home/<int:vid>", methods=["GET"])
+@authorize(db.students)
+def home(student: Student | None, vid: int):
     if config.config.registration and not student:
         return redirect("/login")
     if config.config.registration and student and student.group is None:
@@ -133,6 +143,9 @@ def home(student: Student | None):
         return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
+    variants = db.variants.get_all()
+    if vid >= len(variants):
+        return redirect("/home")
     # Определение сообщения приветствия
     if get_time("06:00") <= current_time() < get_time("12:00"):
         greeting_message = "Доброе утро"
@@ -146,7 +159,7 @@ def home(student: Student | None):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(student.group, hide_pending)
     tasks_statuses = list(int(task_status.status) \
-                         for task_status in group.variants[student.variant].statuses)
+                         for task_status in group.variants[vid].statuses)
     # Получение места группы в рейтинге
     groupings = statuses.get_group_rating()
     group_place: int = -1
@@ -156,17 +169,17 @@ def home(student: Student | None):
             list(group_in_place.group.id for group_in_place in groups_in_place):
             group_place = place
             break
+    # Получение места студента в рейтинге
     student_rating = statuses.get_rating()
     student_place: int = -1
     for place in student_rating.keys():
         students_in_place = student_rating[place]
         for student_in_place in students_in_place:
-            if student_in_place.group == student.group and student_in_place.variant == student.variant:
+            if student_in_place.group == student.group and student_in_place.variant == vid:
                 student_place = place
                 break
         if student_place != -1:
             break
-    # Получение места студента в рейтинге
     return render_template(
         "student/home.jinja",
         student=student,
@@ -175,11 +188,22 @@ def home(student: Student | None):
         group_rating = config.config.groups,
         exam = config.config.exam,
         group=group,
+        variant=vid,
+        variants=variants,
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
         group_place=group_place,
         student_place=student_place,
     )
+
+
+@blueprint.route("/home/variant_select", methods=["POST"])
+def open_variant():
+    vid = request.form.get("variant")
+    if vid and vid.isdigit():
+        return redirect(f"/home/{vid}")
+    else:
+        return redirect("/home")
 
 
 @blueprint.route("/group/<int:gid>", methods=["GET"])

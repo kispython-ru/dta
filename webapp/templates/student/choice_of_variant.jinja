@@ -7,11 +7,12 @@
 
 {% block main %}
 <h6 class="card-subtitle mb-2 text-muted">
-  Нажмите на вариант, чтобы закрепить его за собой.
+  Выберите вариант, чтобы сделать его основным — это позволит вам быстро переключаться к нему.
+    В будущем вы всегда сможете изменить выбор и решать задачи из других вариантов.
 </h6>
-<div>
+<div class="d-flex flex-wrap row-cols-12 row-cols-1 row-cols-md-6 row-cols-sm-12 gap-2">
     {% for variant in variants %}
-    <a class="btn btn-outline-primary mb-2 mr-3" href="/variant/select/{{ variant }}">
+    <a class="btn btn-outline-primary" href="/variant/select/{{ variant }}">
       {{ variant + 1 }}
     </a>
     {% endfor %}
