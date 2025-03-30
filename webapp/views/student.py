@@ -208,6 +208,8 @@ def group(student: Student | None, gid: int):
 @blueprint.route("/group/select/<int:gid>", methods=["GET"])
 @authorize(db.students, lambda _: True)
 def group_select(student: Student, gid: int):
+    if not student:
+        return redirect("/login")
     if student.group is None:
         db.students.update_group(student.id, gid)
     return redirect("/variant")
@@ -216,6 +218,8 @@ def group_select(student: Student, gid: int):
 @blueprint.route("/variant/select/<int:vid>", methods=["GET"])
 @authorize(db.students, lambda _: True)
 def variant_select(student: Student, vid: int):
+    if not student:
+        return redirect("/login")
     if student.group is None:
         return redirect("/")
     group_students: list[Student] = students.students.get_all_by_group(student.group)
