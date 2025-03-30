@@ -1,0 +1,140 @@
+{% extends 'layout.jinja' %}
+{% block header %}
+<li class="breadcrumb-item active" aria-current="page">
+  Главная страница
+</li>
+<style>
+.h-card {
+    transition: filter 0.3s ease; /* Плавный переход для фильтра */
+}
+
+.h-card:hover {
+    filter: brightness(0.9); /* Увеличение яркости на 10% при наведении */
+}
+.task-card {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.d-flex {
+    min-height: 10vh;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<h4 class="card-title fw-bold">
+  {{ greeting_message }}!
+</h4>
+<h6 class="card-subtitle mb-2 text-muted">
+  <div class="mt-4">
+    <div class="row">
+        {% if group.tasks %}
+        <div class="col-md-4">
+            <a href="/group/{{ group.id }}/variant/0/task/{{ group.tasks[-1].id }}" class="text-decoration-none text-muted">
+                <div class="card h-card text-bg-light mb-3" style="background-color: #212529; color:white;" role="button">
+                    <div class="card-body  task-card">
+                        <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
+                        {% if group.tasks[-1].formulation is not none %}
+                        <p class="card-text">{{ group.tasks[-1].formulation }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="col-md-{% if group.tasks %}8{% else %}12{% endif %}">
+            <div class="row mb-3">
+                <a href="/rating/groups" class="col-md-6 text-decoration-none text-muted">
+                    <div class="card h-card p-3"
+                         style="min-height: 100%;">
+                        <h5 class="">Рейтинг групп</h5>
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                            <h3 class="{% if group_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
+                                style="background-color: #fff;">
+                                {% if group_place == 0 %}🥇
+                                {% elif group_place == 1 %}🥈
+                                {% elif group_place == 2 %}🥉
+                                {% else %}
+                                №{{ group_place + 1 }}{% endif %}</h3>
+                            <h4 class="mb-0 me-2">{{ group.title }}</h4>
+                        </div>
+                    </div>
+                </a>
+
+
+                <a href="/rating" class="col-md-6 text-decoration-none text-muted">
+                    <div class="card h-card p-3"
+                         style="min-height: 100%;">
+                        <h5 class="">Рейтинг студентов</h5>
+                        {% if student_place != -1 %}
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                            <h3 class="{% if student_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
+                                style="background-color: #fff;">
+                                {% if student_place == 0 %}🥇
+                                {% elif student_place == 1 %}🥈
+                                {% elif student_place == 2 %}🥉
+                                {% else %}
+                                №{{ student_place + 1 }}{% endif %}</h3>
+                            <h4 class="mb-0 me-2">{{ group.title }} {{ student.variant }}</h4>
+                        </div>
+                        {% else %}
+                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
+                        <h5>На данный момент вас нет в рейтинге</h5>
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            <div class="card tasks-card">
+                <div class="card-body">
+                    <h5 class="card-title">Ваши задачи</h5>
+                    <div>
+                        <div class="row row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-2">
+                            {% for task in group.tasks %}
+                                <div class="col">
+                                    <a href="/group/{{ group.id }}/variant/{{ student.variant }}/task/{{ task.id }}"
+                                       class="btn
+                                        {% if tasks_statuses[task.id] == 3 %}
+                                        btn-danger
+                                        {% elif tasks_statuses[task.id] in [2, 5, 6] %}
+                                        btn-success
+                                        {% elif tasks_statuses[task.id] == 0 %}
+                                        btn-primary
+                                        {% else %}
+                                        btn-outline-secondary
+                                        {% endif %} w-100">№{{ task.id + 1 }}</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
+                        Посмотреть таблицу группы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</h6>
+{% endblock %}
+
+{% block footer %}
+<div class="container mt-4 mb-4">
+  <div class="row opacity-75">
+    <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+      <div class="text-muted">
+        <a class="text-decoration-none" href="https://github.com/true-grue/kispython" target="_blank">
+          Программирование на языке Python.
+        </a>
+        <a class="text-decoration-none text-muted" href="https://vk.com/kis_it_mirea" target="_blank">
+          Кафедра корпоративных информационных систем, РТУ МИРЭА
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

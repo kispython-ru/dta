@@ -467,6 +467,11 @@ class StudentRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_all_by_group(self, group_id: int) -> list[Student] | None:
+        with self.db.create_session() as session:
+            students = session.query(Student).filter(Student.group == group_id).all()
+            return students if students else None
+
     def get_by_id(self, id: int) -> Student | None:
         with self.db.create_session() as session:
             student = session.query(Student).get(id)
@@ -528,6 +533,12 @@ class StudentRepository:
             session.query(Student) \
                 .filter_by(id=student) \
                 .update(dict(group=group))
+
+    def update_variant(self, student: int, variant_id: int | None):
+        with self.db.create_session() as session:
+            session.query(Student) \
+                .filter_by(id=student) \
+                .update(dict(variant=variant_id))
 
 
 class MailerRepository:

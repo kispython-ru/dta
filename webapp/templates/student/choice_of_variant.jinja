@@ -6,25 +6,15 @@
 {% endblock %}
 
 {% block main %}
-<h5 class="card-title fw-bold">
-  {% if exam %} Режим зачёта {% else %} Перечень групп {% endif %}
-</h5>
 <h6 class="card-subtitle mb-2 text-muted">
-  Нажмите на группу, чтобы перейти к вариантам заданий группы.
+  Нажмите на вариант, чтобы закрепить его за собой.
 </h6>
 <div>
-  {% for key, grouping in groupings.items() %}
-  <div>
-    <small class="mb-2 text-muted d-block">
-      <span>{{ key }}</span>
-    </small>
-    {% for group in grouping %}
-    <a class="btn btn-outline-primary mb-2 mr-3" href="/group/{% if not exam %}select/{% endif %}{{ group.id }}">
-      {{ group.title }}
+    {% for variant in variants %}
+    <a class="btn btn-outline-primary mb-2 mr-3" href="/variant/select/{{ variant }}">
+      {{ variant + 1 }}
     </a>
     {% endfor %}
-  </div>
-  {% endfor %}
 </div>
 {% endblock %}
 
