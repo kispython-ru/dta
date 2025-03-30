@@ -67,10 +67,6 @@ def variant(student: Student | None):
     if config.config.registration and student and student.variant is not None:
         return redirect("/")
     all_variants: list[int] = list(variant_obj.id for variant_obj in variants.get_variants())
-    group_students: list[Student] = students.students.get_all_by_group(student.group)
-    for group_student in group_students:
-        if group_student.variant is not None and group_student.variant in all_variants:
-            all_variants.remove(group_student.variant)
     return render_template(
         "student/choice_of_variant.jinja",
         variants=all_variants,
@@ -124,17 +120,7 @@ def submissions(student: Student | None, page: int):
 
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students)
-def default_home(student: Student | None):
-    if config.config.registration and not student:
-        return redirect("/login")
-    if config.config.registration and student and student.variant is None:
-        return redirect("/variant")
-    return redirect(f"/home/{student.variant}")
-
-
-@blueprint.route("/home/<int:vid>", methods=["GET"])
-@authorize(db.students)
-def home(student: Student | None, vid: int):
+def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
     if config.config.registration and student and student.group is None:
@@ -143,9 +129,6 @@ def home(student: Student | None, vid: int):
         return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
-    variants = db.variants.get_all()
-    if vid >= len(variants):
-        return redirect("/home")
     # Определение сообщения приветствия
     if get_time("06:00") <= current_time() < get_time("12:00"):
         greeting_message = "Доброе утро"
@@ -159,7 +142,7 @@ def home(student: Student | None, vid: int):
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(student.group, hide_pending)
     tasks_statuses = list(int(task_status.status) \
-                         for task_status in group.variants[vid].statuses)
+                         for task_status in group.variants[student.variant].statuses)
     # Получение места группы в рейтинге
     groupings = statuses.get_group_rating()
     group_place: int = -1
@@ -175,11 +158,13 @@ def home(student: Student | None, vid: int):
     for place in student_rating.keys():
         students_in_place = student_rating[place]
         for student_in_place in students_in_place:
-            if student_in_place.group == student.group and student_in_place.variant == vid:
+            if student_in_place.group == student.group and student_in_place.variant == student.variant:
                 student_place = place
                 break
         if student_place != -1:
             break
+    # Получение всех вариантов
+    variants = db.variants.get_all()
     return render_template(
         "student/home.jinja",
         student=student,
@@ -188,7 +173,7 @@ def home(student: Student | None, vid: int):
         group_rating = config.config.groups,
         exam = config.config.exam,
         group=group,
-        variant=vid,
+        variant=student.variant,
         variants=variants,
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
@@ -198,12 +183,12 @@ def home(student: Student | None, vid: int):
 
 
 @blueprint.route("/home/variant_select", methods=["POST"])
-def open_variant():
+@authorize(db.students)
+def open_variant(student: Student):
     vid = request.form.get("variant")
     if vid and vid.isdigit():
-        return redirect(f"/home/{vid}")
-    else:
-        return redirect("/home")
+        db.students.update_variant(student.id, vid)
+    return redirect(f"/home")
 
 
 @blueprint.route("/group/<int:gid>", methods=["GET"])
@@ -246,9 +231,6 @@ def variant_select(student: Student, vid: int):
         return redirect("/login")
     if student.group is None:
         return redirect("/")
-    group_students: list[Student] = students.students.get_all_by_group(student.group)
-    if vid in list(group_student.variant for group_student in group_students):
-        return redirect("/variant")
     if student.variant is None:
         db.students.update_variant(student.id, vid)
     return redirect(f"/home")
