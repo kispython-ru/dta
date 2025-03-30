@@ -279,11 +279,15 @@ def student(teacher: Student):
         return redirect("/teacher")
     group = None if user.group is None else db.groups.get_by_id(user.group)
     groups = db.groups.get_all()
+    variant = None if user.variant is None else db.variants.get_by_id(user.variant)
+    variants = db.variants.get_all()
     return render_template(
         "teacher/student.jinja",
         user=user,
         group=group,
         groups=groups,
+        variant=variant,
+        variants=variants,
         student=teacher,
         password_form=TeacherChangePasswordForm(),
     )
@@ -320,6 +324,16 @@ def update_student_group(teacher: Student, id: int):
     gid = request.form["group"]
     group = db.groups.get_by_id(gid).id if gid.strip() else None
     db.students.update_group(student.id, group)
+    return redirect(url_for("teacher.student", email=student.email))
+
+
+@blueprint.route("/teacher/student/<int:id>/variant", methods=["POST"])
+@authorize(db.students, lambda s: s.teacher)
+def update_student_variant(teacher: Student, id: int):
+    student = db.students.get_by_id(id)
+    vid = request.form["variant"]
+    variant = db.variants.get_by_id(vid).id if vid.strip() else None
+    db.students.update_variant(student.id, variant)
     return redirect(url_for("teacher.student", email=student.email))
 
 
