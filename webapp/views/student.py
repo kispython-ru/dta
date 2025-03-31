@@ -42,7 +42,7 @@ def dashboard(student: Student | None):
     if config.config.registration and student and student.group is not None and student.variant is not None:
         return redirect("/home")
     if config.config.registration and not config.config.exam and student and student.group is not None and \
-        student.variant is None:
+            student.variant is None:
         return redirect("/variant")
     groupings = groups.get_groupings()
     return render_template(

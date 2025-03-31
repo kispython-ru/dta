@@ -76,9 +76,12 @@ def load_config_files(directory_name: str):
     return merged
 
 
+def get_time(string_time):
+    return datetime.strptime(string_time, "%H:%M").time()
+
+
 def get_greeting_msg():
     current_time = datetime.now().time()
-    get_time = lambda string_time: datetime.strptime(string_time, "%H:%M").time()
     if get_time("06:00") <= current_time < get_time("12:00"):
         return "Доброе утро"
     if get_time("12:00") <= current_time < get_time("18:00"):
