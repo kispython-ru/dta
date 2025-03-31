@@ -8,7 +8,7 @@
     "HIGHLIGHT_SYNTAX": false,
     "READONLY": false,
     "TASK_BASE_PATH": "CHANGE_ME",
-    "ENABLE_REGISTRATION": true,
+    "ENABLE_REGISTRATION": false,
     "IMAP_LOGIN": null,
     "IMAP_PASSWORD": null,
     "FINAL_VARIANTS": 40,
