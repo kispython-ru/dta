@@ -29,6 +29,9 @@
   </a>
 </div>
 
+{% if status.status == 0 or status.status == 5 %}
+<script src="/static/js/autoreload.js"></script>
+{% endif %}
 <div id="task-status">
 {% include 'student/task_status.jinja' %}
 </div>
