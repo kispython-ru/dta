@@ -14,7 +14,7 @@ from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager
-from webapp.models import Student
+from webapp.models import Status, Student
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info, get_greeting_msg, get_real_ip, logout
 
@@ -243,6 +243,25 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         form=form,
         student=student,
     )
+
+
+@blueprint.route('/group/<int:gid>/variant/<int:vid>/task/<int:tid>/status', methods=["GET"])
+@authorize(db.students)
+def task_status(student: Student | None, gid: int, vid: int, tid: int):
+    if config.config.registration and not student:
+        return redirect("/login")
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
+    status = statuses.get_task_status(gid, vid, tid)
+    if status.status not in [Status.Submitted, Status.CheckedSubmitted]:
+        return render_template(
+            "student/task_status.jinja",
+            registration=config.config.registration,
+            status=status,
+            student=student,
+        )
+    else:
+        return ('', 418)
 
 
 @blueprint.route("/files/task/<int:tid>/group/<int:gid>", methods=["GET"])
