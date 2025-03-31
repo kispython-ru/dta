@@ -232,14 +232,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         session_id = request.cookies.get("anonymous_identifier")
         db.messages.submit_task(tid, vid, gid, form.code.data, ip, sid, session_id)
         db.statuses.submit_task(tid, vid, gid, form.code.data, ip)
-        return render_template(
-            "student/success.jinja",
-            status=status,
-            registration=config.config.registration,
-            group_rating=config.config.groups,
-            exam=config.config.exam,
-            student=student,
-        )
+        return redirect(f"/group/{gid}/variant/{vid}/task/{tid}")
     return render_template(
         "student/task.jinja",
         highlight=config.config.highlight_syntax,
