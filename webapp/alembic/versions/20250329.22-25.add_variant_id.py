@@ -19,9 +19,10 @@ depends_on = None
 def upgrade():
     with op.batch_alter_table('students') as bop:
         bop.add_column(sa.Column('variant', sa.Integer, nullable=True))
-        bop.create_foreign_key('variant', 'variants', ['variant'], ['id'])
+        bop.create_foreign_key('fk_students_variant', 'variants', ['variant'], ['id'])
 
 
 def downgrade():
-    op.drop_column('students', 'variant')
-    op.add_column('students', sa.Column('variant', sa.Integer, nullable=True))
+    with op.batch_alter_table("students") as bop:
+        bop.drop_constraint("fk_students_variant", type_="foreignkey")
+        bop.drop_column("variant")
