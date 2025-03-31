@@ -13,7 +13,7 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, HomeManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase, VariantRepository
 from webapp.utils import authorize, get_exception_info, get_real_ip, logout, get_greeting_msg
@@ -24,6 +24,7 @@ config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
+home_manager = HomeManager(statuses)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
@@ -124,32 +125,12 @@ def home(student: Student | None):
         return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
-    # Определение сообщения приветствия
     greeting_message = get_greeting_msg()
-    # Получение всех заданий
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(student.group, hide_pending)
     tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
-    # Получение места группы в рейтинге
-    groupings = statuses.get_group_rating()
-    group_place: int = -1
-    for place in groupings.keys():
-        groups_in_place = groupings[place]
-        if student.group in list(group_in_place.group.id for group_in_place in groups_in_place):
-            group_place = place
-            break
-    # Получение места студента в рейтинге
-    student_rating = statuses.get_rating()
-    student_place: int = -1
-    for place in student_rating.keys():
-        students_in_place = student_rating[place]
-        for student_in_place in students_in_place:
-            if student_in_place.group == student.group and student_in_place.variant == student.variant:
-                student_place = place
-                break
-        if student_place != -1:
-            break
-    # Получение всех вариантов
+    group_place = home_manager.get_group_place(student.group)
+    student_place = home_manager.get_student_place(student.group, student.variant)
     variants = db.variants.get_all()
     return render_template(
         "student/home.jinja",
