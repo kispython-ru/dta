@@ -72,22 +72,6 @@ class GroupManager:
         return groupings
 
 
-class VariantManager:
-    def __init__(
-        self,
-        config: AppConfigManager,
-        variants: VariantRepository,
-        seeds: FinalSeedRepository
-    ):
-        self.seeds = seeds
-        self.variants = variants
-        self.config = config
-
-    def get_variants(self) -> list[Variant]:
-        config = self.config.config
-        return self.variants.get_all()
-
-
 class ExternalTaskManager:
     def __init__(
         self,

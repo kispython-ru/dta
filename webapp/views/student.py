@@ -13,9 +13,9 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, VariantManager
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
 from webapp.models import Student, Variant
-from webapp.repositories import AppDatabase
+from webapp.repositories import AppDatabase, VariantRepository
 from webapp.utils import authorize, get_exception_info, get_real_ip, logout, get_greeting_msg
 
 
@@ -25,7 +25,6 @@ db = AppDatabase(lambda: config.config.connection_string)
 
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
 groups = GroupManager(config, db.groups, db.seeds)
-variants = VariantManager(config, db.variants, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
 
 
@@ -62,7 +61,7 @@ def variant(student: Student | None):
         return redirect("/login")
     if config.config.registration and student and student.variant is not None:
         return redirect("/")
-    all_variants: list[int] = list(variant_obj.id for variant_obj in variants.get_variants())
+    all_variants: list[int] = list(variant_obj.id for variant_obj in db.variants.get_variants())
     return render_template(
         "student/choice_of_variant.jinja",
         variants=all_variants,
