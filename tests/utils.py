@@ -70,15 +70,3 @@ def teacher_login(db: AppDatabase, client: FlaskClient):
 
 def mode(mode_name):
     return pytest.mark.parametrize('app', ([f'enable-{mode_name}']), indirect=True)
-
-
-def get_greeting_msg():
-    current_time = datetime.now().time()
-    get_time = lambda string_time: datetime.strptime(string_time, "%H:%M").time()
-    if get_time("06:00") <= current_time < get_time("12:00"):
-        return "Доброе утро"
-    if get_time("12:00") <= current_time < get_time("18:00"):
-        return "Добрый день"
-    if get_time("18:00") <= current_time < get_time("22:00"):
-        return "Добрый вечер"
-    return "Доброй ночи"

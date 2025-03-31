@@ -4,6 +4,7 @@ import sys
 import traceback
 from functools import wraps
 from typing import Callable
+from datetime import datetime
 
 from flask_jwt_extended import get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 from jwt import PyJWTError
@@ -73,3 +74,15 @@ def load_config_files(directory_name: str):
                 merged = {**merged, **json_content}
     print(json.dumps(merged, indent=2))
     return merged
+
+
+def get_greeting_msg():
+    current_time = datetime.now().time()
+    get_time = lambda string_time: datetime.strptime(string_time, "%H:%M").time()
+    if get_time("06:00") <= current_time < get_time("12:00"):
+        return "Доброе утро"
+    if get_time("12:00") <= current_time < get_time("18:00"):
+        return "Добрый день"
+    if get_time("18:00") <= current_time < get_time("22:00"):
+        return "Добрый вечер"
+    return "Доброй ночи"

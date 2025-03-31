@@ -1,6 +1,5 @@
 import os
 from secrets import token_hex
-from datetime import datetime
 
 import requests
 from authlib.integrations.requests_client import OAuth2Session
