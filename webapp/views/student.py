@@ -6,6 +6,7 @@ from authlib.integrations.requests_client import OAuth2Session
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
+from flask_sock import Sock
 from jwt.exceptions import PyJWTError
 
 from flask import Blueprint, Response
@@ -14,11 +15,12 @@ from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager
-from webapp.models import Student
+from webapp.models import Status, Student
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info, get_real_ip, logout
 
 
+sock = Sock(app)
 blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
@@ -200,6 +202,24 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         form=form,
         student=student,
     )
+
+
+@sock.route('/group/<int:gid>/variant/<int:vid>/task/<int:tid>/ws', bp=blueprint)
+@authorize(db.students)
+def ws_route(student: Student | None, ws, gid: int, vid: int, tid: int):
+    if student is None:
+        ws.close()
+    while True:
+        status = statuses.get_task_status(gid, vid, tid)
+        if status.status not in [Status.Submitted, Status.CheckedSubmitted]:
+            ws.send(render_template(
+                "student/task_status.jinja",
+                registration=config.config.registration,
+                status=status,
+                student=student,
+            ))
+            ws.close()
+            return
 
 
 @blueprint.route("/files/task/<int:tid>/group/<int:gid>", methods=["GET"])
