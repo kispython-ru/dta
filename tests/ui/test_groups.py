@@ -34,7 +34,7 @@ def test_group_html_link(db: AppDatabase, client: FlaskClient):
     prefix = unique_str().replace('-', '')
     title = f'{prefix}-{unique_str()}'
     db.groups.create_by_names([title])
-    
+
     response = client.get('/')
     html_dashboard = response.get_data(as_text=True)
 

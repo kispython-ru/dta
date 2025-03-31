@@ -17,7 +17,7 @@ from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMes
 from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, VariantManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase
-from webapp.utils import authorize, get_exception_info, get_real_ip, logout
+from webapp.utils import authorize, get_exception_info, get_real_ip, logout, get_greeting_msg
 
 
 blueprint = Blueprint("student", __name__)
@@ -28,10 +28,6 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 groups = GroupManager(config, db.groups, db.seeds)
 variants = VariantManager(config, db.variants, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
-
-
-current_time = lambda: datetime.now().time()
-get_time = lambda string_time: datetime.strptime(string_time, "%H:%M").time()
 
 
 @blueprint.after_request
@@ -46,7 +42,8 @@ def set_anonymous_identifier(response: Response) -> Response:
 def dashboard(student: Student | None):
     if config.config.registration and student and student.group is not None and student.variant is not None:
         return redirect("/home")
-    if config.config.registration and not config.config.exam and student and student.group is not None and student.variant is None:
+    if config.config.registration and not config.config.exam and student and student.group is not None and \
+        student.variant is None:
         return redirect("/variant")
     groupings = groups.get_groupings()
     return render_template(
@@ -130,26 +127,17 @@ def home(student: Student | None):
     if config.config.exam:
         return redirect("/exam")
     # Определение сообщения приветствия
-    if get_time("06:00") <= current_time() < get_time("12:00"):
-        greeting_message = "Доброе утро"
-    elif get_time("12:00") <= current_time() < get_time("18:00"):
-        greeting_message = "Добрый день"
-    elif get_time("18:00") <= current_time() < get_time("22:00"):
-        greeting_message = "Добрый вечер"
-    else:
-        greeting_message = "Доброй ночи"
+    greeting_message = get_greeting_msg()
     # Получение всех заданий
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(student.group, hide_pending)
-    tasks_statuses = list(int(task_status.status) \
-                         for task_status in group.variants[student.variant].statuses)
+    tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
     # Получение места группы в рейтинге
     groupings = statuses.get_group_rating()
     group_place: int = -1
     for place in groupings.keys():
         groups_in_place = groupings[place]
-        if student.group in \
-            list(group_in_place.group.id for group_in_place in groups_in_place):
+        if student.group in list(group_in_place.group.id for group_in_place in groups_in_place):
             group_place = place
             break
     # Получение места студента в рейтинге
@@ -169,9 +157,9 @@ def home(student: Student | None):
         "student/home.jinja",
         student=student,
         greeting_message=greeting_message,
-        registration = config.config.registration,
-        group_rating = config.config.groups,
-        exam = config.config.exam,
+        registration=config.config.registration,
+        group_rating=config.config.groups,
+        exam=config.config.exam,
         group=group,
         variant=student.variant,
         variants=variants,
