@@ -32,7 +32,7 @@
     <div class="row">
         {% if group.tasks %}
         <div class="col-md-4">
-            <a href="/group/{{ group.id }}/variant/0/task/{{ group.tasks[-1].id }}" class="text-decoration-none text-muted">
+            <a href="/group/{{ group.id }}/variant/{{ vid }}/task/{{ group.tasks[-1].id }}" class="text-decoration-none text-muted">
                 <div class="card h-card text-bg-light mb-3" style="background-color: #212529; color:white;" role="button">
                     <div class="card-body  task-card">
                         <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
@@ -96,7 +96,7 @@
                                 {% elif student_place == 2 %}🥉
                                 {% else %}
                                 №{{ student_place + 1 }}{% endif %}</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }} {{ student.variant }}</h4>
+                            <h4 class="mb-0 me-2">{{ group.title }} {{ vid }}</h4>
                         </div>
                         {% else %}
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
