@@ -62,7 +62,7 @@ def variant(student: Student | None):
         return redirect("/login")
     if config.config.registration and student and student.variant is not None:
         return redirect("/")
-    all_variants: list[int] = list(variant_obj.id for variant_obj in db.variants.get_variants())
+    all_variants: list[int] = list(variant_obj.id for variant_obj in db.variants.get_all())
     return render_template(
         "student/choice_of_variant.jinja",
         variants=all_variants,
