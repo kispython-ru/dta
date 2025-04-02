@@ -120,7 +120,7 @@ def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
     if config.config.exam:
-        return redirect("/exam")
+        return redirect("/")
     if config.config.registration and student:
         if student.group is None:
             return redirect("/")
