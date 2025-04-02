@@ -3,40 +3,20 @@ from secrets import token_hex
 
 import requests
 from authlib.integrations.requests_client import OAuth2Session
-from flask_jwt_extended import (
-    create_access_token,
-    set_access_cookies,
-    unset_jwt_cookies,
-)
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flask_jwt_extended.exceptions import JWTExtendedException
 from flask_paginate import Pagination
 from jwt.exceptions import PyJWTError
+
 from flask import Blueprint, Response
 from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
-from webapp.forms import (
-    StudentChangePasswordForm,
-    StudentLoginForm,
-    StudentMessageForm,
-    StudentRegisterForm,
-)
-from webapp.managers import (
-    AppConfigManager,
-    GroupManager,
-    StatusManager,
-    StudentManager,
-    HomeManager,
-)
+from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
+from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, HomeManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase, VariantRepository
-from webapp.utils import (
-    authorize,
-    get_exception_info,
-    get_real_ip,
-    logout,
-    get_greeting_msg,
-)
+from webapp.utils import authorize, get_exception_info, get_real_ip, logout, get_greeting_msg
 
 
 blueprint = Blueprint("student", __name__)

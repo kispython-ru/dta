@@ -2,13 +2,14 @@ import json
 import os
 import sys
 import traceback
-from datetime import datetime
 from functools import wraps
 from typing import Callable
+from datetime import datetime
 
-from flask import Request, redirect
 from flask_jwt_extended import get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 from jwt import PyJWTError
+
+from flask import Request, redirect
 
 from webapp.managers import AppConfigManager
 from webapp.models import Student
