@@ -125,27 +125,22 @@ def home(student: Student | None):
         return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
-    greeting_message = get_greeting_msg()
-    hide_pending = config.config.exam and request.args.get('hide_pending', False)
-    group = statuses.get_group_statuses(student.group, hide_pending)
+    group = statuses.get_group_statuses(student.group, False)
     tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
-    group_place = home_manager.get_group_place(student.group)
-    student_place = home_manager.get_student_place(student.group, student.variant)
-    variants = db.variants.get_all()
     return render_template(
         "student/home.jinja",
         student=student,
-        greeting_message=greeting_message,
+        greeting_message=get_greeting_msg(),
         registration=config.config.registration,
         group_rating=config.config.groups,
         exam=config.config.exam,
         group=group,
         variant=student.variant,
-        variants=variants,
+        variants=db.variants.get_all(),
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
-        group_place=group_place,
-        student_place=student_place,
+        group_place=home_manager.get_group_place(student.group),
+        student_place=home_manager.get_student_place(student.group, student.variant),
     )
 
 

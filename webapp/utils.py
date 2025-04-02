@@ -82,10 +82,10 @@ def get_time(string_time):
 
 def get_greeting_msg():
     current_time = datetime.now().time()
-    if get_time("06:00") <= current_time < get_time("12:00"):
-        return "Доброе утро"
-    if get_time("12:00") <= current_time < get_time("18:00"):
-        return "Добрый день"
-    if get_time("18:00") <= current_time < get_time("22:00"):
-        return "Добрый вечер"
-    return "Доброй ночи"
+    greetings = {
+        get_time("06:00") <= current_time < get_time("12:00"): "Доброе утро",
+        get_time("12:00") <= current_time < get_time("18:00"): "Добрый день",
+        get_time("18:00") <= current_time < get_time("22:00"): "Добрый вечер",
+        get_time("22:00") <= current_time or current_time < get_time("06:00"): "Доброй ночи",
+    }
+    return greetings[True]
