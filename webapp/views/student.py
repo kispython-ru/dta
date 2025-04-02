@@ -13,10 +13,10 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, StatusManager, StudentManager, HomeManager
+from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase, VariantRepository
-from webapp.utils import authorize, get_exception_info, get_real_ip, logout, get_greeting_msg
+from webapp.utils import authorize, get_exception_info, get_greeting_msg, get_real_ip, logout
 
 
 blueprint = Blueprint("student", __name__)
