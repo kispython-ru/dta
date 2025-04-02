@@ -119,12 +119,13 @@ def submissions(student: Student | None, page: int):
 def home(student: Student | None):
     if config.config.registration and not student:
         return redirect("/login")
-    if config.config.registration and student and student.group is None:
-        return redirect("/")
-    if config.config.registration and student and student.group is not None and student.variant is None:
-        return redirect("/variant")
     if config.config.exam:
         return redirect("/exam")
+    if config.config.registration and student:
+        if student.group is None:
+            return redirect("/")
+        elif student.variant is None:
+            return redirect("/variant")
     group = statuses.get_group_statuses(student.group, False)
     tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
     return render_template(
