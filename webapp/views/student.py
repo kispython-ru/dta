@@ -232,7 +232,7 @@ def rating(student: Student | None):
 def task(student: Student | None, gid: int, vid: int, tid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    if student and not student.teacher and student.group != gid:
+    if student and (not student.teacher or student.group != gid):
         return redirect("/")
     status = statuses.get_task_status(gid, vid, tid)
     form = StudentMessageForm()
