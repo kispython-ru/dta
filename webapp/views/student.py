@@ -159,8 +159,6 @@ def open_variant(student: Student):
 def group(student: Student | None, gid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    if student and student.group is not None and student.group != gid:
-        return redirect("/")
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(gid, hide_pending)
     seed = db.seeds.get_final_seed(gid)
