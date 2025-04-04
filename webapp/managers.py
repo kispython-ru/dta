@@ -337,7 +337,6 @@ class HomeManager:
             groups_in_place = groupings[place]
             if gid in list(group_in_place.group.id for group_in_place in groups_in_place):
                 return place
-        return -1
 
     def get_student_place(self, gid: int, vid: int) -> int:
         student_rating = self.statuses.get_rating()
@@ -346,7 +345,6 @@ class HomeManager:
             for student_in_place in students_in_place:
                 if student_in_place.group == gid and student_in_place.variant == vid:
                     return place
-        return -1
 
 
 class StudentManager:

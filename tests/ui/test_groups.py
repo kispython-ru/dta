@@ -45,7 +45,7 @@ def test_group_html_link(db: AppDatabase, client: FlaskClient):
 
     tags = [tag.get('href') for tag in get_tags(html_dashboard, 'a', True)]
 
-    tag_contents = next(tag for tag in tags if tag == f'/group/select/{group_id}')
+    tag_contents = next(tag for tag in tags if tag == f'/group/{group_id}')
 
     response = client.get(tag_contents)
     html_group_href = response.get_data(as_text=True)
