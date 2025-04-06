@@ -13,7 +13,7 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager, VariantManager
+from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase, VariantRepository
 from webapp.utils import authorize, get_exception_info, get_greeting_msg, get_real_ip, logout
@@ -27,7 +27,6 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 home_manager = HomeManager(statuses)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
-variants = VariantManager(db.messages)
 
 
 @blueprint.after_request
@@ -41,7 +40,7 @@ def set_anonymous_identifier(response: Response) -> Response:
 @authorize(db.students)
 def dashboard(student: Student | None):
     if config.config.registration and student and student.group is not None:
-        if student.variant is not None or variants.get_student_variants(student):
+        if student.variant is not None or db.variants.get_student_variants(student.id):
             return redirect("/home")
         return redirect(f"/group/{student.group}")
     groupings = groups.get_groupings()
@@ -53,16 +52,6 @@ def dashboard(student: Student | None):
         exam=config.config.exam,
         student=student,
     )
-
-
-@blueprint.route("/variant", methods=["GET"])
-@authorize(db.students)
-def variant(student: Student | None):
-    if config.config.registration and not student:
-        return redirect("/login")
-    if config.config.registration and student and student.variant is not None:
-        return redirect("/")
-    return redirect(f"/group/{student.group}")
 
 
 @blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})
@@ -109,21 +98,32 @@ def submissions(student: Student | None, page: int):
 
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students)
-def home(student: Student | None):
+def default_home(student: Student | None):
+    if config.config.registration and student and student.group is None:
+        return redirect("/")
+    student_variants = db.variants.get_student_variants(student.id)
+    if not student_variants:
+        return redirect(f"/group/{student.group}")
+    return redirect(f"/home/{student_variants[0]}")
+
+
+@blueprint.route("/home/<int:vid>", methods=["GET"])
+@authorize(db.students)
+def home(student: Student | None, vid: int):
     if config.config.registration and not student:
         return redirect("/login")
     if config.config.exam:
         return redirect("/")
-    student_variants = variants.get_student_variants(student)
+    student_variants = db.variants.get_student_variants(student.id)
     if config.config.registration and student:
         if student.group is None:
             return redirect("/")
         elif not student_variants:
             return redirect(f"/group/{student.group}")
-    if student.variant is None:
-        db.students.update_variant(student.id, student_variants[0])
+        elif vid not in student_variants:
+            return redirect("/home")
     group = statuses.get_group_statuses(student.group, False)
-    tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
+    tasks_statuses = list(int(task_status.status) for task_status in group.variants[vid].statuses)
     return render_template(
         "student/home.jinja",
         student=student,
@@ -132,12 +132,12 @@ def home(student: Student | None):
         group_rating=config.config.groups,
         exam=config.config.exam,
         group=group,
-        variant=next((v for v in group.variants if v.id == student.variant), None),
+        variant=next((v for v in group.variants if v.id == vid), None),
         variants=sorted(student_variants),
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
         group_place=home_manager.get_group_place(student.group),
-        student_place=home_manager.get_student_place(student.group, student.variant),
+        student_place=home_manager.get_student_place(student.group, vid),
     )
 
 
@@ -145,9 +145,7 @@ def home(student: Student | None):
 @authorize(db.students)
 def open_variant(student: Student):
     vid = request.form.get("variant")
-    if vid and vid.isdigit():
-        db.students.update_variant(student.id, vid)
-    return redirect(f"/home")
+    return redirect(f"/home/{vid}")
 
 
 @blueprint.route("/group/<int:gid>", methods=["GET"])
@@ -155,6 +153,8 @@ def open_variant(student: Student):
 def group(student: Student | None, gid: int):
     if config.config.registration and not student:
         return redirect("/login")
+    if student and student.group is not None and student.group != gid:
+        return redirect("/")
     hide_pending = config.config.exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(gid, hide_pending)
     seed = db.seeds.get_final_seed(gid)
@@ -178,17 +178,7 @@ def group_select(student: Student, gid: int):
         return redirect("/login")
     if student.group is None:
         db.students.update_group(student.id, gid)
-    return redirect(f"/group/{student.group}")
-
-
-@blueprint.route("/variant/select/<int:vid>", methods=["GET"])
-@authorize(db.students, lambda _: True)
-def variant_select(student: Student, vid: int):
-    if not student:
-        return redirect("/login")
-    if student.group is None:
-        return redirect("/")
-    return redirect(f"/group/{student.group}")
+    return redirect(f"/group/{gid}")
 
 
 @blueprint.route("/rating/groups", methods=["GET"])
