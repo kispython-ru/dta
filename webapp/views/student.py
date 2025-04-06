@@ -43,7 +43,7 @@ def dashboard(student: Student | None):
         return redirect("/home")
     if config.config.registration and not config.config.exam and student and student.group is not None and \
             student.variant is None:
-        return redirect("/variant")
+        return redirect(f"/group/{student.group}")
     groupings = groups.get_groupings()
     return render_template(
         "student/dashboard.jinja",
@@ -62,14 +62,7 @@ def variant(student: Student | None):
         return redirect("/login")
     if config.config.registration and student and student.variant is not None:
         return redirect("/")
-    all_variants: list[int] = list(variant_obj.id for variant_obj in db.variants.get_all())
-    return render_template(
-        "student/choice_of_variant.jinja",
-        variants=all_variants,
-        registration=config.config.registration,
-        group_rating=config.config.groups,
-        student=student,
-    )
+    return redirect(f"/group/{student.group}")
 
 
 @blueprint.route("/submissions", methods=["GET"], defaults={'page': 0})
@@ -125,7 +118,7 @@ def home(student: Student | None):
         if student.group is None:
             return redirect("/")
         elif student.variant is None:
-            return redirect("/variant")
+            return redirect(f"/group/{student.group}")
     group = statuses.get_group_statuses(student.group, False)
     tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
     return render_template(
@@ -182,7 +175,7 @@ def group_select(student: Student, gid: int):
         return redirect("/login")
     if student.group is None:
         db.students.update_group(student.id, gid)
-    return redirect("/variant")
+    return redirect(f"/group/{student.group}")
 
 
 @blueprint.route("/variant/select/<int:vid>", methods=["GET"])
@@ -192,9 +185,7 @@ def variant_select(student: Student, vid: int):
         return redirect("/login")
     if student.group is None:
         return redirect("/")
-    if student.variant is None:
-        db.students.update_variant(student.id, vid)
-    return redirect(f"/home")
+    return redirect(f"/group/{student.group}")
 
 
 @blueprint.route("/rating/groups", methods=["GET"])
