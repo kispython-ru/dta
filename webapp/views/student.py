@@ -136,7 +136,7 @@ def home(student: Student | None):
         group_rating=config.config.groups,
         exam=config.config.exam,
         group=group,
-        variant=student.variant,
+        variant=list(v for v in group.variants if v.id == student.variant)[0],
         variants=db.variants.get_all(),
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,

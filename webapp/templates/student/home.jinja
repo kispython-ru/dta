@@ -32,7 +32,7 @@
     <div class="row">
         {% if group.tasks %}
         <div class="col-md-4 mb-sm-3">
-            <a href="/group/{{ group.id }}/variant/{{ variant }}/task/{{ group.tasks[-1].id }}"
+            <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ group.tasks[-1].id }}"
                class="text-decoration-none text-muted">
                 <div class="card h-card mb-3 overflow-hidden card-body align-content-end"
                      style="min-height: 40vh; background-color: #E8F4FF; color: #fff;
@@ -89,7 +89,7 @@
                                 {% elif student_place == 2 %}🥉
                                 {% else %}
                                 №{{ student_place + 1 }}{% endif %}</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }} {{ variant }}</h4>
+                            <h4 class="mb-0 me-2">{{ group.title }} {{ variant.id }}</h4>
                         </div>
                         {% else %}
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
@@ -104,7 +104,7 @@
                 <div class="col-md-8 mb-2">
                   <select name="variant" class="form-select mb-2">
                     {% for v in variants %}
-                      <option value="{{ v.id }}" {{ "selected='selected'" if v.id == variant else "" }}>
+                      <option value="{{ v.id }}" {{ "selected='selected'" if v.id == variant.id else "" }}>
                         Вариант №{{ v.id + 1 }}
                       </option>
                     {% endfor %}
@@ -124,7 +124,7 @@
                         <div class="row row-cols-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-2">
                             {% for task in group.tasks %}
                                 <div class="col">
-                                    <a href="/group/{{ group.id }}/variant/{{ variant }}/task/{{ task.id }}"
+                                    <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}"
                                        class="btn
                                         {% if tasks_statuses[task.id] == 3 %}
                                         btn-danger
@@ -134,7 +134,10 @@
                                         btn-primary
                                         {% else %}
                                         btn-outline-secondary
-                                        {% endif %} w-100">№{{ task.id + 1 }}</a>
+                                        {% endif %} w-100">№{{ task.id + 1 }}
+                                        {% if variant.statuses[task.id].earned > 1 %}
+                                        <span> | {{ variant.statuses[task.id].earned }}{% endif %}</span>
+                                    </a>
                                 </div>
                             {% endfor %}
                         </div>
