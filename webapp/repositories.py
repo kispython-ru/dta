@@ -285,6 +285,14 @@ class MessageRepository:
                 .all()
             return messages
 
+    def get_messages_by_student(self, student_id: int) -> list[Message]:
+        with self.db.create_session() as session:
+            student_messages = session.query(Message) \
+                .filter_by(student=student_id) \
+                .order_by(Message.time.desc()) \
+                .all()
+            return student_messages
+
     def get_latest(self, count: int) -> list[Message]:
         with self.db.create_session() as session:
             latest_messages = session.query(Message) \

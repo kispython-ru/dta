@@ -13,7 +13,7 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager
+from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager, VariantManager
 from webapp.models import Student, Variant
 from webapp.repositories import AppDatabase, VariantRepository
 from webapp.utils import authorize, get_exception_info, get_greeting_msg, get_real_ip, logout
@@ -27,6 +27,7 @@ statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, 
 home_manager = HomeManager(statuses)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
+variants = VariantManager(db.messages)
 
 
 @blueprint.after_request
@@ -39,10 +40,9 @@ def set_anonymous_identifier(response: Response) -> Response:
 @blueprint.route("/", methods=["GET"])
 @authorize(db.students)
 def dashboard(student: Student | None):
-    if config.config.registration and student and student.group is not None and student.variant is not None:
-        return redirect("/home")
-    if config.config.registration and not config.config.exam and student and student.group is not None and \
-            student.variant is None:
+    if config.config.registration and student and student.group is not None:
+        if student.variant is not None or variants.get_student_variants(student):
+            return redirect("/home")
         return redirect(f"/group/{student.group}")
     groupings = groups.get_groupings()
     return render_template(
@@ -114,11 +114,14 @@ def home(student: Student | None):
         return redirect("/login")
     if config.config.exam:
         return redirect("/")
+    student_variants = variants.get_student_variants(student)
     if config.config.registration and student:
         if student.group is None:
             return redirect("/")
-        elif student.variant is None:
+        elif not student_variants:
             return redirect(f"/group/{student.group}")
+    if student.variant is None:
+        db.students.update_variant(student.id, student_variants[0])
     group = statuses.get_group_statuses(student.group, False)
     tasks_statuses = list(int(task_status.status) for task_status in group.variants[student.variant].statuses)
     return render_template(
@@ -130,7 +133,7 @@ def home(student: Student | None):
         exam=config.config.exam,
         group=group,
         variant=next((v for v in group.variants if v.id == student.variant), None),
-        variants=db.variants.get_all(),
+        variants=sorted(student_variants),
         number_of_tasks=len(group.variants),
         tasks_statuses=tasks_statuses,
         group_place=home_manager.get_group_place(student.group),

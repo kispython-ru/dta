@@ -104,8 +104,8 @@
                 <div class="col-md-8 mb-2">
                   <select name="variant" class="form-select mb-2">
                     {% for v in variants %}
-                      <option value="{{ v.id }}" {{ "selected='selected'" if v.id == variant.id else "" }}>
-                        Вариант №{{ v.id + 1 }}
+                      <option value="{{ v }}" {{ "selected='selected'" if v == variant.id else "" }}>
+                        Вариант №{{ v + 1 }}
                       </option>
                     {% endfor %}
                   </select>

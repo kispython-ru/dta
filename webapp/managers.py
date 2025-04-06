@@ -72,6 +72,19 @@ class GroupManager:
         return groupings
 
 
+class VariantManager:
+    def __init__(
+        self,
+        messages: MessageRepository,
+    ):
+        self.messages = messages
+
+    def get_student_variants(self, student: Student) -> list[Variant]:
+        student_messages = self.messages.get_messages_by_student(student.id)
+        student_variants = list(set(msg.variant for msg in student_messages))
+        return student_variants
+
+
 class ExternalTaskManager:
     def __init__(
         self,
