@@ -99,7 +99,7 @@ def submissions(student: Student | None, page: int):
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students)
 def default_home(student: Student | None):
-    if config.config.registration and student and student.group is None:
+    if not config.config.registration or not student or student.group is None:
         return redirect("/")
     student_variants = db.variants.get_student_variants(student.id)
     if not student_variants:
