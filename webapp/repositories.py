@@ -145,7 +145,7 @@ class VariantRepository:
             student_variants = session.query(Message.variant) \
                 .filter_by(student=student_id) \
                 .group_by(Message.variant) \
-                .order_by(Message.time.desc()) \
+                .order_by(func.count().desc()) \
                 .all()
             return list(v[0] for v in student_variants)
 
