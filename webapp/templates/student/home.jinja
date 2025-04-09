@@ -95,6 +95,7 @@
                     </div>
                 </div>
             </div>
+            {% if variants | length > 1 %}
             <form action="/home/variant_select" method="POST" class="w-100 mt-0 mt-sm-3">
               <div class="row">
                 <div class="col-md-8 mb-2">
@@ -113,6 +114,7 @@
                 </div>
               </div>
             </form>
+            {% endif %}
             <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
               <thead>
                 <tr>
