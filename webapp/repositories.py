@@ -140,6 +140,15 @@ class VariantRepository:
         with self.db.create_session() as session:
             session.query(Variant).delete()
 
+    def get_student_variants(self, student_id: int) -> list[int]:
+        with self.db.create_session() as session:
+            student_variants = session.query(Message.variant) \
+                .filter_by(student=student_id) \
+                .group_by(Message.variant) \
+                .order_by(func.count().desc()) \
+                .all()
+            return list(v[0] for v in student_variants)
+
 
 class TaskStatusRepository:
     def __init__(self, db: DbContextManager):
@@ -467,6 +476,11 @@ class StudentRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_all_by_group(self, group_id: int) -> list[Student] | None:
+        with self.db.create_session() as session:
+            students = session.query(Student).filter(Student.group == group_id).all()
+            return students if students else None
+
     def get_by_id(self, id: int) -> Student | None:
         with self.db.create_session() as session:
             student = session.query(Student).get(id)
@@ -528,6 +542,12 @@ class StudentRepository:
             session.query(Student) \
                 .filter_by(id=student) \
                 .update(dict(group=group))
+
+    def update_variant(self, student: int, variant_id: int | None):
+        with self.db.create_session() as session:
+            session.query(Student) \
+                .filter_by(id=student) \
+                .update(dict(variant=variant_id))
 
 
 class MailerRepository:

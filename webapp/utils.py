@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import traceback
+from datetime import datetime
 from functools import wraps
 from typing import Callable
 
@@ -73,3 +74,18 @@ def load_config_files(directory_name: str):
                 merged = {**merged, **json_content}
     print(json.dumps(merged, indent=2))
     return merged
+
+
+def get_time(string_time):
+    return datetime.strptime(string_time, "%H:%M").time()
+
+
+def get_greeting_msg():
+    current_time = datetime.now().time()
+    greetings = {
+        get_time("06:00") <= current_time < get_time("12:00"): "Доброе утро",
+        get_time("12:00") <= current_time < get_time("18:00"): "Добрый день",
+        get_time("18:00") <= current_time < get_time("22:00"): "Добрый вечер",
+        get_time("22:00") <= current_time or current_time < get_time("06:00"): "Доброй ночи",
+    }
+    return greetings[True]

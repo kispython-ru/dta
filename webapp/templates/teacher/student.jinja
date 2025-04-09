@@ -56,6 +56,33 @@
     </form>
   </div>
   <div class="col-12">
+    <b class="d-block">Варинат студента</b>
+    <div class="text-muted">
+      Если установить значение "Не выбран", студенту будет предложено выбрать вариант самостоятельно.
+    </div>
+    <form action="/teacher/student/{{ user.id }}/variant" method="POST" class="w-100">
+      <div class="row">
+        <div class="col-md-8 mb-2">
+          <select name="variant" class="form-select mb-2">
+            <option value="" {{ "selected='selected'" if variant is none else "" }}>
+              Не выбран
+            </option>
+            {% for v in variants %}
+              <option value="{{ v.id }}" {{ "selected='selected'" if v.id == variant.id else "" }}>
+                {{ v.id + 1 }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 mb-2">
+          <button type="submit" class="btn btn-outline-primary w-100 d-block mb-2">
+            Сохранить вариант
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-12">
     <b class="d-block">Пароль студента</b>
     <div class="text-muted">
       Пароль от аккаунта студента можно обновить вручную, если почтовый сервис недоступен.
