@@ -5,11 +5,10 @@
 </li>
 <style>
 .h-card {
-    transition: filter 0.3s ease; /* Плавный переход для фильтра */
+    transition: filter 0.3s ease;
 }
-
 .h-card:hover {
-    filter: brightness(0.9); /* Увеличение яркости на 10% при наведении */
+    filter: brightness(0.9);
 }
 .task-card {
     min-height: 50vh;
@@ -19,6 +18,14 @@
 }
 .d-flex {
     min-height: 10vh;
+}
+.poster {
+    min-height: 40vh;
+    background-color: #E8F4FF;
+    color: #fff;
+    background-image: url('/static/background.png');
+    background-repeat: repeat;
+    background-size: auto;
 }
 </style>
 {% endblock %}
@@ -34,22 +41,18 @@
         <div class="col-md-4 mb-sm-3">
             <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ group.tasks[-1].id }}"
                class="text-decoration-none text-muted">
-                <div class="card h-card mb-3 overflow-hidden card-body align-content-end"
-                     style="min-height: 40vh; background-color: #E8F4FF; color: #fff;
-                     background-image: url('/static/background.png'); background-repeat: repeat;
-                     background-size: auto;">
+                <div class="card h-card mb-3 overflow-hidden card-body align-content-end poster">
                     <div class="card-body align-content-end">
                         <img src="/static/logo.svg" alt="Decoration" class="w-auto mb-3" style="max-height: 42px;">
                         <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
                         {% if group.tasks[-1].formulation is not none %}
-                        <p class="card-text">{{ group.tasks[-1].formulation }}</p>
+                            <p class="card-text">{{ group.tasks[-1].formulation }}</p>
                         {% endif %}
                     </div>
                 </div>
             </a>
         </div>
         {% endif %}
-
         <div class="col-md-{% if group.tasks %}8{% else %}12{% endif %}">
             <div class="row mb-3">
                 <a href="/rating/groups" class="col-6 text-decoration-none text-muted">
@@ -74,8 +77,6 @@
                         {% endif %}
                     </div>
                 </a>
-
-
                 <a href="/rating" class="col-6 text-decoration-none text-muted">
                     <div class="card h-card p-3"
                          style="min-height: 100%;">
@@ -93,7 +94,7 @@
                         </div>
                         {% else %}
                         <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                        <h5>На данный момент вас нет в рейтинге</h5>
+                        <h5>На данный момент Вас нет в рейтинге</h5>
                         </div>
                         {% endif %}
                     </div>
@@ -150,10 +151,8 @@
         </div>
     </div>
 </div>
-
 </h6>
 {% endblock %}
-
 {% block footer %}
 <div class="container mt-4 mb-4">
   <div class="row opacity-75">
