@@ -94,7 +94,7 @@
         <div class="dropdown">
           <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" id="dLabel" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             {% if student is defined and student is not none %}
-            {{ student.email | hide }}
+            {{ student.email }}
             {% elif registration %}
             Войти
             {% else %}

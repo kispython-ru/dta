@@ -333,15 +333,15 @@ class HomeManager:
 
     def get_group_place(self, gid: int) -> int:
         groupings = self.statuses.get_group_rating()
-        for place, groups_in_place in groupings.items():
-            if gid in list(group_in_place.group.id for group_in_place in groups_in_place):
+        for place, groups_in_place in enumerate(groupings.values()):
+            if gid in list(g.group.id for g in groups_in_place):
                 return place
 
     def get_student_place(self, gid: int, vid: int) -> int:
         student_rating = self.statuses.get_rating()
-        for place, students_in_place in student_rating:
+        for place, students_in_place in enumerate(student_rating.values()):
             for student_in_place in students_in_place:
-                if student_in_place.group == gid and student_in_place.variant == vid:
+                if student_in_place.group.id == gid and student_in_place.variant == vid:
                     return place
 
 

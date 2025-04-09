@@ -140,14 +140,13 @@ class VariantRepository:
         with self.db.create_session() as session:
             session.query(Variant).delete()
 
-    def get_student_variants(self, student_id: int) -> list[int]:
+    def get_student_variants(self, student: int, group: int) -> list[int]:
         with self.db.create_session() as session:
-            student_variants = session.query(Message.variant) \
-                .filter_by(student=student_id) \
+            return session.query(Message.variant, func.count()) \
+                .filter_by(student=student, group=group) \
                 .group_by(Message.variant) \
                 .order_by(func.count().desc()) \
                 .all()
-            return list(v[0] for v in student_variants)
 
 
 class TaskStatusRepository:

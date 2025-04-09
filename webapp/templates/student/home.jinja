@@ -1,26 +1,14 @@
 {% extends 'layout.jinja' %}
 {% block header %}
 <li class="breadcrumb-item active" aria-current="page">
-  Главная страница
+  Цифровой ассистент преподавателя
 </li>
 <style>
 .h-card {
-    transition: filter 0.3s ease;
-}
-.h-card:hover {
-    filter: brightness(0.9);
-}
-.task-card {
-    min-height: 50vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-.d-flex {
     min-height: 10vh;
 }
 .poster {
-    min-height: 40vh;
+    min-height: 30vh;
     background-color: #E8F4FF;
     color: #fff;
     background-image: url('/static/background.png');
@@ -38,13 +26,13 @@
   <div class="mt-4">
     <div class="row">
         {% if group.tasks %}
-        <div class="col-md-4 mb-sm-3">
+        <div class="col-md-3 mb-sm-3">
             <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ group.tasks[-1].id }}"
                class="text-decoration-none text-muted">
-                <div class="card h-card mb-3 overflow-hidden card-body align-content-end poster">
+                <div class="card h-card overflow-hidden card-body align-content-end poster">
                     <div class="card-body align-content-end">
-                        <img src="/static/logo.svg" alt="Decoration" class="w-auto mb-3" style="max-height: 42px;">
-                        <h2 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h2>
+                        <img src="/static/logo.svg" alt="Decoration" class="w-auto mb-3" style="max-height: 70px;">
+                        <h4 class="card-title">Новая задача: {{ group.tasks[-1].id + 1 }}</h4>
                         {% if group.tasks[-1].formulation is not none %}
                             <p class="card-text">{{ group.tasks[-1].formulation }}</p>
                         {% endif %}
@@ -53,60 +41,67 @@
             </a>
         </div>
         {% endif %}
-        <div class="col-md-{% if group.tasks %}8{% else %}12{% endif %}">
+        <div class="col-md-9">
             <div class="row mb-3">
-                <a href="/rating/groups" class="col-6 text-decoration-none text-muted">
-                    <div class="card h-card p-3"
-                         style="min-height: 100%;">
-                        <h6 class="">Рейтинг групп</h6>
+                <div class="col-6">
+                    <div class="card h-card p-3">
+                        <h6 class="">Место группы в рейтинге групп</h6>
                         {% if group_place is defined and group_place is not none %}
-                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                            <h3 class="{% if group_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
-                                style="background-color: #fff;">
-                                {% if group_place == 0 %}🥇
-                                {% elif group_place == 1 %}🥈
-                                {% elif group_place == 2 %}🥉
-                                {% else %}
-                                №{{ group_place + 1 }}{% endif %}</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }}</h4>
+                        <div class="mt-1 gap-1">
+                            <a href="/rating/groups" class="text-decoration-none">
+                                <h4 class="fw-bold mb-1 me-2 d-inline-block"
+                                    style="background-color:#fff;vertical-align:middle">
+                                    {% if group_place == 0 %}🥇
+                                    {% elif group_place == 1 %}🥈
+                                    {% elif group_place == 2 %}🥉
+                                    {% else %}
+                                    №{{ group_place + 1 }}{% endif %}
+                                </h4>
+                            </a>
+                            <a href="/group/{{ group.id }}"
+                               class="badge alert-primary d-inline-block"
+                               style="font-size: inherit; text-decoration: none">
+                               {{ group.title }}
+                            </a>
                         </div>
                         {% else %}
-                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                        <h5>На данный момент вашей группы нет в рейтинге</h5>
+                        <div class="mt-1 gap-1">
+                          Сейчас Вашей группы нет в рейтинге
                         </div>
                         {% endif %}
                     </div>
-                </a>
-                <a href="/rating" class="col-6 text-decoration-none text-muted">
-                    <div class="card h-card p-3"
-                         style="min-height: 100%;">
-                        <h6 class="">Рейтинг студентов</h6>
+                </div>
+                <div class="col-6">
+                    <div class="card h-card p-3">
+                        <h6 class="">Место в рейтинге студентов</h6>
                         {% if student_place is defined and student_place is not none %}
-                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                            <h3 class="{% if student_place not in [0, 1, 2] %}card{% endif %} p-3 mb-0 me-2"
-                                style="background-color: #fff;">
-                                {% if student_place == 0 %}🥇
-                                {% elif student_place == 1 %}🥈
-                                {% elif student_place == 2 %}🥉
-                                {% else %}
-                                №{{ student_place + 1 }}{% endif %}</h3>
-                            <h4 class="mb-0 me-2">{{ group.title }} {{ variant.id }}</h4>
+                        <div class="mt-1 gap-1">
+                            <a href="/rating" class="text-decoration-none">
+                                <h4 class="fw-bold mb-1 me-2 d-inline-block"
+                                    style="background-color:#fff;vertical-align:middle"> 
+                                    {% if student_place == 0 %}🥇
+                                    {% elif student_place == 1 %}🥈
+                                    {% elif student_place == 2 %}🥉
+                                    {% else %}
+                                    №{{ student_place + 1 }}{% endif %} 🚀
+                                </h4>
+                            </a>
                         </div>
                         {% else %}
-                        <div class="d-flex flex-wrap justify-content-left align-items-center mt-1 gap-1">
-                        <h5>На данный момент Вас нет в рейтинге</h5>
+                        <div class="mt-1 gap-1">
+                          Сейчас Вас нет в рейтинге
                         </div>
                         {% endif %}
                     </div>
-                </a>
+                </div>
             </div>
             <form action="/home/variant_select" method="POST" class="w-100 mt-0 mt-sm-3">
               <div class="row">
                 <div class="col-md-8 mb-2">
                   <select name="variant" class="form-select mb-2">
-                    {% for v in variants %}
+                    {% for v, count in variants %}
                       <option value="{{ v }}" {{ "selected='selected'" if v == variant.id else "" }}>
-                        Вариант №{{ v + 1 }}
+                        Вариант №{{ v + 1 }} (отправлено программ: {{ count }})
                       </option>
                     {% endfor %}
                   </select>
@@ -118,43 +113,50 @@
                 </div>
               </div>
             </form>
-            <div class="card tasks-card">
-                <div class="card-body">
-                    <h5 class="card-title">Ваши задачи</h5>
-                    <div>
-                        <div class="row row-cols-4 row-cols-lg-4 row-cols-md-3 row-cols-sm-1 g-2">
-                            {% for task in group.tasks %}
-                                <div class="col">
-                                    <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ task.id }}"
-                                       class="btn
-                                        {% if tasks_statuses[task.id] == 3 %}
-                                        btn-danger
-                                        {% elif tasks_statuses[task.id] in [2, 5, 6] %}
-                                        btn-success
-                                        {% elif tasks_statuses[task.id] == 0 %}
-                                        btn-primary
-                                        {% else %}
-                                        btn-outline-secondary
-                                        {% endif %} w-100">№{{ task.id + 1 }}
-                                        {% if variant.statuses[task.id].earned > 1 %}
-                                        <span> | {{ variant.statuses[task.id].earned }}{% endif %}</span>
-                                    </a>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
-                        Посмотреть таблицу группы
+            <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
+              <thead>
+                <tr>
+                  <th scope="col" style="width:100px">Вариант</th>
+                  {% for task in group.tasks %}
+                  <td scope="col" class="text-center">
+                    №{{ task.id + 1 }}
+                  </td>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody style="border-top: 0px">
+                <tr>
+                  <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
+                    <span class="p-1 d-block" title="{{ variant.earned }}">
+                      {{ variant.id + 1 }}
+                    </span>
+                  </td>
+                  {% for status in variant.statuses %}
+                  <td scope="col" style="border-bottom: 0; padding: 0">
+                    <a class="d-block text-center text-decoration-none p-1 position-relative"
+                      style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
+                      {{ status.code }}
+                      {% if status.earned > 1 %}
+                      <span class="achievements-counter">
+                        {{ status.earned }}
+                      </span>
+                      {% endif %}
                     </a>
-                </div>
-            </div>
+                  </td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+            <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
+                Открыть таблицу группы
+            </a>
         </div>
     </div>
 </div>
 </h6>
 {% endblock %}
 {% block footer %}
-<div class="container mt-4 mb-4">
+<div class="container mb-4">
   <div class="row opacity-75">
     <div class="col-12 col-md-5 col-lg-4 col-xl-3">
       <div class="text-muted">
