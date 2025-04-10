@@ -104,6 +104,8 @@ def home(student: Student):
     if student.group is None:
         return redirect("/")
     variants = db.variants.get_student_variants(student.id, student.group)
+    if student.variant is not None and not any(v == student.variant for v, _ in variants):
+        variants.insert(0, (student.variant, 0))
     if not variants:
         return redirect(f"/group/{student.group}")
     if student.variant is None:

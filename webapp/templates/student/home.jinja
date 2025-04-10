@@ -8,7 +8,7 @@
     min-height: 10vh;
 }
 .poster {
-    min-height: 290px;
+    min-height: 300px;
     background-color: #E8F4FF;
     color: #fff;
     background-image: url('/static/background.png');
@@ -22,17 +22,17 @@
 <h4 class="card-title fw-bold">
   {{ greeting_message }}!
 </h4>
-<h6 class="card-subtitle mb-2 text-muted">
+<div class="card-subtitle mb-2 text-muted">
   <div class="mt-4">
     <div class="row">
         {% if group.tasks %}
-        <div class="col-lg-3 mb-sm-3 d-none d-lg-block">
+        <div class="col-lg-3 mb-sm-3 d-none d-xl-block">
             <a href="/group/{{ group.id }}/variant/{{ variant.id }}/task/{{ group.tasks[-1].id }}"
                class="text-decoration-none text-muted">
                 <div class="card h-card overflow-hidden card-body align-content-end poster">
                     <div class="card-body align-content-end">
                         <img src="/static/logo.svg" alt="Decoration" class="w-auto mb-3" style="max-height: 70px;">
-                        <h5 class="card-title">Новая задача: №{{ group.tasks[-1].id + 1 }}</h5>
+                        <h5 class="card-title">Новая задача</h5>
                         {% if group.tasks[-1].formulation is not none %}
                             <p class="card-text">{{ group.tasks[-1].formulation }}</p>
                         {% endif %}
@@ -41,22 +41,32 @@
             </a>
         </div>
         {% endif %}
-        <div class="col-lg-9 col-12">
+        <div class="col-xl-9 col-12">
             <div class="row">
-                <div class="col-sm-6 col-12 mb-3">
+                <div class="col-md-4 col-12 mb-3">
                     <div class="card h-card p-3">
-                        <h6 class="">Рейтинг групп</h6>
+                        <h6 class="">Решено обязательных задач</h6>
+                        <div class="mt-2 gap-1">
+                          <span class="badge alert-success" style="font-size: inherit">{{ variant.solved }}</span> из 
+                          <span class="badge alert-secondary" style="font-size: inherit">{{ group.tasks | length }}</span>
+                          ({{ (variant.solved / (group.tasks | length) * 100) | int }}%)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12 mb-3">
+                    <div class="card h-card p-3">
+                        <h6 class="">Место в рейтинге групп</h6>
                         {% if group_place is defined and group_place is not none %}
-                        <div class="mt-1 gap-1">
+                        <div class="mt-2 gap-1">
                             <a href="/rating/groups" class="text-decoration-none">
-                                <h4 class="fw-bold mb-1 me-2 d-inline-block"
+                                <h5 class="fw-bold mb-0 me-2 d-inline-block"
                                     style="background-color:#fff;vertical-align:middle">
                                     {% if group_place == 0 %}🥇
                                     {% elif group_place == 1 %}🥈
                                     {% elif group_place == 2 %}🥉
                                     {% else %}
                                     №{{ group_place + 1 }}{% endif %}
-                                </h4>
+                                </h5>
                             </a>
                             <a href="/group/{{ group.id }}"
                                class="badge alert-primary d-inline-block"
@@ -71,9 +81,9 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-6 col-12 mb-3">
+                <div class="col-md-4 col-12 mb-3">
                     <div class="card h-card p-3">
-                        <h6 class="">Рейтинг студентов</h6>
+                        <h6 class="">Место в рейтинге студентов</h6>
                         {% if student_place is defined and student_place is not none %}
                         <div class="mt-1 gap-1">
                             <a href="/rating" class="text-decoration-none">
@@ -88,9 +98,9 @@
                             </a>
                         </div>
                         {% else %}
-                        <div class="mt-2 gap-1">
-                          Сейчас Вас нет в <a href="/rating" class="text-decoration-none">рейтинге</a>.
-                        </div>
+                        <small class="mt-2 pt-1 gap-1">
+                          Вас ещё нет в <a href="/rating" class="text-decoration-none">рейтинге</a>.
+                        </small>
                         {% endif %}
                     </div>
                 </div>
@@ -98,7 +108,7 @@
             <form action="/home/variant_select" method="POST" class="w-100 mt-0">
               <div class="row">
                 <div class="{% if variants | length > 1 %}col-md-8{% endif %} col-12 mb-2">
-                  <select name="variant" class="form-select mb-2">
+                  <select name="variant" class="form-select mb-2 fw-bold">
                     {% for v, count in variants %}
                       <option value="{{ v }}" {{ "selected='selected'" if v == variant.id else "" }}>
                         Вариант №{{ v + 1 }} (отправлено программ: {{ count }})
@@ -119,7 +129,6 @@
                 <table class="table table-sm table-bordered table-hover mb-0" style="min-width:650px">
                   <thead>
                     <tr>
-                      <th scope="col" style="width:100px">Вариант</th>
                       {% for task in group.tasks %}
                       <td scope="col" class="text-center">
                         №{{ task.id + 1 }}
@@ -129,14 +138,9 @@
                   </thead>
                   <tbody style="border-top: 0px">
                     <tr>
-                      <td scope="col" style="border-bottom: 0; width:100px; padding: 0">
-                        <span class="p-1 d-block" title="{{ variant.earned }}">
-                          {{ variant.id + 1 }}
-                        </span>
-                      </td>
                       {% for status in variant.statuses %}
                       <td scope="col" style="border-bottom: 0; padding: 0">
-                        <a class="d-block text-center text-decoration-none p-1 position-relative"
+                        <a class="d-block text-center text-decoration-none p-2 position-relative"
                           style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
                           {{ status.code }}
                           {% if status.earned > 1 %}
@@ -152,12 +156,12 @@
                 </table>
             </div>
             <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
-                Открыть таблицу группы
+                Таблица группы {{ group.title }}
             </a>
         </div>
     </div>
 </div>
-</h6>
+</div>
 {% endblock %}
 {% block footer %}
 <div class="container mb-4">

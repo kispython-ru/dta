@@ -187,6 +187,11 @@ class VariantDto:
         self.id = int(variant.id)
         self.statuses = statuses
         self.earned = sum(s.earned for s in statuses if s.earned > 1)
+        self.solved = sum(s.status in [
+            Status.Checked,
+            Status.CheckedSubmitted,
+            Status.CheckedFailed,
+        ] for s in statuses)
 
 
 class GroupDto:

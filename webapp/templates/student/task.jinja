@@ -17,10 +17,6 @@
   группа <a href="/group/{{ status.group }}" class="badge alert-primary"
     style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
 </h6>
-<h6 class="card-subtitle mb-2 text-muted">
-  Здесь Вы можете отправить ответ на задание №{{ status.task + 1 }} для
-  варианта №{{ status.variant + 1 }}.
-</h6>
 <div class="card-subtitle mb-4 mt-2">
   <a class="text-decoration-none btn btn-primary" target="_blank" href="{{ status.formulation_url }}">
     Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{
@@ -32,10 +28,9 @@
     Состояние задачи
   </h6>
   <h6 class="card-subtitle mb-2 text-muted">
-    В данной секции Вы можете отслеживать состояние отправленного задания.
+    В данной секции Вы можете отслеживать состояние задания после отправки решения.
   </h6>
   {% if status.status == 4 %}
-  <div class="mb-4">После отправки выполненного задания Вы сможете отслеживать его состояние здесь.</div>
   {% else %}
   <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
     {{ status.name }}
