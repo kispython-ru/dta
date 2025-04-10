@@ -55,19 +55,17 @@
                 </div>
                 <div class="col-md-4 col-12 mb-3">
                     <div class="card h-card p-3">
-                        <h6 class="">Место в рейтинге групп</h6>
+                        <h6 class="">Место в <a href="/rating/groups" class="text-decoration-none">рейтинге групп</a></h6>
                         {% if group_place is defined and group_place is not none %}
                         <div class="mt-2 gap-1">
-                            <a href="/rating/groups" class="text-decoration-none">
-                                <h5 class="fw-bold mb-0 me-2 d-inline-block"
-                                    style="background-color:#fff;vertical-align:middle">
-                                    {% if group_place == 0 %}🥇
-                                    {% elif group_place == 1 %}🥈
-                                    {% elif group_place == 2 %}🥉
-                                    {% else %}
-                                    №{{ group_place + 1 }}{% endif %}
-                                </h5>
-                            </a>
+                            <h5 class="fw-bold mb-0 me-2 d-inline-block"
+                                style="background-color:#fff;vertical-align:middle">
+                                {% if group_place == 0 %}🥇
+                                {% elif group_place == 1 %}🥈
+                                {% elif group_place == 2 %}🥉
+                                {% else %}
+                                №{{ group_place + 1 }}{% endif %}
+                            </h5>
                             <a href="/group/{{ group.id }}"
                                class="badge alert-primary d-inline-block"
                                style="font-size: inherit; text-decoration: none">
@@ -76,30 +74,28 @@
                         </div>
                         {% else %}
                         <div class="mt-2 gap-1">
-                          Сейчас Вашей группы нет в <a href="/rating/groups" class="text-decoration-none">рейтинге</a>.
+                          Сейчас Вашей группы нет в рейтинге.
                         </div>
                         {% endif %}
                     </div>
                 </div>
                 <div class="col-md-4 col-12 mb-3">
                     <div class="card h-card p-3">
-                        <h6 class="">Место в рейтинге студентов</h6>
+                        <h6 class="">Место в <a href="/rating" class="text-decoration-none">рейтинге студентов</a></h6>
                         {% if student_place is defined and student_place is not none %}
                         <div class="mt-1 gap-1">
-                            <a href="/rating" class="text-decoration-none">
-                                <h4 class="fw-bold mb-1 me-2 d-inline-block"
-                                    style="background-color:#fff;vertical-align:middle"> 
-                                    {% if student_place == 0 %}🥇
-                                    {% elif student_place == 1 %}🥈
-                                    {% elif student_place == 2 %}🥉
-                                    {% else %}
-                                    №{{ student_place + 1 }}{% endif %} 🚀
-                                </h4>
-                            </a>
+                            <h4 class="fw-bold mb-1 me-2 d-inline-block"
+                                style="background-color:#fff;vertical-align:middle"> 
+                                {% if student_place == 0 %}🥇
+                                {% elif student_place == 1 %}🥈
+                                {% elif student_place == 2 %}🥉
+                                {% else %}
+                                №{{ student_place + 1 }}{% endif %} 🚀
+                            </h4>
                         </div>
                         {% else %}
                         <small class="mt-2 pt-1 gap-1">
-                          Вас ещё нет в <a href="/rating" class="text-decoration-none">рейтинге</a>.
+                          Вас ещё нет в рейтинге.
                         </small>
                         {% endif %}
                     </div>
