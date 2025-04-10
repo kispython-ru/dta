@@ -1,6 +1,8 @@
+import functools
 import json
 import os
 import sys
+import time
 import traceback
 from datetime import datetime
 from functools import wraps
@@ -11,12 +13,23 @@ from jwt import PyJWTError
 
 from flask import Request, redirect
 
-from webapp.managers import AppConfigManager
 from webapp.models import Student
 from webapp.repositories import StudentRepository
 
 
-def logout(config: AppConfigManager, path: str, auth_redirect=True):
+def ttl_cache(duration: int, maxsize=128, typed=False):
+    def decorator(func):
+        @functools.lru_cache(maxsize=maxsize, typed=typed)
+        def cached(*args, __time, **kwargs):
+            return func(*args, **kwargs)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return cached(*args, **kwargs, __time=int(time.time() / duration))
+        return wrapper
+    return decorator
+
+
+def logout(config, path, auth_redirect=True):
     def wrapper(function):
         @wraps(function)
         def decorator(*args, **kwargs):

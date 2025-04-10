@@ -31,6 +31,7 @@ from webapp.repositories import (
     TaskStatusRepository,
     VariantRepository
 )
+from webapp.utils import ttl_cache
 
 
 class AppConfigManager:
@@ -138,6 +139,7 @@ class StatusManager:
             dtos.append(dto)
         return GroupDto(group, tasks, dtos)
 
+    @ttl_cache(duration=15, maxsize=1)
     def get_group_rating(self) -> dict[int, list[GroupInRatingDto]]:
         def key(info: tuple[Group, int]):
             group, _ = info
@@ -154,6 +156,7 @@ class StatusManager:
             places[earned].append(GroupInRatingDto(group, earned))
         return dict(sorted(places.items(), reverse=True))
 
+    @ttl_cache(duration=15, maxsize=1)
     def get_rating(self) -> dict[int, list[StudentInRatingDto]]:
         def key(info: tuple[Group, TaskStatus]):
             _, status = info
