@@ -22,6 +22,7 @@ def ttl_cache(duration: int, maxsize=128, typed=False):
         @functools.lru_cache(maxsize=maxsize, typed=typed)
         def cached(*args, __time, **kwargs):
             return func(*args, **kwargs)
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             return cached(*args, **kwargs, __time=int(time.time() / duration))
