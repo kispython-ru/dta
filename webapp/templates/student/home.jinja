@@ -151,9 +151,18 @@
                   </tbody>
                 </table>
             </div>
-            <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
-                Таблица группы {{ group.title }}
-            </a>
+            <div class="row">
+                <div class="col-md-6 col-12 mb-3">
+                    <a href="/group/{{ group.id }}" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
+                        Таблица группы {{ group.title }}
+                    </a>
+                </div>
+                <div class="col-md-6 col-12 mb-3">
+                    <a href="/submissions" class="btn btn-outline-primary w-100 mt-3 w-100 mt-3">
+                        Отправленные решения
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
