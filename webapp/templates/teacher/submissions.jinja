@@ -23,7 +23,7 @@
       вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ submission.status.variant + 1 }}</span>,
       группа <a href="/group/{{ submission.status.group }}" class="badge alert-primary" style="font-size: inherit; text-decoration: none">{{ submission.status.group_title }}</a>
       {% if submission.student %}
-      , студент <span class="badge alert-secondary" style="font-size: inherit">{{ submission.student.email | hide }}</span>,
+      , студент <span class="badge alert-secondary" style="font-size: inherit">{{ submission.student.email }}</span>,
       id <span class="badge alert-secondary" style="font-size: inherit">{{ submission.student.id }}</span>
       {% endif %}
     </h6>
