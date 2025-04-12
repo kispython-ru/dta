@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
-from sqlalchemy import desc, func, literal, null
+from sqlalchemy import desc, func, literal, null, text
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -26,7 +26,7 @@ class DbContext:
         self.session = session
 
     def __enter__(self) -> Session:
-        self.session.execute("PRAGMA foreign_keys=ON")
+        self.session.execute(text("PRAGMA foreign_keys=ON"))
         return self.session
 
     def __exit__(self, exc_type: type[BaseException] | None, exc_val, trace):
@@ -67,7 +67,7 @@ class GroupRepository:
 
     def get_by_id(self, group_id: int) -> Group:
         with self.db.create_session() as session:
-            group = session.query(Group).get(group_id)
+            group = session.get(Group, group_id)
             return group
 
     def rename(self, group_id: int, title: str):
@@ -102,7 +102,7 @@ class TaskRepository:
 
     def get_by_id(self, task_id: int) -> Task:
         with self.db.create_session() as session:
-            task = session.query(Task).get(task_id)
+            task = session.get(Task, task_id)
             return task
 
     def create_by_ids(self, ids: list[int]):
@@ -127,7 +127,7 @@ class VariantRepository:
 
     def get_by_id(self, variant_id: int) -> Variant:
         with self.db.create_session() as session:
-            variant = session.query(Variant).get(variant_id)
+            variant = session.get(Variant, variant_id)
             return variant
 
     def create_by_ids(self, ids: list[int]):
@@ -482,7 +482,7 @@ class StudentRepository:
 
     def get_by_id(self, id: int) -> Student | None:
         with self.db.create_session() as session:
-            student = session.query(Student).get(id)
+            student = session.get(Student, id)
             return student
 
     def get_by_external_email(self, email: str, provider: str) -> Student | None:

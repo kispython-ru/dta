@@ -35,4 +35,4 @@ def test_group_fetching_by_prefix(db: AppDatabase):
 
     assert any(group.title == one for group in groups)
     assert any(group.title == two for group in groups)
-    assert not(any(group.title == three for group in groups))
+    assert not any(group.title == three for group in groups)

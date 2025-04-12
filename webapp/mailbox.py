@@ -6,16 +6,9 @@ import imaplib
 import time
 from multiprocessing import Process
 
-from flask import Blueprint
-from flask import current_app as app
-
-from webapp.managers import AppConfigManager
+from webapp.dto import AppConfig
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
-
-
-blueprint = Blueprint("mailbox", __name__)
-config = AppConfigManager(lambda: app.config)
 
 
 def get_senders(connection: imaplib.IMAP4_stream):
@@ -66,21 +59,19 @@ def background_worker(login: str, password: str, connection: str):
         time.sleep(5 * 60)  # 5 minutes.
 
 
-@blueprint.before_app_first_request
-def start_background_worker():
-    if not config.config.enable_registration or config.config.readonly:
+def start_background_worker(config: AppConfig):
+    if not config.enable_registration or config.readonly:
         return
-    if not config.config.imap_login or not config.config.imap_password:
+    if not config.imap_login or not config.imap_password:
         print("IMAP credentials not provided, disabling email confirmation.")
         return
     process = Process(target=background_worker, args=(
-        config.config.imap_login,
-        config.config.imap_password,
-        config.config.connection_string
+        config.imap_login,
+        config.imap_password,
+        config.connection_string,
     ))
     try:
         process.start()
-        app.config["MAILBOX_PID"] = process.pid
-    except BaseException:
-        exception = get_exception_info()
-        print(f"Error occured while starting process: {exception}")
+        return process.pid
+    except Exception as e:
+        print(e)

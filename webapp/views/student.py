@@ -367,11 +367,6 @@ def do_logout():
     return response
 
 
-@blueprint.app_template_filter('hide')
-def hide_email_filter(value: str):
-    return students.hide_email(value)
-
-
 @blueprint.errorhandler(Exception)
 def handle_view_errors(e):
     print(get_exception_info())

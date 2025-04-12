@@ -24,7 +24,7 @@ def test_students_rating(db: AppDatabase, client: FlaskClient):
 
     assert len(tags) == 1
     assert tags[0].get_text().strip() == f'{group_title}, вар. {variant_id + 1}'
-    assert tags[0].fetchParents()[0].get('href') == f'/group/{group_id}'
+    assert tags[0].find_parents()[0].get('href') == f'/group/{group_id}'
 
 
 def send_solution_to_tasks(db):

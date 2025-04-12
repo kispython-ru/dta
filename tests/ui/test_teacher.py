@@ -3,7 +3,6 @@ from tests.utils import arrange_task, mode, teacher_login, unique_str
 from flask.testing import FlaskClient
 
 from webapp.repositories import AppDatabase
-from webapp.views.student import hide_email_filter
 
 
 def test_login_logout(db: AppDatabase, client: FlaskClient):
@@ -69,7 +68,7 @@ def test_submission(db: AppDatabase, client: FlaskClient):
 
     assert db.groups.get_by_id(gid).title in response.get_data(as_text=True)
     assert code in response.get_data(as_text=True)
-    assert hide_email_filter(student_email) in response.get_data(as_text=True)
+    assert student_email in response.get_data(as_text=True)
     assert str(student.id) in response.get_data(as_text=True)
 
 

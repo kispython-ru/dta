@@ -6,13 +6,13 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
-from webapp.app import configure_app
+from webapp.app import configure_app, configure_background_services
 from webapp.commands import migrate
 from webapp.repositories import AppDatabase
 
 
 @pytest.fixture()
-def app(request) -> Flask:
+def app(request):
     param = request.param if hasattr(request, 'param') else None
     src = os.getcwd()
     tests = os.path.join(src, "tests")
@@ -30,6 +30,7 @@ def app(request) -> Flask:
             "0": list(range(0, 5)),
             "1": list(range(5, 9))
         }
+    app = configure_background_services(app)
     yield app
     if param == 'enable-worker':
         wpid = app.config["WORKER_PID"]

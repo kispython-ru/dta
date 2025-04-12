@@ -1,6 +1,6 @@
 import json
 
-from tests.utils import arrange_task, mode
+from tests.utils import arrange_task, mode, unique_int
 
 from flask.testing import FlaskClient
 

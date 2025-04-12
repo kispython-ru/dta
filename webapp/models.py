@@ -3,8 +3,7 @@ import json
 
 import sqlalchemy as sa
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 
 class IntEnum(sa.TypeDecorator):
@@ -62,20 +61,20 @@ def create_session_maker(connection_string: str) -> sessionmaker:
 
 class Group(Base):
     __tablename__ = "groups"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     title = sa.Column("title", sa.String, unique=True, nullable=False)
     external = sa.Column("external", sa.String, unique=False, nullable=True)
 
 
 class Task(Base):
     __tablename__ = "tasks"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     formulation = sa.Column("formulation", sa.String, nullable=True)
 
 
 class Variant(Base):
     __tablename__ = "variants"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
 
 
 class TaskStatus(Base):
@@ -93,7 +92,7 @@ class TaskStatus(Base):
 
 class Message(Base):
     __tablename__ = "messages"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     task = sa.Column("task", sa.Integer, sa.ForeignKey("tasks.id"), nullable=False)
     variant = sa.Column("variant", sa.Integer, sa.ForeignKey("variants.id"), nullable=False)
     group = sa.Column("group", sa.Integer, sa.ForeignKey("groups.id"), nullable=False)
@@ -107,7 +106,7 @@ class Message(Base):
 
 class MessageCheck(Base):
     __tablename__ = "message_checks"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     message = sa.Column("message", sa.Integer, sa.ForeignKey("messages.id"), nullable=False)
     time = sa.Column('time', sa.DateTime, nullable=False)
     status = sa.Column('status', sa.Integer, nullable=False)
@@ -124,7 +123,7 @@ class FinalSeed(Base):
 
 class Student(Base):
     __tablename__ = "students"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     external_id = sa.Column("external_id", sa.BigInteger, nullable=True)
     provider = sa.Column("provider", sa.String, nullable=True)
     email = sa.Column("email", sa.String, nullable=False)
@@ -138,12 +137,12 @@ class Student(Base):
 
 class Mailer(Base):
     __tablename__ = "mailers"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     domain = sa.Column("domain", sa.String, nullable=False)
 
 
 class AllowedIp(Base):
     __tablename__ = "allowed_ips"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False)
+    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     ip = sa.Column("ip", sa.String, nullable=False)
     label = sa.Column("label", sa.String, nullable=True)

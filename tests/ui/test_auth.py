@@ -59,7 +59,7 @@ def test_success_login(client: FlaskClient, db: AppDatabase):
 
     response = client.post("/login", data={'login': email, 'password': password})
     assert response.status_code == 302
-    assert response.location == 'http://localhost/'
+    assert response.location == '/'
     assert 'access_token' in response.headers.get('Set-Cookie')
 
 

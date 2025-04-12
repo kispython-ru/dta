@@ -2,16 +2,10 @@ import sys
 import time
 from multiprocessing import Process
 
-from flask import Blueprint
-from flask import current_app as app
-
 from webapp.dto import AppConfig
 from webapp.managers import AppConfigManager, ExternalTaskManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
-
-
-blueprint = Blueprint("worker", __name__)
 
 
 def check_solution(
@@ -119,15 +113,12 @@ def background_worker(config: AppConfig):
         time.sleep(10)
 
 
-@blueprint.before_app_first_request
-def start_background_worker():
-    manager = AppConfigManager(lambda: app.config)
-    if manager.config.no_background_worker:
+def start_background_worker(config: AppConfig):
+    if config.no_background_worker:
         return
-    process = Process(target=background_worker, args=(manager.config,))
+    process = Process(target=background_worker, args=(config,))
     try:
         process.start()
-        app.config["WORKER_PID"] = process.pid
-    except BaseException:
-        exception = get_exception_info()
-        print(f"Error occured while starting process: {exception}")
+        return process.pid
+    except Exception as e:
+        print(e)
