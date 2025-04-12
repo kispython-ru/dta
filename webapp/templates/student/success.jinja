@@ -1,5 +1,10 @@
 {% extends 'layout.jinja' %}
 {% block header %}
+<li class="breadcrumb-item" aria-current="page">
+  <a class="text-decoration-none" href="/">
+    ЦАП
+  </a>
+</li>
 <li class="breadcrumb-item">
   <a class="text-decoration-none" href="/group/{{ status.group }}">
     {{ status.group_title }}
@@ -7,11 +12,8 @@
 </li>
 <li class="breadcrumb-item">
   <a class="text-decoration-none" href="{{ status.submission_url }}">
-    №{{ status.task + 1 }}, вариант №{{ status.variant + 1 }}
+    №{{ status.task + 1 }}, в. №{{ status.variant + 1 }}
   </a>
-</li>
-<li class="breadcrumb-item active" aria-current="page">
-  Уведомление
 </li>
 {% endblock %}
 
@@ -19,7 +21,7 @@
 <h6 class="card-title fw-bold">
   Задача <span class="badge alert-secondary" style="font-size: inherit">№{{ status.task + 1 }}</span>,
   вариант <span class="badge alert-secondary" style="font-size: inherit">№{{ status.variant + 1 }}</span>,
-  группа <span class="badge alert-secondary" style="font-size: inherit">{{ status.group_title }}</span>
+  <span class="badge alert-secondary" style="font-size: inherit">{{ status.group_title }}</span>
 </h6>
 <h6 class="card-subtitle mb-2 mt-2 text-muted">
   Ответ на задание успешно отправлен. Результат проверки вскоре отобразится на странице задания.
