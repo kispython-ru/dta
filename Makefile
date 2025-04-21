@@ -1,3 +1,14 @@
+.PHONY: venv
+venv:
+	uv venv
+
+.PHONY: install
+install:
+	uv pip install -e ".[dev]"
+.PHONY: freeze
+freeze:
+	uv pip compile pyproject.toml -o requirements.txt
+
 .PHONY: fix
 fix:
 	isort .
