@@ -1,8 +1,9 @@
 import enum
+from functools import lru_cache
 import json
 
 import sqlalchemy as sa
-from sqlalchemy import create_engine
+from sqlalchemy import Engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
@@ -52,8 +53,7 @@ class Status(enum.IntEnum):
 Base = declarative_base()
 
 
-def create_session_maker(connection_string: str) -> sessionmaker:
-    engine = create_engine(connection_string)
+def create_session_maker(engine: Engine) -> sessionmaker:
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine)
     return factory

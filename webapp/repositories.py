@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Callable
 
-from sqlalchemy import desc, func, literal, null, text
+from sqlalchemy import create_engine, desc, func, literal, null, text
 from sqlalchemy.orm import Session
 
 from webapp.models import (
@@ -40,13 +40,20 @@ class DbContext:
 class DbContextManager:
     def __init__(self, get_connection: Callable[[], str]):
         self.get_connection = get_connection
+        self.engine = None
 
     def create_session(self) -> DbContext:
         connection_string = self.get_connection()
-        maker = create_session_maker(connection_string)
+        if not self.engine:
+            self.engine = create_engine(connection_string)
+        maker = create_session_maker(self.engine)
         session = maker(expire_on_commit=False)
         context = DbContext(session)
         return context
+
+    def __del__(self):
+        if self.engine:
+            self.engine.dispose()
 
 
 class GroupRepository:
