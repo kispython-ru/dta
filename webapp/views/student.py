@@ -253,7 +253,7 @@ def task_status(student: Student | None, gid: int, vid: int, tid: int):
     if student and not student.teacher and student.group != gid:
         return redirect("/")
     status = statuses.get_task_status(gid, vid, tid)
-    if status.status not in [Status.Submitted, Status.CheckedSubmitted]:
+    if not status.is_submitted:
         return render_template(
             "student/task_status.jinja",
             registration=config.config.registration,

@@ -29,7 +29,7 @@
   </a>
 </div>
 
-{% if status.status == 0 or status.status == 5 %}
+{% if status.is_submitted %}
 <script src="/static/js/autoreload.js"></script>
 {% endif %}
 <div id="task-status">
