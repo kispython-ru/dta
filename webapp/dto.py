@@ -170,6 +170,16 @@ class TaskStatusDto:
             Status.CheckedFailed: True,
         })
 
+    @property
+    def is_submitted(self) -> bool:
+        if self.status in [Status.Submitted, Status.CheckedSubmitted]:
+            return True
+        if self.status in [Status.Checked, Status.Failed, Status.NotSubmitted, Status.CheckedFailed]:
+            return False
+        else:
+            assert False, "unhandled status"
+            return False
+
     def map_achievements(self, status: TaskStatus | None, achievements: list[int]):
         dtos = []
         for order, count in enumerate(achievements):

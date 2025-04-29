@@ -1,0 +1,42 @@
+<div>
+  <h6 class="card-title fw-bold">
+    Состояние задачи
+  </h6>
+  <h6 class="card-subtitle mb-2 text-muted">
+    В данной секции Вы можете отслеживать состояние задания после отправки решения.
+  </h6>
+  {% if status.status == 4 %}
+  {% else %}
+  <div class="badge alert-{{ status.color }} mt-2 mb-2" style="font-size: inherit">
+    {{ status.name }}
+  </div>
+  {% if status.error_message is not none and status.error_message and (not registration or student) %}
+  <div>Подробные сведения об ошибке:</div>
+  <div class="text-muted mb-2" style="white-space: pre-wrap">{{ status.error_message | e }}</div>
+  {% else %}
+  <div class="mb-2"></div>
+  {% endif %}
+  {% endif %}
+</div>
+{% if status.show_achievements %}
+<div>
+  <h6 class="card-title fw-bold">
+    Разблокированные достижения
+    <small class="text-muted">
+      {{ status.earned }} из {{ status.achievements | length }}
+    </small>
+  </h6>
+  <h6 class="card-subtitle mb-2 text-muted">
+    Сможете ли Вы решить задачу всеми способами, известными <a class="text-decoration-none"
+      href="https://github.com/true-grue/kispython/blob/main/contrib/elm.ipynb">искусственной нейронной сети</a>?
+  </h6>
+  {% if status.achievements %}
+  {% for dto in status.achievements %}
+  <div class="callout callout-{{ 'success' if dto.active else 'default text-muted' }}">
+    <div>{{ dto.title }} {{ '✓' if dto.active else '' }}</div>
+    <small>{{ dto.description }}</small>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endif %}
