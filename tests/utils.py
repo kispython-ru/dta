@@ -10,6 +10,7 @@ from bs4.element import ResultSet, Tag
 from flask.testing import FlaskClient
 
 from webapp.managers import StudentManager
+from webapp.models import TypeOfTask
 from webapp.repositories import AppDatabase
 
 
@@ -34,14 +35,14 @@ def timeout_assert(condition: Callable[[], bool], timeout: int = 20):
             break
 
 
-def arrange_task(db: AppDatabase) -> tuple[int, int, int]:
+def arrange_task(db: AppDatabase, type: TypeOfTask = TypeOfTask.Static) -> tuple[int, int, int]:
     variant = unique_int()
     group_name = unique_str()
     task = unique_int()
 
     db.variants.create_by_ids([variant])
     db.groups.create(group_name)
-    db.tasks.create_by_ids([task])
+    db.tasks.create(task, type)
 
     group = db.groups.get_by_prefix(group_name)[0].id
     return (group, variant, task)

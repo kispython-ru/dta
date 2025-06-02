@@ -20,7 +20,8 @@ from webapp.managers import (
     HomeManager,
     RatingManager,
     StatusManager,
-    StudentManager
+    StudentManager,
+    ExternalTaskManager,
 )
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -32,9 +33,11 @@ config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
 ach = AchievementManager(config)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach)
+ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
 home_manager = HomeManager(statuses)
-groups = GroupManager(config, db.groups, db.seeds)
+
+groups = GroupManager(db.groups, db.seeds, ext)
 students = StudentManager(config, db.students, db.mailers)
 rating = RatingManager(config, db.statuses, ach, db.tasks)
 
@@ -59,7 +62,7 @@ def dashboard(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         student=student,
     )
 
@@ -98,7 +101,7 @@ def submissions(student: Student | None, page: int):
         submissions=submissions,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         student=student,
         highlight=config.config.highlight_syntax,
         page=page,
@@ -109,7 +112,7 @@ def submissions(student: Student | None, page: int):
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students, lambda _: True)
 def home(student: Student):
-    if config.config.exam:
+    if ext.is_exam_active():
         return redirect("/")
     if student.group is None:
         return redirect("/")
@@ -128,7 +131,7 @@ def home(student: Student):
         greeting_message=get_greeting_msg(),
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         group=group,
         variant=variant,
         variants=variants,
@@ -153,10 +156,11 @@ def group(student: Student | None, gid: int):
         return redirect("/login")
     if student and student.group is not None and student.group != gid:
         return redirect("/")
-    hide_pending = config.config.exam and request.args.get('hide_pending', False)
+    exam = ext.is_exam_active()
+    hide_pending = exam and request.args.get('hide_pending', False)
     group = statuses.get_group_statuses(gid, hide_pending)
     seed = db.seeds.get_final_seed(gid)
-    blocked = config.config.exam and seed is None
+    blocked = exam and seed is None
     return render_template(
         "student/group.jinja",
         group=group,
@@ -164,8 +168,8 @@ def group(student: Student | None, gid: int):
         hide_pending=hide_pending,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
         student=student,
+        exam=exam,
     )
 
 
@@ -186,7 +190,7 @@ def group_rating(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         student=student,
     )
 
@@ -200,7 +204,7 @@ def stduent_rating(student: Student | None):
         groupings=groupings,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         student=student,
     )
 
@@ -219,7 +223,7 @@ def task(student: Student | None, gid: int, vid: int, tid: int):
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         status=status,
         form=form,
         student=student,
@@ -247,7 +251,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
             status=status,
             registration=config.config.registration,
             group_rating=config.config.groups,
-            exam=config.config.exam,
+            exam=ext.is_exam_active(),
             student=student,
         )
     return render_template(
@@ -255,7 +259,7 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
         highlight=config.config.highlight_syntax,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         status=status,
         form=form,
         student=student,

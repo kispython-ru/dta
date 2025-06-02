@@ -20,7 +20,7 @@ def test_message_get_latest(db: AppDatabase):
     ip = unique_str()
 
     task_2 = unique_int()
-    db.tasks.create_by_ids([task_2])
+    db.tasks.create(task_2)
     db.messages.submit_task(task_1, variant, group, code, ip, None)
     db.messages.submit_task(task_2, variant, group, code, ip, None)
 
@@ -54,7 +54,8 @@ def test_message_get_pending(db: AppDatabase):
 
     task_2 = unique_int()
     task_3 = unique_int()
-    db.tasks.create_by_ids([task_2, task_3])
+    db.tasks.create(task_2)
+    db.tasks.create(task_3)
 
     message = db.messages.submit_task(task_1, variant, group, code, ip, None)
     db.messages.mark_as_processed(message.id)

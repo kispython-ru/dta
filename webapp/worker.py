@@ -3,7 +3,7 @@ import time
 from multiprocessing import Process
 
 from webapp.dto import AppConfig
-from webapp.managers import AppConfigManager, ExternalTaskManager
+from webapp.managers import ExternalTaskManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info
 
@@ -41,19 +41,14 @@ def analyze_solution(analytics_path: str, task: int, code: str):
     return analyze_solution(task, code)
 
 
-def process_pending_messages(config: AppConfig, db: AppDatabase):
+def process_pending_messages(config: AppConfig, db: AppDatabase, external: ExternalTaskManager):
     pending_messages = db.messages.get_pending_messages()
     message_count = len(pending_messages)
     if message_count == 0:
         return
     print(f"Processing {message_count} incoming messages...")
     for message in pending_messages:
-        group = db.groups.get_by_id(message.group)
-        task = db.tasks.get_by_id(message.task)
-        variant = db.variants.get_by_id(message.variant)
-        seed = db.seeds.get_final_seed(group.id)
-        external = ExternalTaskManager(group=group, seed=seed, groups=db.groups, config=config)
-        ext = external.get_external_task(task.id, variant.id)
+        ext = external.get_external_task(message.group, message.variant, message.task, config)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:
@@ -104,9 +99,10 @@ def process_pending_messages(config: AppConfig, db: AppDatabase):
 def background_worker(config: AppConfig):
     print(f"Starting background worker for database: {config.connection_string}")
     db = AppDatabase(lambda: config.connection_string)
+    ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
     while True:
         try:
-            process_pending_messages(config, db)
+            process_pending_messages(config, db, ext)
         except BaseException:
             exception = get_exception_info()
             print(f"Error occured inside the loop: {exception}")

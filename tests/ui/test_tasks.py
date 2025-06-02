@@ -11,7 +11,7 @@ def test_task_html_id(db: AppDatabase, client: FlaskClient):
     db.groups.create_by_names([title])
 
     task_id = unique_int()
-    db.tasks.create_by_ids([task_id])
+    db.tasks.create(task_id)
 
     group_id = next(group.id for group in db.groups.get_by_prefix(prefix))
     response = client.get(f'/group/{group_id}')

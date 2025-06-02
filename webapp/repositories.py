@@ -16,6 +16,7 @@ from webapp.models import (
     Student,
     Task,
     TaskStatus,
+    TypeOfTask,
     Variant,
     create_session_maker
 )
@@ -70,11 +71,11 @@ class GroupRepository:
             group = session.get(Group, group_id)
             return group
 
-    def rename(self, group_id: int, title: str):
+    def rename(self, group_id: int, title: str, external: str):
         with self.db.create_session() as session:
             session.query(Group) \
                 .filter_by(id=group_id) \
-                .update(dict(title=title))
+                .update(dict(title=title, external=external))
 
     def create_by_names(self, names: list[str]):
         for name in names:
@@ -105,11 +106,10 @@ class TaskRepository:
             task = session.get(Task, task_id)
             return task
 
-    def create_by_ids(self, ids: list[int]):
+    def create(self, id: int, type: TypeOfTask = TypeOfTask.Static):
         with self.db.create_session() as session:
-            for task_id in ids:
-                group = Task(id=task_id)
-                session.add(group)
+            group = Task(id=id, type=type)
+            session.add(group)
 
     def delete_all(self):
         with self.db.create_session() as session:

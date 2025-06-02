@@ -1,6 +1,6 @@
 from flask import Config
 
-from webapp.models import Group, Status, Student, Task, TaskStatus, Variant
+from webapp.models import FinalSeed, Group, Status, Student, Task, TaskStatus, TypeOfTask, Variant
 
 
 class AppConfig:
@@ -29,12 +29,8 @@ class AppConfig:
         self.groups: dict = config["GROUPS"]
 
     @property
-    def exam(self) -> bool:
-        return self.final_tasks is not None
-
-    @property
     def registration(self) -> bool:
-        return not self.exam and self.enable_registration
+        return self.enable_registration
 
 
 class ExternalTaskDto:
@@ -47,9 +43,11 @@ class ExternalTaskDto:
 
 
 class TaskDto:
-    def __init__(self, task: Task):
+    def __init__(self, task: Task, seed: FinalSeed | None):
         self.id = int(task.id)
         self.formulation = task.formulation
+        self.active = task.type == TypeOfTask.Static or seed and seed.active
+        self.is_random = task.type == TypeOfTask.Random
 
 
 class AchievementDto:

@@ -4,7 +4,7 @@ from tests.utils import arrange_task, mode, unique_int
 
 from flask.testing import FlaskClient
 
-from webapp.models import Status
+from webapp.models import Status, TypeOfTask
 from webapp.repositories import AppDatabase
 
 
@@ -25,10 +25,10 @@ def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
 @mode("exam")
 def test_final_seed_is_used(db: AppDatabase, client: FlaskClient):
     task = 0
-    group, var, _ = arrange_task(db)
+    group, var, _ = arrange_task(db, TypeOfTask.Random)
     title = db.groups.get_by_id(group).title
 
-    db.tasks.create_by_ids([task])
+    db.tasks.create(task, TypeOfTask.Random)
     db.seeds.begin_final_test(group)
 
     default_template = f'/{task}/{title}.html#вариант-{var + 1}'
@@ -60,7 +60,7 @@ def test_final_submissions_are_allowed(db: AppDatabase, client: FlaskClient):
 
 @mode("exam")
 def test_final_submissions_are_paused(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_task(db)
+    (group, variant, task) = arrange_task(db, TypeOfTask.Random)
     db.seeds.begin_final_test(group)
     db.seeds.end_final_test(group)
 

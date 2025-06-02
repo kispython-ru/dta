@@ -95,9 +95,11 @@
         <tr>
           <th scope="col" style="width:100px">Вариант</th>
           {% for task in group.tasks %}
-          <td scope="col" class="text-center">
+          {% if task.active %}
+          <td scope="col" class="text-center {{ 'fw-bold' if task.is_random }}">
             №{{ task.id + 1 }}
           </td>
+          {% endif %}
           {% endfor %}
         </tr>
       </thead>
@@ -110,6 +112,7 @@
             </span>
           </td>
           {% for status in variant.statuses %}
+          {% if status.external.active %}
           <td scope="col" style="border-bottom: 0; padding: 0">
             <a class="d-block text-center text-decoration-none p-1 position-relative"
               style="background-color:{{ status.cell_background }}" href="{{ status.submission_url }}">
@@ -121,6 +124,7 @@
               {% endif %}
             </a>
           </td>
+          {% endif %}
           {% endfor %}
         </tr>
         {% endfor %}

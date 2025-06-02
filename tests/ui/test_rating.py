@@ -49,7 +49,7 @@ def create_groups_and_tasks(db):
 
 def create_test_tasks(db):
     tasks_id = unique_int()
-    db.tasks.create_by_ids([tasks_id])
+    db.tasks.create(tasks_id)
 
 
 def create_test_variant(db):
