@@ -103,41 +103,38 @@ class ExternalTaskManager:
         return random.Random(f'{self.seed.seed}{seed}').choice(options)
 
 
-class StatusManager:
+class AchievementManager:
+    def __init__(self, config: AppConfigManager):
+        self.achievements = None
+        self.config = config
+
+    def read_achievements(self) -> dict[str, list[int]]:
+        if self.achievements is not None:
+            return self.achievements
+        analytics = self.config.config.analytics_path
+        spec = os.path.join(analytics, 'specification.json')
+        if not os.path.exists(spec):
+            self.achievements = dict()
+            return self.achievements
+        with open(spec, 'r') as file:
+            content = file.read()
+            spec = json.loads(content)
+            self.achievements = spec
+        return self.achievements
+
+
+class RatingManager:
     def __init__(
         self,
-        tasks: TaskRepository,
-        groups: GroupRepository,
-        variants: VariantRepository,
-        statuses: TaskStatusRepository,
         config: AppConfigManager,
-        seeds: FinalSeedRepository,
-        checks: MessageCheckRepository
+        statuses: TaskStatusRepository,
+        achievements: AchievementManager,
+        tasks: TaskRepository,
     ):
-        self.tasks = tasks
-        self.groups = groups
-        self.variants = variants
-        self.statuses = statuses
         self.config = config
-        self.seeds = seeds
-        self.checks = checks
-        self.achievements = None
-
-    def get_group_statuses(self, group_id: int, hide_pending: bool) -> GroupDto:
-        config = self.config.config
-        group = self.groups.get_by_id(group_id)
-        variants = self.variants.get_all()
-        statuses = self.__get_statuses(group.id)
-        e = self.__get_external_task_manager(group)
-        tasks = self.__get_tasks()
-        dtos: list[VariantDto] = []
-        for var in variants:
-            dto = self.__get_variant(group, var, tasks, statuses, config, e)
-            solved = any(status.status != Status.NotSubmitted for status in dto.statuses)
-            if hide_pending and not solved:
-                continue
-            dtos.append(dto)
-        return GroupDto(group, tasks, dtos)
+        self.statuses = statuses
+        self.achievements = achievements
+        self.tasks = tasks
 
     @ttl_cache(duration=15, maxsize=1)
     def get_group_rating(self) -> dict[int, list[GroupInRatingDto]]:
@@ -162,7 +159,7 @@ class StatusManager:
             _, status = info
             return status.group, status.variant
 
-        achievements = self.__read_achievements()
+        achievements = self.achievements.read_achievements()
         statuses = self.statuses.get_rating()
         tasks = self.tasks.get_all()
         places: dict[int, list[StudentInRatingDto]] = dict()
@@ -179,6 +176,44 @@ class StatusManager:
             places[earned].append(StudentInRatingDto(group, status.variant, earned))
         ordered = sorted(places.items(), reverse=True)
         return dict(ordered[0:self.config.config.places_in_rating])
+
+
+class StatusManager:
+    def __init__(
+        self,
+        tasks: TaskRepository,
+        groups: GroupRepository,
+        variants: VariantRepository,
+        statuses: TaskStatusRepository,
+        config: AppConfigManager,
+        seeds: FinalSeedRepository,
+        checks: MessageCheckRepository,
+        achievements: AchievementManager,
+    ):
+        self.tasks = tasks
+        self.groups = groups
+        self.variants = variants
+        self.statuses = statuses
+        self.config = config
+        self.seeds = seeds
+        self.checks = checks
+        self.achievements = achievements
+
+    def get_group_statuses(self, group_id: int, hide_pending: bool) -> GroupDto:
+        config = self.config.config
+        group = self.groups.get_by_id(group_id)
+        variants = self.variants.get_all()
+        statuses = self.__get_statuses(group.id)
+        e = self.__get_external_task_manager(group)
+        tasks = self.__get_tasks()
+        dtos: list[VariantDto] = []
+        for var in variants:
+            dto = self.__get_variant(group, var, tasks, statuses, config, e)
+            solved = any(status.status != Status.NotSubmitted for status in dto.statuses)
+            if hide_pending and not solved:
+                continue
+            dtos.append(dto)
+        return GroupDto(group, tasks, dtos)
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
@@ -228,12 +263,6 @@ class StatusManager:
             submissions.append(self.__get_submissions(check, message, None))
         return submissions
 
-    def count_student_submissions(self, student: Student) -> int:
-        return self.checks.count_student_submissions(student)
-
-    def count_session_id_submissions(self, session_id: str) -> int:
-        return self.checks.count_session_id_submissions(session_id)
-
     def __get_submissions(
         self,
         check: MessageCheck,
@@ -267,24 +296,10 @@ class StatusManager:
         return TaskStatusDto(group, variant, TaskDto(task), status, ext, config, achievements)
 
     def __get_task_achievements(self, task: int) -> list[int]:
-        achievements = self.__read_achievements()
+        achievements = self.achievements.read_achievements()
         stid = str(task)
         achievements = achievements[stid] if stid in achievements else []
         return achievements
-
-    def __read_achievements(self) -> dict[str, list[int]]:
-        if self.achievements is not None:
-            return self.achievements
-        analytics = self.config.config.analytics_path
-        spec = os.path.join(analytics, 'specification.json')
-        if not os.path.exists(spec):
-            self.achievements = dict()
-            return self.achievements
-        with open(spec, 'r') as file:
-            content = file.read()
-            spec = json.loads(content)
-            self.achievements = spec
-        return self.achievements
 
     def __get_external_task_manager(self, group: Group) -> ExternalTaskManager:
         seed = self.seeds.get_final_seed(group.id)
@@ -328,20 +343,17 @@ class StatusManager:
 
 
 class HomeManager:
-    def __init__(
-        self,
-        statuses: StatusManager
-    ):
-        self.statuses = statuses
+    def __init__(self, rating: RatingManager):
+        self.rating = rating
 
     def get_group_place(self, gid: int) -> int:
-        groupings = self.statuses.get_group_rating()
+        groupings = self.rating.get_group_rating()
         for place, groups_in_place in enumerate(groupings.values()):
             if gid in list(g.group.id for g in groups_in_place):
                 return place
 
     def get_student_place(self, gid: int, vid: int) -> int:
-        student_rating = self.statuses.get_rating()
+        student_rating = self.rating.get_rating()
         for place, students_in_place in enumerate(student_rating.values()):
             for student_in_place in students_in_place:
                 if student_in_place.group.id == gid and student_in_place.variant == vid:
@@ -491,21 +503,13 @@ class ExportManager:
         output = self.__create_csv(table, delimiter)
         return output
 
-    def export_exam_results(
-        self,
-        group_id: int,
-        separator: str
-    ) -> str:
+    def export_exam_results(self, group_id: int, separator: str) -> str:
         table = self.__create_exam_table(group_id)
         delimiter = ";" if separator == "semicolon" else ","
         output = self.__create_csv(table, delimiter)
         return output
 
-    def __create_messages_table(
-        self,
-        messages: list[Message],
-        group_titles: dict[int, str]
-    ) -> list[list[str]]:
+    def __create_messages_table(self, messages: list[Message], group_titles: dict[int, str]) -> list[list[str]]:
         rows = [["ID", "Время", "Группа", "Задача", "Вариант", "IP", "Отправитель", "Код"]]
         for message in messages:
             gt = group_titles[message.group]
