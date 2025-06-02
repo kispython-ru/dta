@@ -16,12 +16,12 @@ from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMes
 from webapp.managers import (
     AchievementManager,
     AppConfigManager,
+    ExternalTaskManager,
     GroupManager,
     HomeManager,
     RatingManager,
     StatusManager,
-    StudentManager,
-    ExternalTaskManager,
+    StudentManager
 )
 from webapp.models import Student
 from webapp.repositories import AppDatabase
@@ -33,7 +33,7 @@ config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
 ach = AchievementManager(config)
-ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
+ext = ExternalTaskManager(db.groups, db.tasks)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
 home_manager = HomeManager(statuses)
 

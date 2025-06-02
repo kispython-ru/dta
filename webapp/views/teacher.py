@@ -8,7 +8,14 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.forms import TeacherChangePasswordForm
-from webapp.managers import AchievementManager, AppConfigManager, ExportManager, StatusManager, StudentManager, ExternalTaskManager
+from webapp.managers import (
+    AchievementManager,
+    AppConfigManager,
+    ExportManager,
+    ExternalTaskManager,
+    StatusManager,
+    StudentManager
+)
 from webapp.models import Message, Student, TypeOfTask
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info
@@ -18,7 +25,7 @@ blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
+ext = ExternalTaskManager(db.groups, db.tasks)
 students = StudentManager(config, db.students, db.mailers)
 ach = AchievementManager(config)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)

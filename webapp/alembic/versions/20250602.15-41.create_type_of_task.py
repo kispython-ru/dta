@@ -17,8 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column("tasks", sa.Column("type", sa.Integer, nullable=False))
-    op.execute("update tasks set type = 0")
+    op.add_column("tasks", sa.Column("type", sa.Integer, nullable=False, server_default='0'))
 
 
 def downgrade():

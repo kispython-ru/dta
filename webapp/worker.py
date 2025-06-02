@@ -48,7 +48,11 @@ def process_pending_messages(config: AppConfig, db: AppDatabase, external: Exter
         return
     print(f"Processing {message_count} incoming messages...")
     for message in pending_messages:
-        ext = external.get_external_task(message.group, message.variant, message.task, config)
+        group = db.groups.get_by_id(message.group)
+        variant = db.variants.get_by_id(message.variant)
+        task = db.tasks.get_by_id(message.task)
+        seed = db.seeds.get_final_seed(group.id)
+        ext = external.get_external_task(group, variant, task, seed, config)
         print(f"g-{message.group}, t-{message.task}, v-{message.variant}")
         print(f"external: {ext.group_title}, t-{ext.task}, v-{ext.variant}")
         try:
@@ -99,7 +103,7 @@ def process_pending_messages(config: AppConfig, db: AppDatabase, external: Exter
 def background_worker(config: AppConfig):
     print(f"Starting background worker for database: {config.connection_string}")
     db = AppDatabase(lambda: config.connection_string)
-    ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
+    ext = ExternalTaskManager(db.groups, db.tasks)
     while True:
         try:
             process_pending_messages(config, db, ext)

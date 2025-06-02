@@ -19,7 +19,18 @@ from webapp.dto import (
     TaskStatusDto,
     VariantDto
 )
-from webapp.models import Group, Message, MessageCheck, Status, Student, TaskStatus, TypeOfTask, Variant
+from webapp.models import (
+    FinalSeed,
+    Group,
+    Message,
+    MessageCheck,
+    Status,
+    Student,
+    Task,
+    TaskStatus,
+    TypeOfTask,
+    Variant
+)
 from webapp.repositories import (
     FinalSeedRepository,
     GroupRepository,
@@ -46,33 +57,26 @@ class AppConfigManager:
 
 
 class ExternalTaskManager:
-    def __init__(self, groups: GroupRepository, tasks: TaskRepository, seeds: FinalSeedRepository):
+    def __init__(self, groups: GroupRepository, tasks: TaskRepository):
         self.groups = groups
         self.tasks = tasks
-        self.seeds = seeds
 
     def is_exam_active(self):
-        tasks = self.tasks.get_all()
-        exam = any(task.type == TypeOfTask.Random for task in tasks)
-        return exam
+        return any(task.type == TypeOfTask.Random for task in self.tasks.get_all())
 
-    def get_external_task(self, group_id: int, variant_id: int, task_id: int, config: AppConfig):
-        seed = self.seeds.get_final_seed(group_id)
-        task = self.tasks.get_by_id(task_id)
+    def get_external_task(self, group: Group, variant: Variant, task: Task, seed: FinalSeed | None, config: AppConfig):
         match task.type:
             case TypeOfTask.Static:
-                group = self.groups.get_by_id(group_id)
-                return ExternalTaskDto(group.id, group.external or group.title, task.id, variant_id, True)
+                return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, True)
             case TypeOfTask.Random if seed:
-                h = f'{seed.seed}{task.id}{variant_id}'
+                h = f'{seed.seed}{task.id}{variant.id}'
                 groups = self.groups.get_all()
                 group: Group = self.rnd(h, groups)
                 task = self.rnd(h, config.final_tasks[str(task.id)])
                 variant = self.rnd(h, list(range(1, config.final_variants + 1)))
                 return ExternalTaskDto(group.id, group.external or group.title, task, variant, seed.active)
             case _:
-                group = self.groups.get_by_id(group_id)
-                return ExternalTaskDto(group.id, group.external or group.title, task.id, variant_id, False)
+                return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, False)
 
     def rnd(self, seed: str, options: list):
         return random.Random(seed).choice(options)
@@ -202,71 +206,89 @@ class StatusManager:
     def get_group_statuses(self, group_id: int, hide_pending: bool) -> GroupDto:
         config = self.config.config
         group = self.groups.get_by_id(group_id)
+        seed = self.seeds.get_final_seed(group.id)
         variants = self.variants.get_all()
+        tasks = self.tasks.get_all()
         statuses = self.__get_statuses(group.id)
-        tasks = self.__get_tasks(group_id)
         dtos: list[VariantDto] = []
         for var in variants:
-            dto = self.__get_variant(group, var, tasks, statuses, config)
-            solved = any(status.status != Status.NotSubmitted for status in dto.statuses)
-            if hide_pending and not solved:
+            dto = self.__get_variant(group, var, tasks, statuses, seed, config)
+            if hide_pending and all(status.status != Status.NotSubmitted for status in dto.statuses):
                 continue
             dtos.append(dto)
-        return GroupDto(group, tasks, dtos)
+        return GroupDto(group, [TaskDto(task, seed) for task in tasks], dtos)
+
+    def __get_statuses(self, group: int) -> dict[tuple[int, int], TaskStatus]:
+        statuses = self.statuses.get_by_group(group=group)
+        return {(status.variant, status.task): status for status in statuses}
+
+    def __get_variant(
+        self,
+        group: Group,
+        variant: Variant,
+        tasks: list[Task],
+        statuses: dict[tuple[int, int], TaskStatus],
+        seed: FinalSeed | None,
+        config: AppConfig,
+    ) -> VariantDto:
+        dtos: list[TaskStatusDto] = []
+        for task in tasks:
+            status = statuses.get((variant.id, task.id))
+            e = self.external.get_external_task(group, variant, task, seed, config)
+            achievements = self.__get_task_achievements(task.id)
+            dtos.append(TaskStatusDto(group, variant, TaskDto(task, seed), status, e, config, achievements))
+        return VariantDto(variant, dtos)
+
+    def __get_task_achievements(self, task: int) -> list[int]:
+        achievements = self.achievements.read_achievements()
+        stid = str(task)
+        achievements = achievements[stid] if stid in achievements else []
+        return achievements
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
-        group = self.groups.get_by_id(gid)
         variant = self.variants.get_by_id(vid)
+        group = self.groups.get_by_id(gid)
+        seed = self.seeds.get_final_seed(group.id)
         statuses = self.__get_statuses(group.id)
-        tasks = self.__get_tasks(gid)
-        dto = self.__get_variant(group, variant, tasks, statuses, config)
-        return dto
+        tasks = self.tasks.get_all()
+        return self.__get_variant(group, variant, tasks, statuses, seed, config)
 
     def get_task_status(self, gid: int, vid: int, tid: int) -> TaskStatusDto:
         status = self.statuses.get_task_status(tid, vid, gid)
         achievements = self.__get_task_achievements(tid)
         return self.__get_task_status_dto(gid, vid, tid, status, achievements)
 
-    def get_submissions_statuses_by_info(
+    def __get_task_status_dto(
         self,
-        group: int,
-        variant: int,
-        task: int,
-        skip: int,
-        take: int,
-    ) -> list[SubmissionDto]:
-        registration = self.config.config.enable_registration
-        submissions = []
-        checks = self.checks.get_by_task(group, variant, task, skip, take, registration)
-        for check, message, student in checks:
-            submissions.append(self.__get_submissions(check, message, student))
-        return submissions
+        gid: int, vid: int, tid: int,
+        status: TaskStatus | None,
+        achievements: list[int]
+    ) -> TaskStatusDto:
+        config = self.config.config
+        group = self.groups.get_by_id(gid)
+        variant = self.variants.get_by_id(vid)
+        task = self.tasks.get_by_id(tid)
+        seed = self.seeds.get_final_seed(gid)
+        ext = self.external.get_external_task(group, variant, task, seed, self.config.config)
+        return TaskStatusDto(group, variant, TaskDto(task, seed), status, ext, config, achievements)
+
+    def get_submissions_statuses_by_info(self, gid: int, vid: int, tid: int, skip: int, take: int):
+        checks = self.checks.get_by_task(gid, vid, tid, skip, take, self.config.config.enable_registration)
+        return [self.__get_submissions(check, message, student) for check, message, student in checks]
 
     def count_submissions_by_info(self, group: int, variant: int, task: int) -> int:
-        registration = self.config.config.enable_registration
-        return self.checks.count_submissions_by_info(group, variant, task, registration)
+        return self.checks.count_submissions_by_info(group, variant, task, self.config.config.enable_registration)
 
     def get_submissions_statuses(self, student: Student, skip: int, take: int) -> list[SubmissionDto]:
-        checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_student(student, skip, take)
-        submissions = []
-        for check, message in checks_and_messages:
-            submissions.append(self.__get_submissions(check, message, None))
-        return submissions
+        checks = self.checks.get_by_student(student, skip, take)
+        return [self.__get_submissions(check, message, None) for check, message in checks]
 
     def get_anonymous_submissions_statuses(self, session_id: str, skip: int, take: int) -> list[SubmissionDto]:
-        checks_and_messages: list[tuple[MessageCheck, Message]] = self.checks.get_by_session_id(session_id, skip, take)
-        submissions = []
-        for check, message in checks_and_messages:
-            submissions.append(self.__get_submissions(check, message, None))
-        return submissions
+        checks = self.checks.get_by_session_id(session_id, skip, take)
+        return [self.__get_submissions(check, message, None) for check, message in checks]
 
-    def __get_submissions(
-        self,
-        check: MessageCheck,
-        message: Message,
-        student: Student | None
-    ):
+    def __get_submissions(self, check: MessageCheck, message: Message, student: Student | None):
         return SubmissionDto(self.__get_task_status_dto(message.group, message.variant, message.task, TaskStatus(
             task=message.task,
             variant=message.variant,
@@ -279,57 +301,6 @@ class StatusManager:
             achievements=[]
         ), []), message.code, check.time, message.time, message.ip, student)
 
-    def __get_task_status_dto(
-        self,
-        gid: int, vid: int, tid: int,
-        status: TaskStatus | None,
-        achievements: list[int]
-    ) -> TaskStatusDto:
-        config = self.config.config
-        ext = self.external.get_external_task(gid, vid, tid, self.config.config)
-        group = self.groups.get_by_id(gid)
-        variant = self.variants.get_by_id(vid)
-        task = self.tasks.get_by_id(tid)
-        seed = self.seeds.get_final_seed(gid)
-        return TaskStatusDto(group, variant, TaskDto(task, seed), status, ext, config, achievements)
-
-    def __get_task_achievements(self, task: int) -> list[int]:
-        achievements = self.achievements.read_achievements()
-        stid = str(task)
-        achievements = achievements[stid] if stid in achievements else []
-        return achievements
-
-    def __get_variant(
-        self,
-        group: Group,
-        variant: Variant,
-        tasks: list[TaskDto],
-        statuses: dict[tuple[int, int], TaskStatus],
-        config: AppConfig,
-    ) -> VariantDto:
-        dtos: list[TaskStatusDto] = []
-        for task in tasks:
-            composite_key: tuple[int, int] = (variant.id, task.id)
-            status = statuses.get(composite_key)
-            e = self.external.get_external_task(group.id, variant.id, task.id, self.config.config)
-            achievements = self.__get_task_achievements(task.id)
-            dto = TaskStatusDto(group, variant, task, status, e, config, achievements)
-            dtos.append(dto)
-        return VariantDto(variant, dtos)
-
-    def __get_tasks(self, gid: int) -> list[TaskDto]:
-        tasks = self.tasks.get_all()
-        seed = self.seeds.get_final_seed(gid)
-        return [TaskDto(task, seed) for task in tasks]
-
-    def __get_statuses(self, group: int) -> dict[tuple[int, int], TaskStatus]:
-        statuses = self.statuses.get_by_group(group=group)
-        dictionary = dict()
-        for status in statuses:
-            composite_key: tuple[int, int] = (status.variant, status.task)
-            dictionary[composite_key] = status
-        return dictionary
-
 
 class HomeManager:
     def __init__(self, rating: RatingManager):
@@ -337,15 +308,16 @@ class HomeManager:
 
     def get_group_place(self, gid: int) -> int:
         groupings = self.rating.get_group_rating()
-        for place, groups_in_place in enumerate(groupings.values()):
-            if gid in list(g.group.id for g in groups_in_place):
-                return place
+        for place, groups in enumerate(groupings.values()):
+            for group in groups:
+                if group.group.id == gid:
+                    return place
 
     def get_student_place(self, gid: int, vid: int) -> int:
-        student_rating = self.rating.get_rating()
-        for place, students_in_place in enumerate(student_rating.values()):
-            for student_in_place in students_in_place:
-                if student_in_place.group.id == gid and student_in_place.variant == vid:
+        students = self.rating.get_rating()
+        for place, students in enumerate(students.values()):
+            for student in students:
+                if student.group.id == gid and student.variant == vid:
                     return place
 
 

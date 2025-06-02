@@ -1,13 +1,20 @@
 from tests.utils import arrange_task
 
-from webapp.managers import AchievementManager, AppConfigManager, ExportManager, StatusManager, StudentManager, ExternalTaskManager
+from webapp.managers import (
+    AchievementManager,
+    AppConfigManager,
+    ExportManager,
+    ExternalTaskManager,
+    StatusManager,
+    StudentManager
+)
 from webapp.repositories import AppDatabase
 
 
 def test_export(db: AppDatabase):
     c = AppConfigManager(lambda: dict())
     ach = AchievementManager(c)
-    ext = ExternalTaskManager(db.groups, db.tasks, db.seeds)
+    ext = ExternalTaskManager(db.groups, db.tasks)
     s = StatusManager(db.tasks, db.groups, db.variants, db.statuses, c, db.seeds, db.checks, ach, ext)
     m = StudentManager(c, db.students, db.mailers)
     e = ExportManager(db.groups, db.messages, s, db.variants, db.tasks, db.students, m)
