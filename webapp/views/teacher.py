@@ -8,7 +8,7 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.forms import TeacherChangePasswordForm
-from webapp.managers import AppConfigManager, ExportManager, StatusManager, StudentManager
+from webapp.managers import AchievementManager, AppConfigManager, ExportManager, StatusManager, StudentManager
 from webapp.models import Message, Student
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info
@@ -19,7 +19,8 @@ config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
 students = StudentManager(config, db.students, db.mailers)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
+ach = AchievementManager(config)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 
 

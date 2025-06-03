@@ -13,7 +13,15 @@ from flask import current_app as app
 from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
-from webapp.managers import AppConfigManager, GroupManager, HomeManager, StatusManager, StudentManager
+from webapp.managers import (
+    AchievementManager,
+    AppConfigManager,
+    GroupManager,
+    HomeManager,
+    RatingManager,
+    StatusManager,
+    StudentManager
+)
 from webapp.models import Student
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info, get_greeting_msg, get_real_ip, logout
@@ -23,10 +31,12 @@ blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks)
+ach = AchievementManager(config)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach)
 home_manager = HomeManager(statuses)
 groups = GroupManager(config, db.groups, db.seeds)
 students = StudentManager(config, db.students, db.mailers)
+rating = RatingManager(config, db.statuses, ach, db.tasks)
 
 
 @blueprint.after_request
@@ -64,10 +74,10 @@ def submissions(student: Student | None, page: int):
         if not session:
             return redirect('/')
         submissions = statuses.get_anonymous_submissions_statuses(session, (page - 1) * size, size)
-        count = statuses.count_session_id_submissions(session)
+        count = db.checks.count_session_id_submissions(session)
     elif student is not None:
         submissions = statuses.get_submissions_statuses(student, (page - 1) * size, size)
-        count = statuses.count_student_submissions(student)
+        count = db.checks.count_student_submissions(student)
     else:
         return redirect('/')
     if not submissions and page > 0:
@@ -169,8 +179,8 @@ def group_select(student: Student, gid: int):
 
 @blueprint.route("/rating/groups", methods=["GET"])
 @authorize(db.students)
-def rating_groups(student: Student | None):
-    groupings = statuses.get_group_rating()
+def group_rating(student: Student | None):
+    groupings = rating.get_group_rating()
     return render_template(
         "student/groups_rating.jinja",
         groupings=groupings,
@@ -183,8 +193,8 @@ def rating_groups(student: Student | None):
 
 @blueprint.route("/rating", methods=["GET"])
 @authorize(db.students)
-def rating(student: Student | None):
-    groupings = statuses.get_rating()
+def stduent_rating(student: Student | None):
+    groupings = rating.get_rating()
     return render_template(
         "student/rating.jinja",
         groupings=groupings,
