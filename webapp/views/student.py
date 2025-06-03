@@ -35,11 +35,11 @@ db = AppDatabase(lambda: config.config.connection_string)
 ach = AchievementManager(config)
 ext = ExternalTaskManager(db.groups, db.tasks)
 statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
-home_manager = HomeManager(statuses)
 
 groups = GroupManager(db.groups, db.seeds, ext)
 students = StudentManager(config, db.students, db.mailers)
 rating = RatingManager(config, db.statuses, ach, db.tasks)
+home_manager = HomeManager(rating)
 
 
 @blueprint.after_request
@@ -112,8 +112,6 @@ def submissions(student: Student | None, page: int):
 @blueprint.route("/home", methods=["GET"])
 @authorize(db.students, lambda _: True)
 def home(student: Student):
-    if ext.is_exam_active():
-        return redirect("/")
     if student.group is None:
         return redirect("/")
     variants = db.variants.get_student_variants(student.id, student.group)
@@ -271,7 +269,8 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
 def files(student: Student | None, tid: int, gid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    if student and not student.teacher and student.group != gid:
+    exam = ext.is_exam_active()
+    if student and not student.teacher and student.group != gid and not exam:
         return redirect("/")
     group = db.groups.get_by_id(gid)
     title = group.external or group.title
