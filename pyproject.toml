@@ -1,42 +1,49 @@
-[tool.poetry]
-name = "webapp"
-version = "0.1.0"
+[project]
+name = "dta"
+version = "0.2.0"
 description = "DTA web app."
-authors = ["Gorchakov A.V. and Contributors <worldbeater-dev@yandex.ru>"]
+authors = [
+    { name = "Gorchakov A.V. and Contributors", email = "worldbeater-dev@yandex.ru" },
+    { name = "Czertilla", email = "czertilla@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "Flask==3.1.0",
+    "Jinja2>=3.1.6,<4.0.0",
+    "SQLAlchemy==2.0.40",
+    "Flask-WTF==1.2.2",
+    "alembic==1.15.2",
+    "uvicorn==0.34.2",
+    "waitress==3.0.2",
+    "pycodestyle==2.13.0",
+    "scikit-learn==1.6.1",
+    "Flask-JWT-Extended==4.7.1",
+    "bcrypt==4.3.0",
+    "authlib==1.5.2",
+    "requests==2.32.3",
+    "flask-paginate==2024.4.12"
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.14"
-Flask = "3.1.0"
-Jinja2 = "3.1.6"
-SQLAlchemy = "2.0.40"
-Flask-WTF = "1.2.2"
-alembic = "1.15.2"
-waitress = "3.0.2"
-pycodestyle = "2.8.0"
-scikit-learn = "1.6.1"
-Flask-JWT-Extended = "4.7.1"
-bcrypt = "4.3.0"
-authlib = "1.5.2"
-requests = "2.32.3"
-flask-paginate = "2024.4.12"
+[project.optional-dependencies]
+dev = [
+    "beautifulsoup4==4.13.3",
+    "isort==6.0.1",
+    "pytest==8.3.1",
+    "pytest-cov==6.1.1",
+    "pytest-alembic==0.11.1",
+    "uv==0.6.14"
+]
 
-[tool.poetry.dev-dependencies]
-beautifulsoup4 = "4.13.3"
-isort = "6.0.1"
-pytest = "8.3.1"
-pytest-cov = "6.1.1"
-pytest-alembic = "0.11.1"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools]
+packages = ["webapp", "mocks"]
 
 [tool.isort]
-line_length = "119"
-multi_line_output = "3"
-lines_after_imports = "2"
-include_trailing_comma = "false"
-use_parentheses = "true"
+line_length = 119
+multi_line_output = 3
+lines_after_imports = 2
+include_trailing_comma = false
+use_parentheses = true
 skip = [
     ".git",
     "webapp/alembic/versions"
@@ -46,8 +53,8 @@ skip_glob = [
     "venv*"
 ]
 default_section = "THIRDPARTY"
-src_paths = "webapp"
-known_flask = "flask"
+src_paths = ["webapp"]
+known_flask = ["flask"]
 sections = [
     "FUTURE",
     "STDLIB",
@@ -59,12 +66,15 @@ sections = [
 
 [tool.pytest.ini_options]
 addopts = "--cov=webapp --cov-report xml"
-testpaths = [
-    "tests"
-]
+testpaths = ["tests"]
 filterwarnings = [
     "default",
     "error"
 ]
-log_cli="true"
-log_level="NOTSET"
+log_cli = true
+log_level = "NOTSET"
+
+[tool.uv]
+resolution = "highest"
+link-mode = "clone"
+preview = true
