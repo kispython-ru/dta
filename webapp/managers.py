@@ -213,7 +213,7 @@ class StatusManager:
         dtos: list[VariantDto] = []
         for var in variants:
             dto = self.__get_variant(group, var, tasks, statuses, seed, config)
-            if hide_pending and all(status.status != Status.NotSubmitted for status in dto.statuses):
+            if hide_pending and all(status.status == Status.NotSubmitted for status in dto.statuses):
                 continue
             dtos.append(dto)
         return GroupDto(group, [TaskDto(task, seed) for task in tasks], dtos)
