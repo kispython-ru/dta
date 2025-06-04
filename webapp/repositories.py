@@ -54,10 +54,16 @@ class GroupRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
+    def get_active(self) -> list[Group]:
+        with self.db.create_session() as session:
+            return session.query(Group) \
+                .join(FinalSeed, Group.id == FinalSeed.group) \
+                .filter(FinalSeed.active.is_(True)) \
+                .all()
+
     def get_all(self) -> list[Group]:
         with self.db.create_session() as session:
-            groups = session.query(Group).all()
-            return groups
+            return session.query(Group).all()
 
     def get_by_prefix(self, prefix: str) -> list[Group]:
         with self.db.create_session() as session:

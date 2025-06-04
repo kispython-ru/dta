@@ -94,18 +94,11 @@ class GroupManager:
         self.external = external
 
     def get_groupings(self) -> dict[str, list[Group]]:
-        groups = self.groups.get_all()
         exam = self.external.is_exam_active()
+        groups = self.groups.get_active() if exam else self.groups.get_all()
         groupings: dict[str, list[Group]] = {}
         for group in groups:
-            if exam:
-                seed = self.seeds.get_final_seed(group.id)
-                if seed is None:
-                    continue
-                if not seed.active:
-                    continue
-            title: str = group.title
-            key = title.split("-")[0]
+            key = group.title.split("-")[0]
             groupings.setdefault(key, []).append(group)
         return groupings
 
