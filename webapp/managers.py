@@ -136,7 +136,7 @@ class RatingManager:
         self.achievements = achievements
         self.tasks = tasks
 
-    @ttl_cache(duration=15, maxsize=1)
+    @ttl_cache(duration=30, maxsize=1)
     def get_group_rating(self) -> dict[int, list[GroupInRatingDto]]:
         def key(info: tuple[Group, int]):
             group, _ = info
@@ -153,7 +153,7 @@ class RatingManager:
             places[earned].append(GroupInRatingDto(group, earned))
         return dict(sorted(places.items(), reverse=True))
 
-    @ttl_cache(duration=15, maxsize=1)
+    @ttl_cache(duration=30, maxsize=1)
     def get_rating(self) -> dict[int, list[StudentInRatingDto]]:
         def key(info: tuple[Group, TaskStatus]):
             _, status = info
@@ -307,16 +307,14 @@ class HomeManager:
     def get_group_place(self, gid: int) -> int:
         groupings = self.rating.get_group_rating()
         for place, groups in enumerate(groupings.values()):
-            for group in groups:
-                if group.group.id == gid:
-                    return place
+            if any(group.group.id == gid for group in groups):
+                return place
 
     def get_student_place(self, gid: int, vid: int) -> int:
         students = self.rating.get_rating()
         for place, students in enumerate(students.values()):
-            for student in students:
-                if student.group.id == gid and student.variant == vid:
-                    return place
+            if any(student.group.id == gid and student.variant == vid for student in students):
+                return place
 
 
 class StudentManager:
