@@ -15,7 +15,7 @@ def test_task_status_html_link(db: AppDatabase, client: FlaskClient):
     db.variants.create_by_ids([variant_id])
 
     tasks_id = unique_int()
-    db.tasks.create_by_ids([tasks_id])
+    db.tasks.create(tasks_id)
 
     group_id = next(group.id for group in db.groups.get_by_prefix(prefix))
     db.statuses.submit_task(tasks_id, variant_id, group_id, unique_str(), unique_str())
@@ -39,7 +39,7 @@ def test_task_status_html_status(db: AppDatabase, client: FlaskClient):
     db.variants.create_by_ids([variant_id])
 
     tasks_id = unique_int()
-    db.tasks.create_by_ids([tasks_id])
+    db.tasks.create(tasks_id)
 
     group_id = next(group.id for group in db.groups.get_by_prefix(prefix))
     db.statuses.submit_task(tasks_id, variant_id, group_id, unique_str(), unique_str())

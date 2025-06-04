@@ -6,6 +6,7 @@ from tests.utils import mode, unique_str
 
 from flask.testing import FlaskClient
 
+from webapp.models import TypeOfTask
 from webapp.repositories import AppDatabase
 
 
@@ -39,7 +40,7 @@ def test_empty_submissions(db: AppDatabase, client: FlaskClient):
 
 @mode("exam")
 def test_exam_anonymous_submissions(db: AppDatabase, client: FlaskClient):
-    group_id, variant_id, task_id = arrange_task(db)
+    group_id, variant_id, task_id = arrange_task(db, TypeOfTask.Random)
     session_id = token_hex(16)
     code = "main = lambda: 42" + unique_str()
     ip = "0.0.0.0"

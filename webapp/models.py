@@ -49,6 +49,11 @@ class Status(enum.IntEnum):
     CheckedFailed = 6
 
 
+class TypeOfTask(enum.IntEnum):
+    Static = 0
+    Random = 1
+
+
 Base = declarative_base()
 
 
@@ -70,6 +75,7 @@ class Task(Base):
     __tablename__ = "tasks"
     id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
     formulation = sa.Column("formulation", sa.String, nullable=True)
+    type = sa.Column("type", IntEnum(TypeOfTask), nullable=False)
 
 
 class Variant(Base):

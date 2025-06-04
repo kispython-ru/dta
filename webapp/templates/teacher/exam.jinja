@@ -63,7 +63,7 @@
   <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">Получить результаты</button>
 </form>
 {% endif %}
-{% if seed == None or seed.active == false %}
+{% if (seed == None or seed.active == false) and clearable_database %}
 <form action="/teacher/group/{{ group.id }}/exam/delete" method="GET" class="w-100">
   <button class="btn btn-outline-danger w-100 d-block" type="submit">Очистить таблицу</button>
 </form>
@@ -76,7 +76,7 @@
 {% endif %}
 <form action="/teacher/group/{{ group.id }}/rename" method="GET" class="w-100">
   <label class="mx-auto fw-bold mt-2 mb-2 d-block">
-    Видимое название группы {{ group.external }}
+    Видимое название группы {{ group.external or group.title }}
   </label>
   <input
     name="title"
@@ -84,8 +84,17 @@
     class="form-control mb-2"
     placeholder="Видимое название группы"
     value="{{ group.title }}">
+  <label class="mx-auto fw-bold mt-2 mb-2 d-block">
+    Фактическое название группы {{ group.external or group.title }}
+  </label>
+  <input
+    name="external"
+    type="text"
+    class="form-control mb-2"
+    placeholder="Фактическое название группы"
+    value="{{ group.external or '' }}">
   <button class="btn btn-outline-primary w-100 mb-2 d-block" type="submit">
-    Переименовать группу
+    Сохранить
   </button>
 </form>
 {% endblock %}

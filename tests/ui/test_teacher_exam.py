@@ -2,6 +2,7 @@ from tests.utils import arrange_task, mode, teacher_login, unique_str
 
 from flask.testing import FlaskClient
 
+from webapp.models import TypeOfTask
 from webapp.repositories import AppDatabase
 
 
@@ -42,7 +43,7 @@ def test_exam_toggle(db: AppDatabase, client: FlaskClient):
 def test_exam_download(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
-    gid, vid, tid = arrange_task(db)
+    gid, vid, tid = arrange_task(db, TypeOfTask.Random)
     student_email = unique_str()
 
     db.students.create(student_email, unique_str())

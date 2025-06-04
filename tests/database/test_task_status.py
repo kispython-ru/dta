@@ -18,7 +18,7 @@ def test_task_status_fetching_by_group(db: AppDatabase):
     code = unique_str()
 
     task_2 = unique_int()
-    db.tasks.create_by_ids([task_2])
+    db.tasks.create(task_2)
     db.statuses.submit_task(task_1, variant, group, code, unique_str())
     db.statuses.submit_task(task_2, variant, group, code, unique_str())
 

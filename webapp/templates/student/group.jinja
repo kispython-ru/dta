@@ -95,7 +95,7 @@
         <tr>
           <th scope="col" style="width:100px">Вариант</th>
           {% for task in group.tasks %}
-          <td scope="col" class="text-center">
+          <td scope="col" class="text-center {{ 'fw-bold' if task.is_random }}">
             №{{ task.id + 1 }}
           </td>
           {% endfor %}

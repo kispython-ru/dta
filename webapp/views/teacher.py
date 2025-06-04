@@ -8,8 +8,15 @@ from flask import current_app as app
 from flask import make_response, redirect, render_template, request, url_for
 
 from webapp.forms import TeacherChangePasswordForm
-from webapp.managers import AchievementManager, AppConfigManager, ExportManager, StatusManager, StudentManager
-from webapp.models import Message, Student
+from webapp.managers import (
+    AchievementManager,
+    AppConfigManager,
+    ExportManager,
+    ExternalTaskManager,
+    StatusManager,
+    StudentManager
+)
+from webapp.models import Message, Student, TypeOfTask
 from webapp.repositories import AppDatabase
 from webapp.utils import authorize, get_exception_info
 
@@ -18,9 +25,10 @@ blueprint = Blueprint("teacher", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
+ext = ExternalTaskManager(db.groups, db.tasks)
 students = StudentManager(config, db.students, db.mailers)
 ach = AchievementManager(config)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
 exports = ExportManager(db.groups, db.messages, statuses, db.variants, db.tasks, db.students, students)
 
 
@@ -81,7 +89,7 @@ def dashboard(teacher: Student):
         clearable=config.config.clearable_database,
         registration=config.config.registration,
         group_rating=config.config.groups,
-        exam=config.config.exam,
+        exam=ext.is_exam_active(),
         groups=groups,
         glist=glist,
         vlist=vlist,
@@ -94,17 +102,16 @@ def dashboard(teacher: Student):
 @authorize(db.students, lambda s: s.teacher)
 def select_group(teacher: Student):
     group = request.args.get('group')
-    if config.config.exam:
-        return redirect(f'/teacher/group/{group}/exam')
-    return redirect(f'/teacher/group/{group}')
+    return redirect(f'/teacher/group/{group}/exam')
 
 
 @blueprint.route("/teacher/group/<int:group_id>/rename", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def rename(teacher: Student, group_id: int):
     group = db.groups.get_by_id(group_id)
-    title = request.args.get('title')
-    db.groups.rename(group_id, title if title else group.external)
+    title = request.args.get('title') or group.title
+    external = request.args.get('external') or group.external or None
+    db.groups.rename(group_id, title, external)
     return redirect(f'/teacher/group/{group_id}/exam')
 
 
@@ -115,6 +122,7 @@ def exam(teacher: Student, group_id: int):
     seed = db.seeds.get_final_seed(group_id)
     return render_template(
         "teacher/exam.jinja",
+        clearable_database=config.config.clearable_database,
         registration=config.config.registration,
         group_rating=config.config.groups,
         group=group,
@@ -174,7 +182,7 @@ def exam_endall(teacher: Student):
 @blueprint.route("/teacher/exam/delete", methods=["GET"])
 @authorize(db.students, lambda s: s.teacher)
 def exam_deleteall(teacher: Student):
-    if not config.config.final_tasks or not config.config.clearable_database:
+    if not config.config.clearable_database:
         return redirect('/teacher')
     groups = db.groups.get_all()
     for group in groups:
