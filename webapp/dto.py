@@ -103,10 +103,11 @@ class TaskStatusDto:
 
     @property
     def formulation_url(self) -> str:
-        gid = self.external.group
-        vid = self.external.variant
-        tid = self.external.task
-        return f'/files/task/{tid}/group/{gid}#вариант-{vid + 1}'
+        gid = self.group
+        vid = self.variant
+        tid = self.task
+        evid = self.external.variant
+        return f'/files/task/{tid}/group/{gid}/variant/{vid}#вариант-{evid + 1}'
 
     @property
     def cell_background(self) -> str:

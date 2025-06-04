@@ -12,7 +12,7 @@ def test_final_seed_is_not_used(db: AppDatabase, client: FlaskClient):
     (group, var, task) = arrange_task(db)
     group = db.groups.get_by_id(group)
 
-    default_template = f'/files/task/{task}/group/{group.id}#вариант-{var + 1}'
+    default_template = f'/files/task/{task}/group/{group.id}/variant/{var}#вариант-{var + 1}'
     response = client.get(f"/api/v1/group/{group.id}/variant/{var}/task/{task}")
 
     assert response.is_json

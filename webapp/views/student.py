@@ -264,15 +264,21 @@ def submit_task(student: Student | None, gid: int, vid: int, tid: int):
     )
 
 
-@blueprint.route("/files/task/<int:tid>/group/<int:gid>", methods=["GET"])
+@blueprint.route("/files/task/<int:tid>/group/<int:gid>/variant/<int:vid>", methods=["GET"])
 @authorize(db.students)
-def files(student: Student | None, tid: int, gid: int):
+def files(student: Student | None, tid: int, gid: int, vid: int):
     if config.config.registration and not student:
         return redirect("/login")
-    exam = ext.is_exam_active()
-    if student and not student.teacher and student.group != gid and not exam:
-        return redirect("/")
     group = db.groups.get_by_id(gid)
+    if ext.is_exam_active():
+        variant = db.variants.get_by_id(vid)
+        task = db.tasks.get_by_id(tid)
+        seed = db.seeds.get_final_seed(group.id)
+        e = ext.get_external_task(group, variant, task, seed, config.config)
+        path = os.path.join(str(e.task), f'{e.group_title}.html')
+        return send_from_directory(config.config.task_base_path, path)
+    if student and not student.teacher and student.group != gid:
+        return redirect("/")
     title = group.external or group.title
     path = os.path.join(str(tid), f'{title}.html')
     return send_from_directory(config.config.task_base_path, path)
