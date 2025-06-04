@@ -60,9 +60,13 @@ class ExternalTaskManager:
     def __init__(self, groups: GroupRepository, tasks: TaskRepository):
         self.groups = groups
         self.tasks = tasks
+        self.exam = None
+        self.all_groups = None
 
     def is_exam_active(self):
-        return any(task.type == TypeOfTask.Random for task in self.tasks.get_all())
+        if self.exam is None:
+            self.exam = any(task.type == TypeOfTask.Random for task in self.tasks.get_all())
+        return self.exam
 
     def get_external_task(self, group: Group, variant: Variant, task: Task, seed: FinalSeed | None, config: AppConfig):
         match task.type:
@@ -70,8 +74,9 @@ class ExternalTaskManager:
                 return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, True)
             case TypeOfTask.Random if seed:
                 h = f'{seed.seed}{task.id}{variant.id}'
-                groups = self.groups.get_all()
-                group: Group = self.rnd(h, groups)
+                if self.all_groups is None:
+                    self.all_groups = self.groups.get_all()
+                group: Group = self.rnd(h, self.all_groups)
                 task = self.rnd(h, config.final_tasks[str(task.id)])
                 variant = self.rnd(h, list(range(1, config.final_variants + 1)))
                 return ExternalTaskDto(group.id, group.external or group.title, task, variant, seed.active)
