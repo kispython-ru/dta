@@ -62,7 +62,7 @@ def authorize(students: StudentRepository, check: Callable[[Student], bool] | No
 
 
 def get_real_ip(request: Request) -> str:
-    ip_forward_headers = request.headers.getlist("X-Forwarded-For")
+    ip_forward_headers = request.headers.getlist("X-Forwarded-For") or request.headers.getlist("X-Real-Ip")
     if ip_forward_headers:
         return ip_forward_headers[0]
     return request.remote_addr
