@@ -22,7 +22,7 @@
   <a href="/group/{{ status.group }}" class="badge alert-primary"
      style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
 </h6>
-{% if exam %}
+{% if status.task != status.external.task or status.variant != status.external.variant or status.group_title != status.external.group_title %}
 <h6 class="card-title mt-2">
   ❗️ Необходимо решить <span class="text-danger fw-bold">случайно выданный вариант</span>, номер которого может не совпадать с Вашим.
 </h6>
