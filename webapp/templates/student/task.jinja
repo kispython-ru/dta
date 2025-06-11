@@ -22,6 +22,11 @@
   <a href="/group/{{ status.group }}" class="badge alert-primary"
      style="font-size: inherit; text-decoration: none">{{ status.group_title }}</a>
 </h6>
+{% if exam %}
+<h6 class="card-title mt-2">
+  ❗️ Необходимо решить <span class="text-danger fw-bold">случайно выданный вариант</span>, номер которого может не совпадать с Вашим.
+</h6>
+{% endif %}
 <div class="card-subtitle mb-4 mt-2">
   <a class="text-decoration-none btn btn-primary" target="_blank" href="{{ status.formulation_url }}">
     Перейти к задаче №{{ status.external.task + 1 }} варианта №{{ status.external.variant + 1 }} группы {{
