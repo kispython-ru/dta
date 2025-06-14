@@ -1,9 +1,9 @@
 import enum
-from functools import lru_cache
 import json
+from functools import lru_cache
 
 import sqlalchemy as sa
-from sqlalchemy import Engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 
@@ -58,10 +58,11 @@ class TypeOfTask(enum.IntEnum):
 Base = declarative_base()
 
 
-def create_session_maker(engine: Engine) -> sessionmaker:
+@lru_cache
+def get_or_create_session_maker(connection: str) -> sessionmaker:
+    engine = create_engine(connection)
     Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine)
-    return factory
+    return sessionmaker(bind=engine)
 
 
 class Group(Base):
