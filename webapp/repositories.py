@@ -69,10 +69,9 @@ class GroupRepository:
                 .all()
             return groups
 
-    def get_by_id(self, group_id: int) -> Group:
+    def get_by_id(self, group_id: int) -> Group | None:
         with self.db.create_session() as session:
-            group = session.get(Group, group_id)
-            return group
+            return session.get(Group, group_id)
 
     def rename(self, group_id: int, title: str, external: str):
         with self.db.create_session() as session:
@@ -104,12 +103,11 @@ class TaskRepository:
             tasks = session.query(Task).all()
             return tasks
 
-    def get_by_id(self, task_id: int) -> Task:
+    def get_by_id(self, task_id: int) -> Task | None:
         with self.db.create_session() as session:
-            task = session.get(Task, task_id)
-            return task
+            return session.get(Task, task_id)
 
-    def create(self, id: int, type: TypeOfTask = TypeOfTask.Static):
+    def create(self, id: int, type=TypeOfTask.Static):
         with self.db.create_session() as session:
             group = Task(id=id, type=type)
             session.add(group)
@@ -128,10 +126,9 @@ class VariantRepository:
             variants = session.query(Variant).all()
             return variants
 
-    def get_by_id(self, variant_id: int) -> Variant:
+    def get_by_id(self, variant_id: int) -> Variant | None:
         with self.db.create_session() as session:
-            variant = session.get(Variant, variant_id)
-            return variant
+            return session.get(Variant, variant_id)
 
     def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
@@ -143,12 +140,13 @@ class VariantRepository:
         with self.db.create_session() as session:
             session.query(Variant).delete()
 
-    def get_student_variants(self, student: int, group: int) -> list[int]:
+    def get_student_variants(self, student: int, group: int) -> list[tuple[int, int]]:
         with self.db.create_session() as session:
             return session.query(Message.variant, func.count()) \
                 .filter_by(student=student, group=group) \
                 .group_by(Message.variant) \
                 .order_by(func.count().desc()) \
+                .tuples() \
                 .all()
 
 
@@ -192,6 +190,7 @@ class TaskStatusRepository:
                 .filter((TaskStatus.status == Status.Checked) |
                         (TaskStatus.status == Status.CheckedFailed) |
                         (TaskStatus.status == Status.CheckedSubmitted)) \
+                .tuples() \
                 .all()
             return statuses
 
@@ -239,7 +238,7 @@ class TaskStatusRepository:
         status = Status.CheckedSubmitted if existing and existing.status in checked else Status.Submitted
         return self.create_or_update(task, variant, group, code, status, None, ip)
 
-    def create_or_update(self, task: int, variant: int, group: int, code: str, status: int, output: str, ip: str):
+    def create_or_update(self, task: int, variant: int, group: int, code: str, status: int, output: str | None, ip: str):
         now = datetime.datetime.now()
         with self.db.create_session() as session:
             query = session.query(TaskStatus).filter_by(task=task, variant=variant, group=group)
@@ -345,7 +344,7 @@ class MessageCheckRepository:
     def __init__(self, db: DbContextManager):
         self.db = db
 
-    def get(self, message: int) -> MessageCheck:
+    def get(self, message: int) -> MessageCheck | None:
         with self.db.create_session() as session:
             return session.query(MessageCheck) \
                 .filter_by(message=message) \
@@ -365,6 +364,7 @@ class MessageCheckRepository:
                 .order_by(desc(Message.time)) \
                 .offset(skip) \
                 .limit(take) \
+                .tuples() \
                 .all()
 
     def get_by_session_id(self, session_id: str, skip: int, take: int) -> list[tuple[MessageCheck, Message]]:
@@ -375,6 +375,7 @@ class MessageCheckRepository:
                 .order_by(desc(Message.time)) \
                 .offset(skip) \
                 .limit(take) \
+                .tuples() \
                 .all()
 
     def count_student_submissions(self, student: Student) -> int:
@@ -506,8 +507,8 @@ class StudentRepository:
         email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
-            student: Student = query.first()
-            if student.unconfirmed_hash is not None:
+            student = query.first()
+            if not student or student.unconfirmed_hash is not None:
                 return False
             query.update(dict(unconfirmed_hash=password))
 
@@ -515,8 +516,8 @@ class StudentRepository:
         email = email.lower()
         with self.db.create_session() as session:
             query = session.query(Student).filter_by(email=email)
-            student: Student = query.first()
-            if student.unconfirmed_hash is not None:
+            student = query.first()
+            if student and student.unconfirmed_hash is not None:
                 query.update(dict(
                     password_hash=student.unconfirmed_hash,
                     unconfirmed_hash=None,
@@ -565,8 +566,8 @@ class MailerRepository:
 
     def get_domains(self) -> list[str]:
         with self.db.create_session() as session:
-            mailers: list[Mailer] = session.query(Mailer).all()
-            return [mailer.domain for mailer in mailers]
+            domains = session.query(Mailer.domain).all()
+            return [str(domain) for domain in domains]
 
     def create(self, domain: str) -> Mailer:
         domain = domain.lower()
@@ -587,7 +588,7 @@ class AllowedIpRepository:
                 return True
             return session.query(AllowedIp) \
                 .filter(literal(ip).contains(AllowedIp.ip)) \
-                .count()
+                .count() > 0
 
     def list_allowed(self):
         with self.db.create_session() as session:
