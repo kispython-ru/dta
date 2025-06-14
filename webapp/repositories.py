@@ -212,7 +212,7 @@ class TaskStatusRepository:
         existing = self.get_task_status(task, variant, group)
         if not existing:
             return
-        achievements = list(set(existing.achievements + [achievement]))
+        achievements = list(set(existing.achievements or []) | {achievement})
         with self.db.create_session() as session:
             session.query(TaskStatus) \
                 .filter_by(task=task, variant=variant, group=group) \
@@ -512,6 +512,7 @@ class StudentRepository:
             if not student or student.unconfirmed_hash is not None:
                 return False
             query.update(dict(unconfirmed_hash=password))
+            return True
 
     def confirm(self, email: str):
         email = email.lower()
