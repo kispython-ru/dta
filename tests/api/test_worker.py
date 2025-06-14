@@ -22,6 +22,7 @@ def test_background_task_check(db: AppDatabase, client: FlaskClient):
     url = f"/api/v1/group/{group}/variant/{variant}/task/{task}"
 
     response = post_code(url, "main = lambda x: 42")
+    assert response.json
     assert response.json["status"] == Status.Submitted
     timeout_assert(lambda: client.get(url).json["status"] == Status.Checked)
 

@@ -1,5 +1,4 @@
 import logging
-import mailbox
 import os
 from datetime import timedelta
 

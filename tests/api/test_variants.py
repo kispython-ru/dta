@@ -13,6 +13,7 @@ def test_variant_fetching(db: AppDatabase, client: FlaskClient):
     response = client.get("/api/v1/variant/list")
 
     assert response.is_json
+    assert response.json
     assert len(response.json) != 0
     assert variant_one in response.json
     assert variant_two in response.json

@@ -177,7 +177,7 @@ class TaskStatusDto:
             dtos.append(dto)
         return dtos
 
-    def map_status(self, map: dict[Status, str]):
+    def map_status[TOut](self, map: dict[Status, TOut]) -> TOut:
         return map[self.status]
 
 

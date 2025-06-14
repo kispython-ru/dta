@@ -43,12 +43,11 @@ def test_exam_toggle(db: AppDatabase, client: FlaskClient):
 def test_exam_download(db: AppDatabase, client: FlaskClient):
     teacher_login(db, client)
 
-    gid, vid, tid = arrange_task(db, TypeOfTask.Random)
-    student_email = unique_str()
+    gid, _, _ = arrange_task(db, TypeOfTask.Random)
+    email = unique_str()
 
-    db.students.create(student_email, unique_str())
-    db.students.confirm(student_email)
-    student = db.students.find_by_email(student_email)
+    student = db.students.create(email, unique_str())
+    db.students.confirm(email)
     db.students.update_group(student.id, gid)
 
     response = client.get(f"/teacher/group/{gid}/exam/csv", follow_redirects=True)

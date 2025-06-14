@@ -425,7 +425,7 @@ class MessageCheckRepository:
     def record_check(
         self,
         message: int,
-        status: TaskStatus,
+        status: Status,
         output: str | None,
     ) -> MessageCheck:
         with self.db.create_session() as session:

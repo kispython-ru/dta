@@ -32,6 +32,7 @@ def test_task_status_get_task_status(db: AppDatabase):
     db.statuses.submit_task(task, variant, group, code, unique_str())
 
     task_status = db.statuses.get_task_status(task, variant, group)
+    assert task_status
     assert task_status.task == task
     assert task_status.variant == variant
     assert task_status.group == group
@@ -51,11 +52,12 @@ def test_task_status_check_existing(db: AppDatabase):
     ]:
         db.statuses.check(task, variant, group, unique_str(), ok, unique_str(), unique_str())
         task_status = db.statuses.get_task_status(task, variant, group)
+        assert task_status
         assert task_status.status == expected
 
 
 def test_task_status_check_unexisting(db: AppDatabase):
-    (group, variant, task) = arrange_task(db)
+    group, variant, task = arrange_task(db)
     for ok, expected in [
         (False, Status.Failed),
         (False, Status.Failed),
@@ -65,4 +67,5 @@ def test_task_status_check_unexisting(db: AppDatabase):
     ]:
         db.statuses.check(task, variant, group, unique_str(), ok, unique_str(), unique_str())
         task_status = db.statuses.get_task_status(task, variant, group)
+        assert task_status
         assert task_status.status == expected

@@ -9,18 +9,20 @@ from webapp.repositories import AppDatabase
 
 
 def test_task_status_list_fetching(db: AppDatabase, client: FlaskClient):
-    (group, variant, task) = arrange_task(db)
+    group, variant, task = arrange_task(db)
     response = client.get(f"/api/v1/group/{group}/variant/{variant}/task/list")
 
     assert response.is_json
+    assert response.json
     assert any(item for item in response.json if item["id"] == task)
 
 
 def test_task_status_fetching(db: AppDatabase, client: FlaskClient):
-    (group, var, task) = arrange_task(db)
+    group, var, task = arrange_task(db)
     response = client.get(f"/api/v1/group/{group}/variant/{var}/task/{task}")
 
     assert response.is_json
+    assert response.json
     assert response.json['id'] == task
     assert response.json['status'] == Status.NotSubmitted
     assert response.json['status_name'] == "Не отправлено"

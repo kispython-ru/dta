@@ -322,7 +322,7 @@ def update_student_password(teacher: Student, id: int):
 @authorize(db.students, lambda s: s.teacher)
 def update_student_group(teacher: Student, id: int):
     student = db.students.get_by_id(id)
-    gid = request.form["group"]
+    gid = int(request.form["group"])
     group = db.groups.get_by_id(gid).id if gid.strip() else None
     db.students.update_group(student.id, group)
     return redirect(url_for("teacher.student", email=student.email))

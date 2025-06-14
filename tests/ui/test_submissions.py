@@ -62,6 +62,7 @@ def test_no_reg_cookie_is_set(db: AppDatabase, client: FlaskClient):
     cookie = client.get_cookie('anonymous_identifier')
 
     assert response.status_code == 200
+    assert cookie
     assert cookie.key == 'anonymous_identifier'
 
 

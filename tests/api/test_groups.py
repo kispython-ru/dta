@@ -16,7 +16,8 @@ def test_group_prefixes(db: AppDatabase, client: FlaskClient):
     response = client.get("/api/v1/group/prefixes")
 
     assert response.is_json
-    assert response.json["prefixes"] is not None
+    assert response.json
+    assert response.json["prefixes"]
     assert "prefix_one" in response.json["prefixes"]
     assert "prefix_two" in response.json["prefixes"]
 
@@ -32,6 +33,7 @@ def test_group_fetching(db: AppDatabase, client: FlaskClient):
     response = client.get(f"/api/v1/group/{prefix}")
 
     assert response.is_json
+    assert response.json
     assert len(response.json) == 2
     assert response.json[0]["title"].startswith(prefix)
     assert response.json[1]["title"].startswith(prefix)
