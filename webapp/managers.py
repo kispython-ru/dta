@@ -3,6 +3,7 @@ import io
 import json
 import os
 import random
+from functools import lru_cache
 from itertools import groupby
 from typing import Callable
 
@@ -45,6 +46,14 @@ from webapp.repositories import (
 from webapp.utils import ttl_cache
 
 
+@lru_cache
+def read_achievements(path: str) -> dict[str, list[int]]:
+    spec = os.path.join(path, 'specification.json')
+    with open(spec, 'r') as file:
+        content = file.read()
+        return json.loads(content)
+
+
 class AppConfigManager:
     def __init__(self, get_config: Callable[[], dict]):
         self.get_config = get_config
@@ -76,14 +85,14 @@ class ExternalTaskManager:
                 h = f'{seed.seed}{task.id}{variant.id}'
                 if not self.all_groups:
                     self.all_groups = self.groups.get_all()
-                g: Group = self.rnd(h, self.all_groups)
-                task = self.rnd(h, config.final_tasks[str(task.id)])
-                variant = self.rnd(h, list(range(1, config.final_variants + 1)))
-                return ExternalTaskDto(g.id, g.external or g.title, task, variant, seed.active)
+                g = self.rnd(h, self.all_groups)
+                t = self.rnd(h, config.final_tasks[str(task.id)])
+                v = self.rnd(h, list(range(1, config.final_variants + 1)))
+                return ExternalTaskDto(g.id, g.external or g.title, t, v, seed.active)
             case _:
                 return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, False)
 
-    def rnd(self, seed: str, options: list):
+    def rnd[TOption](self, seed: str, options: list[TOption]) -> TOption:
         return random.Random(seed).choice(options)
 
 
@@ -103,37 +112,15 @@ class GroupManager:
         return groupings
 
 
-class AchievementManager:
-    def __init__(self, config: AppConfigManager):
-        self.achievements = None
-        self.config = config
-
-    def read_achievements(self) -> dict[str, list[int]]:
-        if self.achievements is not None:
-            return self.achievements
-        analytics = self.config.config.analytics_path
-        spec = os.path.join(analytics, 'specification.json')
-        if not os.path.exists(spec):
-            self.achievements = dict()
-            return self.achievements
-        with open(spec, 'r') as file:
-            content = file.read()
-            spec = json.loads(content)
-            self.achievements = spec
-        return self.achievements
-
-
 class RatingManager:
     def __init__(
         self,
         config: AppConfigManager,
         statuses: TaskStatusRepository,
-        achievements: AchievementManager,
         tasks: TaskRepository,
     ):
         self.config = config
         self.statuses = statuses
-        self.achievements = achievements
         self.tasks = tasks
 
     @ttl_cache(duration=30, maxsize=1)
@@ -145,8 +132,8 @@ class RatingManager:
         config = self.config.config.groups
         rating = self.statuses.get_group_rating()
         places: dict[int, list[GroupInRatingDto]] = dict()
-        for _, pairs in groupby(sorted(rating, key=key), key):
-            pairs = list(pairs)
+        for _, p in groupby(sorted(rating, key=key), key):
+            pairs = list(p)
             group, _ = pairs[0]
             earned = sum(1 for group, var in pairs if var is not None and var < config.get(group.title, 40))
             places.setdefault(earned, [])
@@ -159,12 +146,12 @@ class RatingManager:
             _, status = info
             return status.group, status.variant
 
-        achievements = self.achievements.read_achievements()
+        achievements = read_achievements(self.config.config.analytics_path)
         statuses = self.statuses.get_rating()
         tasks = self.tasks.get_all()
         places: dict[int, list[StudentInRatingDto]] = dict()
-        for _, pairs in groupby(sorted(statuses, key=key), key):
-            pairs = list(pairs)
+        for _, p in groupby(sorted(statuses, key=key), key):
+            pairs = list(p)
             group, status = pairs[0]
             tids = [status.task for _, status in pairs]
             if any(task.id not in tids for task in tasks):
@@ -188,7 +175,6 @@ class StatusManager:
         config: AppConfigManager,
         seeds: FinalSeedRepository,
         checks: MessageCheckRepository,
-        achievements: AchievementManager,
         external: ExternalTaskManager,
     ):
         self.tasks = tasks
@@ -198,7 +184,6 @@ class StatusManager:
         self.config = config
         self.seeds = seeds
         self.checks = checks
-        self.achievements = achievements
         self.external = external
 
     def get_group_statuses(self, group_id: int, hide_pending: bool) -> GroupDto:
@@ -238,10 +223,9 @@ class StatusManager:
         return VariantDto(variant, dtos)
 
     def __get_task_achievements(self, task: int) -> list[int]:
-        achievements = self.achievements.read_achievements()
+        achievements = read_achievements(self.config.config.analytics_path)
         stid = str(task)
-        achievements = achievements[stid] if stid in achievements else []
-        return achievements
+        return achievements[stid] if stid in achievements else []
 
     def get_variant_statuses(self, gid: int, vid: int) -> VariantDto:
         config = self.config.config
@@ -304,17 +288,19 @@ class HomeManager:
     def __init__(self, rating: RatingManager):
         self.rating = rating
 
-    def get_group_place(self, gid: int) -> int:
+    def get_group_place(self, gid: int) -> int | None:
         groupings = self.rating.get_group_rating()
         for place, groups in enumerate(groupings.values()):
             if any(group.group.id == gid for group in groups):
                 return place
+        return None
 
-    def get_student_place(self, gid: int, vid: int) -> int:
+    def get_student_place(self, gid: int, vid: int) -> int | None:
         students = self.rating.get_rating()
         for place, students in enumerate(students.values()):
             if any(student.group.id == gid and student.variant == vid for student in students):
                 return place
+        return None
 
 
 class StudentManager:
@@ -358,11 +344,11 @@ class StudentManager:
                 "после отправки письма Ваш аккаунт будет активирован.")
 
     def change_password(self, email: str, new_password: str) -> str:
-        if not self.exists(email):
+        student = self.students.find_by_email(email)
+        if not student:
             return "Такой адрес почты не зарегистрирован!"
         if self.blocked(email):
             return "Данный адрес электронной почты заблокирован."
-        student = self.students.find_by_email(email)
         if not self.confirmed(email) and not student.provider:
             return (f"Пользователь не подтверждён! Отправьте пустое сообщение с Вашего адреса "
                     f"электронной почты {email} на наш адрес {self.config.config.imap_login} "
@@ -399,6 +385,7 @@ class StudentManager:
             actual = student.password_hash.encode('utf8')
             if bcrypt.checkpw(given, actual):
                 return student
+        return None
 
     def update_password(self, email: str, password: str) -> bool:
         student = self.students.find_by_email(email)
@@ -411,11 +398,11 @@ class StudentManager:
 
     def confirmed(self, email: str) -> bool:
         student = self.students.find_by_email(email)
-        return student and student.password_hash
+        return bool(student and student.password_hash)
 
     def blocked(self, email: str) -> bool:
         student = self.students.find_by_email(email)
-        return student and student.blocked
+        return bool(student and student.blocked)
 
     def exists(self, email: str) -> bool:
         student = self.students.find_by_email(email)
@@ -471,13 +458,13 @@ class ExportManager:
         for message in messages:
             gt = group_titles[message.group]
             time = message.time.strftime("%Y-%m-%d %H:%M:%S")
-            task = message.task + 1
-            variant = message.variant + 1
+            task = str(message.task + 1)
+            variant = str(message.variant + 1)
             code = message.code
             ip = message.ip
-            id = message.id
+            id = str(message.id)
             sid = message.student
-            email = self.manager.hide_email(self.students.get_by_id(sid).email) if sid else None
+            email = self.manager.hide_email(self.students.get_by_id(sid).email) if sid else ""
             rows.append([id, time, gt, task, variant, ip, email, code])
         return rows
 
@@ -497,22 +484,18 @@ class ExportManager:
         rows = []
         for variant in self.variants.get_all():
             group_title = self.groups.get_by_id(group_id).title
-            row = [group_title, variant.id + 1]
+            row = [group_title, str(variant.id + 1)]
             score = 0
             for task in tasks:
-                info = self.statuses.get_task_status(
-                    group_id,
-                    variant.id,
-                    task.id
-                )
+                info = self.statuses.get_task_status(group_id, variant.id, task.id)
                 status = 1 if info.status.value == 2 else 0
-                row.append(status)
+                row.append(str(status))
                 row.append(info.external.group_title)
-                row.append(info.external.variant + 1)
-                row.append(info.external.task + 1)
+                row.append(str(info.external.variant + 1))
+                row.append(str(info.external.task + 1))
                 row.append(info.ip)
                 score += status
-            row.append(score)
+            row.append(str(score))
             rows.append(row)
         return [header] + rows
 

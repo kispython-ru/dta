@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from webapp.models import FinalSeed, Group, Status, Student, Task, TaskStatus, TypeOfTask, Variant
 
 
@@ -216,8 +218,8 @@ class SubmissionDto:
         self,
         status: TaskStatusDto,
         code: str,
-        checked: str,
-        sent: str,
+        checked: datetime,
+        sent: datetime,
         ip: str,
         student: Student | None
     ):

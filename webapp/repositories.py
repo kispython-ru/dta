@@ -69,9 +69,9 @@ class GroupRepository:
                 .all()
             return groups
 
-    def get_by_id(self, group_id: int) -> Group | None:
+    def get_by_id(self, group_id: int) -> Group:
         with self.db.create_session() as session:
-            return session.get(Group, group_id)
+            return session.get_one(Group, group_id)
 
     def rename(self, group_id: int, title: str, external: str):
         with self.db.create_session() as session:
@@ -103,9 +103,9 @@ class TaskRepository:
             tasks = session.query(Task).all()
             return tasks
 
-    def get_by_id(self, task_id: int) -> Task | None:
+    def get_by_id(self, task_id: int) -> Task:
         with self.db.create_session() as session:
-            return session.get(Task, task_id)
+            return session.get_one(Task, task_id)
 
     def create(self, id: int, type=TypeOfTask.Static):
         with self.db.create_session() as session:
@@ -126,9 +126,9 @@ class VariantRepository:
             variants = session.query(Variant).all()
             return variants
 
-    def get_by_id(self, variant_id: int) -> Variant | None:
+    def get_by_id(self, variant_id: int) -> Variant:
         with self.db.create_session() as session:
-            return session.get(Variant, variant_id)
+            return session.get_one(Variant, variant_id)
 
     def create_by_ids(self, ids: list[int]):
         with self.db.create_session() as session:
@@ -322,10 +322,7 @@ class MessageRepository:
 
     def get_by_id(self, id: int) -> Message:
         with self.db.create_session() as session:
-            message = session.query(Message) \
-                .filter_by(id=id) \
-                .one()
-            return message
+            return session.get_one(Message, id)
 
     def get(self, task: int, variant: int, group: int) -> list[Message]:
         with self.db.create_session() as session:
@@ -485,10 +482,9 @@ class StudentRepository:
             students = session.query(Student).filter(Student.group == group_id).all()
             return students if students else None
 
-    def get_by_id(self, id: int) -> Student | None:
+    def get_by_id(self, id: int) -> Student:
         with self.db.create_session() as session:
-            student = session.get(Student, id)
-            return student
+            return session.get_one(Student, id)
 
     def get_by_external_email(self, email: str, provider: str) -> Student | None:
         with self.db.create_session() as session:

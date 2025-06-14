@@ -3,7 +3,7 @@ from flask import current_app as app
 from flask import jsonify, request
 
 from webapp.forms import CodeLength
-from webapp.managers import AchievementManager, AppConfigManager, ExternalTaskManager, GroupManager, StatusManager
+from webapp.managers import AppConfigManager, ExternalTaskManager, GroupManager, StatusManager
 from webapp.repositories import AppDatabase
 from webapp.utils import get_exception_info, get_real_ip
 
@@ -12,9 +12,8 @@ blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-ach = AchievementManager(config)
 ext = ExternalTaskManager(db.groups, db.tasks)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ext)
 groups = GroupManager(db.groups, db.seeds, ext)
 
 

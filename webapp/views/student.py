@@ -14,7 +14,6 @@ from flask import redirect, render_template, request, send_from_directory
 
 from webapp.forms import StudentChangePasswordForm, StudentLoginForm, StudentMessageForm, StudentRegisterForm
 from webapp.managers import (
-    AchievementManager,
     AppConfigManager,
     ExternalTaskManager,
     GroupManager,
@@ -32,13 +31,12 @@ blueprint = Blueprint("student", __name__)
 config = AppConfigManager(lambda: app.config)
 db = AppDatabase(lambda: config.config.connection_string)
 
-ach = AchievementManager(config)
 ext = ExternalTaskManager(db.groups, db.tasks)
-statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ach, ext)
+statuses = StatusManager(db.tasks, db.groups, db.variants, db.statuses, config, db.seeds, db.checks, ext)
 
 groups = GroupManager(db.groups, db.seeds, ext)
 students = StudentManager(config, db.students, db.mailers)
-rating = RatingManager(config, db.statuses, ach, db.tasks)
+rating = RatingManager(config, db.statuses, db.tasks)
 home_manager = HomeManager(rating)
 
 
