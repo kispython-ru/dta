@@ -1,10 +1,8 @@
-from flask import Config
-
 from webapp.models import FinalSeed, Group, Status, Student, Task, TaskStatus, TypeOfTask, Variant
 
 
 class AppConfig:
-    def __init__(self, config: Config):
+    def __init__(self, config: dict):
         self.highlight_syntax: bool = config["HIGHLIGHT_SYNTAX"]
         self.core_path: str = config["CORE_PATH"]
         self.analytics_path: str = config["ANALYTICS_PATH"]

@@ -61,7 +61,7 @@ class ExternalTaskManager:
         self.groups = groups
         self.tasks = tasks
         self.exam = None
-        self.all_groups = None
+        self.all_groups: list[Group] = []
 
     def is_exam_active(self):
         if self.exam is None:
@@ -74,12 +74,12 @@ class ExternalTaskManager:
                 return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, True)
             case TypeOfTask.Random if seed:
                 h = f'{seed.seed}{task.id}{variant.id}'
-                if self.all_groups is None:
+                if not self.all_groups:
                     self.all_groups = self.groups.get_all()
-                group: Group = self.rnd(h, self.all_groups)
+                g: Group = self.rnd(h, self.all_groups)
                 task = self.rnd(h, config.final_tasks[str(task.id)])
                 variant = self.rnd(h, list(range(1, config.final_variants + 1)))
-                return ExternalTaskDto(group.id, group.external or group.title, task, variant, seed.active)
+                return ExternalTaskDto(g.id, g.external or g.title, task, variant, seed.active)
             case _:
                 return ExternalTaskDto(group.id, group.external or group.title, task.id, variant.id, False)
 

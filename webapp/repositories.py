@@ -238,7 +238,8 @@ class TaskStatusRepository:
         status = Status.CheckedSubmitted if existing and existing.status in checked else Status.Submitted
         return self.create_or_update(task, variant, group, code, status, None, ip)
 
-    def create_or_update(self, task: int, variant: int, group: int, code: str, status: int, output: str | None, ip: str):
+    def create_or_update(self, task: int, variant: int, group: int, code: str,
+                         status: int, output: str | None, ip: str):
         now = datetime.datetime.now()
         with self.db.create_session() as session:
             query = session.query(TaskStatus).filter_by(task=task, variant=variant, group=group)

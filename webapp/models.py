@@ -1,10 +1,11 @@
 import enum
 import json
+from datetime import datetime
 from functools import lru_cache
 
 import sqlalchemy as sa
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
 class IntEnum(sa.TypeDecorator):
@@ -55,7 +56,112 @@ class TypeOfTask(enum.IntEnum):
     Random = 1
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    __abstract__ = True
+
+    type_annotation_map = {
+        list: JsonArray(),
+        Status: IntEnum(Status),
+        TypeOfTask: IntEnum(TypeOfTask),
+        datetime: sa.DateTime(),
+    }
+
+
+class Group(Base):
+    __tablename__ = "groups"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(unique=True)
+    external: Mapped[str | None]
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    formulation: Mapped[str | None]
+    type: Mapped[TypeOfTask]
+
+
+class Variant(Base):
+    __tablename__ = "variants"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+
+class TaskStatus(Base):
+    __tablename__ = "task_statuses"
+
+    task: Mapped[int] = mapped_column(sa.ForeignKey("tasks.id"), primary_key=True)
+    variant: Mapped[int] = mapped_column(sa.ForeignKey("variants.id"), primary_key=True)
+    group: Mapped[int] = mapped_column(sa.ForeignKey("groups.id"), primary_key=True)
+    time: Mapped[datetime]
+    code: Mapped[str]
+    ip: Mapped[str]
+    output: Mapped[str | None]
+    status: Mapped[Status]
+    achievements: Mapped[list | None]
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    task: Mapped[int] = mapped_column(sa.ForeignKey("tasks.id"))
+    variant: Mapped[int] = mapped_column(sa.ForeignKey("variants.id"))
+    group: Mapped[int] = mapped_column(sa.ForeignKey("groups.id"))
+    time: Mapped[datetime]
+    code: Mapped[str]
+    ip: Mapped[str]
+    session_id: Mapped[str | None]
+    processed: Mapped[bool]
+    student: Mapped[int | None] = mapped_column(sa.ForeignKey("students.id"))
+
+
+class MessageCheck(Base):
+    __tablename__ = "message_checks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    message: Mapped[int] = mapped_column(sa.ForeignKey("messages.id"))
+    time: Mapped[datetime]
+    status: Mapped[Status]
+    output: Mapped[str | None]
+    achievement: Mapped[int | None]
+
+
+class FinalSeed(Base):
+    __tablename__ = "final_seeds"
+
+    seed: Mapped[str] = mapped_column(unique=True)
+    active: Mapped[bool]
+    group: Mapped[int] = mapped_column(sa.ForeignKey("groups.id"), primary_key=True)
+
+
+class Student(Base):
+    __tablename__ = "students"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    external_id: Mapped[int | None] = mapped_column(sa.BigInteger)
+    provider: Mapped[str | None]
+    email: Mapped[str]
+    group: Mapped[str | None]
+    variant: Mapped[int | None]
+    password_hash: Mapped[str | None]
+    unconfirmed_hash: Mapped[str | None]
+    blocked: Mapped[bool]
+    teacher: Mapped[bool | None]
+
+
+class Mailer(Base):
+    __tablename__ = "mailers"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    domain: Mapped[str]
+
+
+class AllowedIp(Base):
+    __tablename__ = "allowed_ips"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    ip: Mapped[str]
+    label: Mapped[str | None]
 
 
 @lru_cache
@@ -63,93 +169,3 @@ def get_or_create_session_maker(connection: str) -> sessionmaker:
     engine = create_engine(connection)
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)
-
-
-class Group(Base):
-    __tablename__ = "groups"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    title = sa.Column("title", sa.String, unique=True, nullable=False)
-    external = sa.Column("external", sa.String, unique=False, nullable=True)
-
-
-class Task(Base):
-    __tablename__ = "tasks"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    formulation = sa.Column("formulation", sa.String, nullable=True)
-    type = sa.Column("type", IntEnum(TypeOfTask), nullable=False)
-
-
-class Variant(Base):
-    __tablename__ = "variants"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-
-
-class TaskStatus(Base):
-    __tablename__ = "task_statuses"
-    task = sa.Column("task", sa.Integer, sa.ForeignKey("tasks.id"), primary_key=True, nullable=False)
-    variant = sa.Column("variant", sa.Integer, sa.ForeignKey("variants.id"), primary_key=True, nullable=False)
-    group = sa.Column("group", sa.Integer, sa.ForeignKey("groups.id"), primary_key=True, nullable=False)
-    time = sa.Column("time", sa.DateTime, nullable=False)
-    code = sa.Column("code", sa.String, nullable=False)
-    ip = sa.Column("ip", sa.String, nullable=False)
-    output = sa.Column("output", sa.String, nullable=True)
-    status = sa.Column("status", IntEnum(Status), nullable=False)
-    achievements = sa.Column("achievements", JsonArray, nullable=True)
-
-
-class Message(Base):
-    __tablename__ = "messages"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    task = sa.Column("task", sa.Integer, sa.ForeignKey("tasks.id"), nullable=False)
-    variant = sa.Column("variant", sa.Integer, sa.ForeignKey("variants.id"), nullable=False)
-    group = sa.Column("group", sa.Integer, sa.ForeignKey("groups.id"), nullable=False)
-    time = sa.Column("time", sa.DateTime, nullable=False)
-    code = sa.Column("code", sa.String, nullable=False)
-    ip = sa.Column("ip", sa.String, nullable=False)
-    session_id = sa.Column("session_id", sa.String, nullable=True)
-    processed = sa.Column("processed", sa.Boolean, nullable=False)
-    student = sa.Column("student", sa.Integer, sa.ForeignKey("students.id"), nullable=True)
-
-
-class MessageCheck(Base):
-    __tablename__ = "message_checks"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    message = sa.Column("message", sa.Integer, sa.ForeignKey("messages.id"), nullable=False)
-    time = sa.Column('time', sa.DateTime, nullable=False)
-    status = sa.Column('status', sa.Integer, nullable=False)
-    output = sa.Column('output', sa.String, nullable=True)
-    achievement = sa.Column('achievement', sa.Integer, nullable=True)
-
-
-class FinalSeed(Base):
-    __tablename__ = "final_seeds"
-    seed = sa.Column("seed", sa.String, unique=True, nullable=False)
-    active = sa.Column("active", sa.Boolean, nullable=False)
-    group = sa.Column("group", sa.Integer, sa.ForeignKey('groups.id'), primary_key=True, nullable=False)
-
-
-class Student(Base):
-    __tablename__ = "students"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    external_id = sa.Column("external_id", sa.BigInteger, nullable=True)
-    provider = sa.Column("provider", sa.String, nullable=True)
-    email = sa.Column("email", sa.String, nullable=False)
-    group = sa.Column("group", sa.String, nullable=True)
-    variant = sa.Column("variant", sa.Integer, nullable=True)
-    password_hash = sa.Column("password_hash", sa.String, nullable=True)
-    unconfirmed_hash = sa.Column("unconfirmed_hash", sa.String, nullable=True)
-    blocked = sa.Column("blocked", sa.Boolean, nullable=False)
-    teacher = sa.Column("teacher", sa.Boolean, nullable=True)
-
-
-class Mailer(Base):
-    __tablename__ = "mailers"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    domain = sa.Column("domain", sa.String, nullable=False)
-
-
-class AllowedIp(Base):
-    __tablename__ = "allowed_ips"
-    id = sa.Column("id", sa.Integer, primary_key=True, nullable=False, autoincrement=True)
-    ip = sa.Column("ip", sa.String, nullable=False)
-    label = sa.Column("label", sa.String, nullable=True)
