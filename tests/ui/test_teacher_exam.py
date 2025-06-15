@@ -25,18 +25,21 @@ def test_exam_toggle(db: AppDatabase, client: FlaskClient):
 
     group = db.groups.create(unique_str())
     seed = db.seeds.get_final_seed(group.id)
-    if (seed is None) or not seed.active:
-        response = client.get(f"/teacher/group/{group.id}/exam/toggle", follow_redirects=True)
-        assert response.status_code == 200
-        assert group.title in response.get_data(as_text=True)
-        assert "Завершить" in response.get_data(as_text=True)
-        assert db.seeds.get_final_seed(group.id).active
+    assert not seed
 
     response = client.get(f"/teacher/group/{group.id}/exam/toggle", follow_redirects=True)
+    seed = db.seeds.get_final_seed(group.id)
+    assert response.status_code == 200
+    assert group.title in response.get_data(as_text=True)
+    assert "Завершить" in response.get_data(as_text=True)
+    assert seed and seed.active
+
+    response = client.get(f"/teacher/group/{group.id}/exam/toggle", follow_redirects=True)
+    seed = db.seeds.get_final_seed(group.id)
     assert response.status_code == 200
     assert group.title in response.get_data(as_text=True)
     assert "Продолжить зачёт" in response.get_data(as_text=True)
-    assert not db.seeds.get_final_seed(group.id).active
+    assert seed and not seed.active
 
 
 @mode("exam")

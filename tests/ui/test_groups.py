@@ -11,10 +11,10 @@ def test_group_html_prefixes(db: AppDatabase, client: FlaskClient):
 
     response = client.get("/")
     html = response.get_data(as_text=True)
-    tag_contents = [tag.contents[0] for tag in get_tags(html, 'span', None)]
+    text = [tag.get_text().strip() for tag in get_tags(html, 'small', 'text-muted')]
 
     assert response.content_type == 'text/html; charset=utf-8'
-    assert tag_contents.count(prefix) == 1
+    assert text.count(prefix) == 1
 
 
 def test_group_html_title(db: AppDatabase, client: FlaskClient):

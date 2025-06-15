@@ -58,9 +58,11 @@ def test_success_login(client: FlaskClient, db: AppDatabase):
     db.students.confirm(email)
 
     response = client.post("/login", data={'login': email, 'password': password})
+    cookie = response.headers.get('Set-Cookie')
     assert response.status_code == 302
     assert response.location == '/'
-    assert 'access_token' in response.headers.get('Set-Cookie')
+    assert cookie
+    assert 'access_token' in cookie
 
 
 @mode('registration')

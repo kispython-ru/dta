@@ -5,11 +5,10 @@ from typing import Callable
 
 import pytest
 from bs4 import BeautifulSoup
-from bs4.element import ResultSet, Tag
 
 from flask.testing import FlaskClient
 
-from webapp.managers import StudentManager
+from webapp.managers import AppConfigManager, StudentManager
 from webapp.models import TypeOfTask
 from webapp.repositories import AppDatabase
 
@@ -51,8 +50,8 @@ def arrange_task(db: AppDatabase, type: TypeOfTask = TypeOfTask.Static) -> tuple
 def get_tags(
     html: str,
     name: str,
-    class_: str | bool | None,
-) -> ResultSet[Tag]:
+    class_: str | bool,
+):
     soup = BeautifulSoup(html, 'html.parser')
     return soup.find_all(name, class_=class_)
 
@@ -60,7 +59,8 @@ def get_tags(
 def teacher_login(db: AppDatabase, client: FlaskClient):
     email = f'{unique_str()}@{unique_str()}.ru'
     password = unique_str()
-    students = StudentManager(None, db.students, db.mailers)
+    config = AppConfigManager(lambda: dict())
+    students = StudentManager(config, db.students, db.mailers)
     students.create(email, password, True)
     db.students.confirm(email)
     return client.post("/login", data={

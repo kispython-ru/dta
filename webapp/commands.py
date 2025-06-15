@@ -62,7 +62,7 @@ class SeedCmd:
         db.groups.create_by_names(groups)
         for task in tasks:
             db.tasks.create(task)
-        db.variants.create_by_ids(range(0, 39 + 1))
+        db.variants.create_by_ids(list(range(0, 39 + 1)))
         print(f'Done seeding db {config.connection_string} using core {config.core_path}!')
 
 

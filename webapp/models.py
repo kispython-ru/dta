@@ -143,7 +143,7 @@ class Student(Base):
     external_id: Mapped[int | None] = mapped_column(sa.BigInteger)
     provider: Mapped[str | None]
     email: Mapped[str]
-    group: Mapped[str | None]
+    group: Mapped[int | None]
     variant: Mapped[int | None]
     password_hash: Mapped[str | None]
     unconfirmed_hash: Mapped[str | None]
