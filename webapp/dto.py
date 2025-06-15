@@ -81,7 +81,10 @@ class TaskStatusDto:
         achievements: list[int],
     ):
         self.task = task.id
-        self.earned = sum(1 for a in range(len(achievements)) if status and a in status.achievements)
+        self.earned = sum(status is not None and
+                          status.achievements is not None and
+                          achievement in status.achievements
+                          for achievement in range(len(achievements)))
         self.formulation = task.formulation
         self.ip = status.ip if status is not None else "-"
         self.variant = variant.id
@@ -90,7 +93,7 @@ class TaskStatusDto:
         self.external = external
         self.status = Status.NotSubmitted if status is None else status.status
         self.checked = self.status in [Status.Checked, Status.CheckedSubmitted, Status.CheckedFailed]
-        self.error_message = status.output if self.status in [Status.Failed, Status.CheckedFailed] else None
+        self.error_message = status.output if status and self.status in [Status.Failed, Status.CheckedFailed] else None
         self.readonly = config.readonly
         self.achievements = self.map_achievements(status, achievements)
 

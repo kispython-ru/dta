@@ -1302,6 +1302,34 @@ files = [
 ]
 
 [[package]]
+name = "types-authlib"
+version = "1.5.0.20250608"
+description = "Typing stubs for Authlib"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "types_authlib-1.5.0.20250608-py3-none-any.whl", hash = "sha256:ce65b51f8fd4892945a5b23e82071601a47f3e9e0398b4947e702f9ad5c14b40"},
+    {file = "types_authlib-1.5.0.20250608.tar.gz", hash = "sha256:165149473c951fbbbea0b0f65cb232ac4ce2ee491191383afe119723a3d8059b"},
+]
+
+[package.dependencies]
+cryptography = "*"
+
+[[package]]
+name = "types-requests"
+version = "2.32.4.20250611"
+description = "Typing stubs for requests"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "types_requests-2.32.4.20250611-py3-none-any.whl", hash = "sha256:ad2fe5d3b0cb3c2c902c8815a70e7fb2302c4b8c1f77bdcd738192cdb3878072"},
+    {file = "types_requests-2.32.4.20250611.tar.gz", hash = "sha256:741c8777ed6425830bf51e54d6abe245f79b4dcb9019f1622b773463946bf826"},
+]
+
+[package.dependencies]
+urllib3 = ">=2"
+
+[[package]]
 name = "types-wtforms"
 version = "3.2.1.20250602"
 description = "Typing stubs for WTForms"
@@ -1395,4 +1423,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.14"
-content-hash = "5238da3a4c5f6dc0ebe44e36185f77365a82c1b2a2374d0b3ceed595df2dd99b"
+content-hash = "43314066caf3c8f19b6aba74582dc9047da06a127abe3f990c9fd2a3cd1212de"

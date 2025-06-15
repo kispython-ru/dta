@@ -140,8 +140,7 @@ def home(student: Student):
 @authorize(db.students, lambda _: True)
 def variant_select(student: Student):
     vid = request.form.get("variant", type=int)
-    variant = db.variants.get_by_id(vid)
-    db.students.update_variant(student.id, variant.id)
+    db.students.update_variant(student.id, vid)
     return redirect(f"/home")
 
 
